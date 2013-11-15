@@ -104,21 +104,22 @@ app.all('/register-by-phone', function(req, res) {
     			});
     		}else{console.log('no manager found');res.send('no manager found');}
     	});
-	}else{}//no params, do nothing
+	}else{console.log('Error: sent from widget without mPhone & ivrId !');res.send('Error: sent from widget without mPhone & ivrId !');}
 });
-    //by wifi
+    //by wifi (here also create activation)
 app.all('/register-by-device-mac', function(req, res) {
     console.log(req.body);
     res.header("Access-Control-Allow-Origin", "*");
     //res.header("Access-Control-Allow-Headers", "X-Requested-With");  //TODO make it specific here?
     var rB = req.body;
     if(rB.deviceMac && rB.nodeMac){
+        activation.create({deviceMac:rB.deviceMac, nodeMac:rB.nodeMac}).success(function(){});
         node.find({where:{}}).success(function(n){
             if(n){
                 manager.find({where:{id:n.managerId}}).success(function(m){
                     if(m){
                         reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
-                            if(r){console.log('already registered');}//do nothing
+                            if(r){console.log('already registered');res.send('already registered');}//do nothing
                             else{
                                 reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
                                     if(r){
@@ -140,7 +141,7 @@ app.all('/register-by-device-mac', function(req, res) {
                 });
             }else{console.log('no node found');}
         });
-    }else{console.log('Error: sent from widget without device & node params !');}//no params, do nothing
+    }else{console.log('Error: sent from widget without device & node params !');res.send('Error: sent from widget without device & node params !');}//no params, do nothing
 });
 
 //Listen to widget #2, Send push notification on second roost download if the registeration isRoostActive: 
@@ -149,21 +150,23 @@ app.all('/store-requested', function(req, res) {
     //res.header("Access-Control-Allow-Headers", "X-Requested-With");  //TODO make it specific here?
     var rB = req.body;
     console.log(rB);
-    if(rB.mPhone && rB.ivrId){ //TODO unify with device MAc
-    	manager.find({where:{ivrId:rB.ivrId}}).success(function(m){
+    console.log(rB.mPhone);
+    console.log(rB.ivrId);
+    if(rB.mPhone!='null' && rB.ivrId!='null'){ //TODO unify with device MAc
+        console.log('store requested with mPhone');
+        manager.find({where:{ivrId:rB.ivrId}}).success(function(m){
 			if(m){
 				reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
     				if(r){
     					if(r.roostDeviceToken && r.isRoostActive){
-    						sendPushNot(r,'roost-reg-welcome-back',m);
-                            //setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},60000);
+                            setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},180000);
     						console.log('sending notification for welcome back (mp)');
     					}else{console.log('new cutomer'); res.send('new cutomer');}//do nothing
 					}else{console.log('error: reg not found'); res.send('error: reg not found');}
 				});
 			}else{console.log('error: manager not found'); res.send('error: manager not found');}
 		});
-    }else if(rB.deviceMac && rB.nodeMac){ //TODO unify with mPhone
+    }else if(rB.deviceMac!='null' && rB.nodeMac!='null'){ //TODO unify with mPhone
         console.log('device');
     	node.find({where:{nodeMac:rB.nodeMac}}).success(function(n){
     		if(n){
@@ -172,7 +175,7 @@ app.all('/store-requested', function(req, res) {
 						reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
     						if(r){
 								if(r.roostDeviceToken && r.isRoostActive){
-									setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},60000);
+									setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},180000);
 									console.log('sending notification for welcome back (wifi)');
 								}else{console.log('ROOSt will send notification');}//do nothing
 							}else{sendError(res, 'reg not found');}
@@ -249,7 +252,7 @@ function roostUnReg(rB, tagType, tagValue, m){
             }
         });
     }else if(tagType=='deviceMac'){ //TODO add method of make roost not active to reg instance
-        reg.find({where:{managerId:m.id, deviceMac:mPhoneTag}}).success(function(r){
+        reg.find({where:{managerId:m.id, deviceMac:tagValue}}).success(function(r){
             if(r){
                 r.isRoostActive = false; 
                 r.save().success(function(){console.log('Device token added to registration');});
@@ -334,6 +337,15 @@ function sendPushNot(reg,type,manager){
         });
     }   
 }
+
+//temp
+app.all('/ct',function(req,res){
+    console.log(req.query);
+});
+
+
+
+
 
 //optional: delete the unndecessary tags from moshe and me
 
