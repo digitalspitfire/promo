@@ -1,7 +1,6 @@
 var express = require('express');
 var app = express()
-			.use(express.bodyParser());
-
+                    .use(express.bodyParser());
 
 app.listen(3000);
 console.log('listening in port 3000');
@@ -141,18 +140,69 @@ app.all('/store-requested', function(req, res) {
     }else{sendError(res, 'no cookies sent');}
 });
 
-//ROOST Callback Lisner:
+//ROOST Callback Lisner & functions:
 app.post('/roost-cb',function(req,res){
-	var rBt = req.body.tags;
-	if(rBt){
+    console.log(req.body);
+    var rB = req.body;
+    if(rB.enabled==true){
+        roostReg(rB);
+    }else if(rB.enabled==false){
+        roostUnReg(rB);
+    }else{console.log('Error: user enabled id undefined');}
+}
+function roostReg(rB){
+    var mPhoneTag='';
+    //getting the mPhone //TODO getting also mdevice if no phone is here
+    for(var t in rB.tags){
+        var tag = rB.tags[t].split("-");
+        if(tag[0]=='mp'){
+            mPhoneTag= tag[1];
+            console.log('phone is: '+tag[1]);
+            break;
+        }else if(tag[0]=='dm'){
+            deviceMacTag= tag[1];
+            console.log('device_mac is: '+tag[1]);
+            break;
+        }
+    }
+    if(mPhone){
+        manager.find({where:{roostConfKey: rB.appKey}}).success(function(m){
+            if(m){
+                reg.find({where:{managerId:m.id, mPhone:mPhoneTag}}).success(function(r){
+                    if(r){
+                        r.roostDeviceToken = rB.device_token; //note: no need to check if it is returning customer- ROOST will send welcome anyways....
+                        r.save().success(function(){console.log('Device token added to registration');});
+                    }
+                });
+            }
+        });
+    }else if(mPhone){
+        manager.find({where:{roostConfKey: rB.appKey}}).success(function(m){
+            if(m){
+                reg.find({where:{managerId:m.id, mPhone:mPhoneTag}}).success(function(r){
+                    if(r){
+                        r.roostDeviceToken = rB.device_token; //note: no need to check if it is returning customer- ROOST will send welcome anyways....
+                        r.save().success(function(){console.log('Device token added to registration');});
+                    }
+                });
+            }
+        });
+    }
+}
+
+
+//    var rBt = req.body.tags;
+	/*
+    if(rBt){
 		console.log(rBt);
 		for(var t in rBt){
 			console.log(rBt[t].toString().split('-')[0]);
 		}
 	}
+    */
 });
 
-//optional: delete myself from ROOST at first, as I am twice in there....
+//optional: delete the unndecessary tags from moshe and me
 //finish the roost-cb function
 // download roost and send a tag mp-544585295
 //check that the widgets are working
@@ -162,25 +212,69 @@ app.post('/roost-cb',function(req,res){
 
 
 
-//Temp:
-//here I am trying to send a request to roost. just as an excersize
-var http = require('http');
+
+
+
+
+/*EXAMPLE FOT CONTACTING ROOST API*/  /*WORKING*/
+/*
+var https = require('https');
 
 var options = {
-  host: 'example.com',
-  auth
-  path: '/foo.html'
+  hostname: 'launch.alertrocket.com',
+  port: 443,
+  path: '/api/device_tokens',
+  method: 'GET',
+  auth:'1f24e572334d4575b5d3ae72afd45d8f:25b45e9c29814bba8a6e41dbdd6edee4'
 };
 
-http.get(options, function(res){
-  res.on('data', function(chunk){
-    //do something with chunk
+var req = https.request(options, function(res) {
+  console.log("statusCode: ", res.statusCode);
+  console.log("headers: ", res.headers);
+
+  res.on('data', function(d) {
+    console.error('yo yo');
+    process.stdout.write(d);
   });
-}).on("error", function(e){
-  console.log("Got error: " + e.message);
 });
+req.end();
 
-//DASHBOARD API
+req.on('error', function(e) {
+  console.error('error');
+  console.error(e);
+});
+*/
+/*EXAMPLE FOT CONTACTING ROOST API*/  /*WORKING---END*/
 
-//Scheduling
+/*EXAMPLE FOT CONTACTING ROOST API*/
+function sendPushNot(){
+    var https = require('https');
+    var qs = require('querystring'); 
+    var data = JSON.stringify({alert:'MOSHE if you see this SMS me', url:'http://launch.alertrocket.com/demo'});
 
+    var options = {
+      hostname: 'launch.alertrocket.com',
+      port: 443,
+      path: '/api/push',
+      method: 'POST',
+      auth:'1f24e572334d4575b5d3ae72afd45d8f:25b45e9c29814bba8a6e41dbdd6edee4',
+      //headers: { 'Content-Type': 'application/json','Content-Length': userString.length}
+    };
+
+    var req = https.request(options, function(res) {
+      console.log("statusCode: ", res.statusCode);
+      console.log("headers: ", res.headers);
+
+      res.on('data', function(d) {
+        console.error('yo yo');
+        process.stdout.write(d);
+      });
+    });
+    req.write(data);
+    req.end();
+
+    req.on('error', function(e) {
+      console.error('error');
+      console.error(e);
+    });
+}
