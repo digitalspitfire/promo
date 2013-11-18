@@ -41,40 +41,53 @@ function del_cookie(name)
 }
 
 $(function(){
-	
 	var cMPhone = getCookie('mPhone');
 	var cIvrId = getCookie('ivrId');
 	var cDeviceMac = getCookie('deviceMac');
 	var cNodeMac = getCookie('nodeMac');
+
+	//Deal with the 'null' problem:
+	if(cMPhone=='null'){cMPhone='';}
+	if(cIvrId=='null'){cIvrId='';}
+	if(cDeviceMac=='null'){cDeviceMac='';}
+	if(cNodeMac=='null'){cNodeMac='';}
+
 	
 	alert(cMPhone + ' / ' +cIvrId + ' / '+cDeviceMac + ' / ' + cNodeMac + ' / ');
-	
+		
+	var sbsInstallLink ='';
+	if(cMPhone && cDeviceMac){
+		sbsInstallLink='alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone+'&tag=dm-'+cDeviceMac;
+		$('#roost-iframe').attr('src','http://roost.me/mnt?tag=mp-'+cMPhone+'&tag=dm-'+cDeviceMac);
+		alert(sbsInstallLink);
+	}
+	else if(cMPhone && !cDeviceMac){
+		sbsInstallLink='alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone;
+		$('#roost-iframe').attr('src','http://roost.me/mnt?tag=mp-'+cMPhone);
+		alert(sbsInstallLink);
+	}
+	else if(cDeviceMac && !cMPhone){
+		sbsInstallLink='alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cDeviceMac;	
+		alert(sbsInstallLink);
+		$('#roost-iframe').attr('src','http://roost.me/mnt?tag=dm-'+cDeviceMac);
+	}else{alert('Error: no cookies !!!');}
+
+	$('#sbs-install').attr('href',sbsInstallLink);
+
+	//$('#app-install').attr('href',getStoreLink());
+
 	$('#app-install').on('click',function(){
 		$.ajax({
 			type:'POST',
 			url: 'http://office.sola.co.il:3000/store-requested',
 			data:{mPhone:cMPhone, ivrId:cIvrId , deviceMac:cDeviceMac, nodeMac:cNodeMac},
-			success: function(response){alert(response);}
+			success: function(response){}
 		});
-
+		//window.location.replace(sbsInstallLink);
+		setTimeout(function () { window.location = getStoreLink(); }, 25);
+		window.location = sbsInstallLink;
 	});
 
-	$('#app-install').attr('href',getStoreLink());
-	if(cMPhone && cDeviceMac){
-		$('#roost-iframe').attr('src','http://roost.me/mnt?tag=mp-'+cMPhone+'&tag=dm-'+cDeviceMac);
-		$('#sbs-install').attr('href', 'alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone+'&tag=dm-'+cDeviceMac);
-		alert('alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone+'&tag=dm-'+cDeviceMac);
-	}
-	else if(cMPhone && !cDeviceMac){
-		$('#roost-iframe').attr('src','http://roost.me/mnt?tag=mp-'+cMPhone);
-		$('#sbs-install').attr('href', 'alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone);
-		alert('alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone);
-	}
-	else if(cDeviceMac && !cMPhone){
-		$('#roost-iframe').attr('src','http://roost.me/mnt?tag=dm-'+cDeviceMac);
-		$('#sbs-install').attr('href', 'alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=dm-'+cDeviceMac);
-		alert('alertrocket://register?appKey=1f24e572334d4575b5d3ae72afd45d8f&tag=mp-'+cMPhone);
-	}else{console.log('Error: no cookies !!!');}
 /*
 	del_cookie('mPhone');
 	del_cookie('ivrId');
