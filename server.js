@@ -189,63 +189,129 @@ app.all('/store-requested', function(req, res) {
 });
 
 //Listen to ROOST. 1) On reg- Update deviceTokens. 2)On un-reg- send cancelation SMS //TODO - should write it shorter....
-/*
-app.post('/roost-cb',function(req,res){ //TODO I think I can write this one shorter...
+app.all('/roost-cb',function(req,res){ //TODO I think I can write this one shorter...
     console.log(req.body);
-
     var rB = req.body;
-    var tagType='';
-    var tagValue='';
+    var mPhoneTag='';
+    var deviceMacTag='';
     //getting the identifier (mPhone OR deviceMac)
     for(var t in rB.tags){
         var tagParts = rB.tags[t].split("-");
         if(tagParts[0]=='mp'){
-            tagType = 'mPhone';
-            tagValue= tagParts[1];
-            console.log('phone is: '+tagParts[1]);
-            break;
+            if(tagParts[1] && tagParts[1]!='null'){
+                mPhoneTag = tagParts[1];
+                log('mPhone tag found: '+tagParts[1]);
+            }
         }else if(tagParts[0]=='dm'){
-            tagType = 'deviceMac';
-            tagValue= tagParts[1];
-            console.log('device_mac is: '+tagParts[1]);
-            break;
+            if(tagParts[1] && tagParts[1]!='null'){
+                deviceMacTag = tagParts[1];
+                log('deviceMac tag found: '+tagParts[1]);    
+            }
         }
     }
-    if(tagType && tagValue){
+    if(mPhoneTag || deviceMacTag){
         manager.find({where:{roostConfKey: rB.appKey}}).success(function(m){
             if(m){        
                 if(rB.enabled==true){
-                    roostReg(rB , tagType, tagValue, m);
+                    roostReg(rB , mPhoneTag, deviceMacTag, m);
                 }else if(rB.enabled==false){
-                    roostUnReg(rB, tagType, tagValue, m);
-                }else{console.log('Error: user enabled is undefined');}
-            }else{console.log('Error: manager not found');}
+                    roostUnReg(rB, mPhoneTag, deviceMacTag, m);
+                }else{log('Error: user enabled is undefined');}
+            }else{log('Error: manager not found');}
         });
-    }else{console.log('Error: user has no identifiers in roost');}
+    }else{log('Error: user has no identifiers in roost');}
 });
 
-
-
-function roostUnReg(rB, tagType, tagValue, m){
-    if(tagType=='mPhone'){ //TODO add method of make roost not active to reg instance
-        reg.find({where:{managerId:m.id, mPhone:tagValue}}).success(function(r){
+    //function roostReg
+function roostReg(rB, mPhoneTag, deviceMacTag, m){
+    log('Roost reg...')
+    //NOTE: we assume we have only one reg with roostDeviceToken per managetId:
+    if(mPhoneTag=='null'){mPhoneTag='';}
+    if(deviceMacTag=='null'){deviceMacTag='';}
+    reg.find({where:{managerId:m.id, roostDeviceToken:rB.device_token}}).success(function(eR){
+        if(eR){
+            if(mPhoneTag){eR.mPhone=mPhoneTag; log('cb sent mPhoneTag');}
+            if(deviceMacTag){eR.deviceMac=deviceMacTag; log('cb sent deviceMacTag');}
+            eR.isRoostActive=true; 
+            eR.save().success(function(){
+                log('registeration is now active with and with all the identifiers that were sent');
+                //NOTE: We assume we do not need to delete unnecessary regs if we got to this stage...
+            });
+        }else{
+            log('no reg has this roostDeviceToken')
+            log('m.id: '+ m.id);
+            log('mPhoneTag: '+mPhoneTag);
+            log('deviceMacTag: '+deviceMacTag);
+            reg.find({where:{managerId: m.id, mPhone: mPhoneTag}}).success(function(rMP){ //rMP = registration with mPhone
+                if(rMP){
+                    if(deviceMacTag){rMP.deviceMac=deviceMacTag; log('deviceMac was overwritten');}
+                    rMP.roostDeviceToken=rB.device_token;
+                    rMP.save().success(function(){
+                        log('added deviceToken to mPhone regisreration');
+                        //Deleting un-necessary deviceMac reg
+                        if(deviceMacTag){
+                            reg.find({where:{managerId: m.id, deviceMac: deviceMacTag, id:{ne:rMP.id}}}).success(function(rD){  //rD= reg-to-delete
+                                if(rD){
+                                    rD.destroy().success(function(){log('un necessary deviceMac reg was deleted');});
+                                }else{log('No un-necessary deviceMac reg was found :)');}
+                            }); 
+                        }
+                    });    
+                }else{
+                    log('no mPhone reg was found, will look for deviceMac reg');
+                    reg.find({where:{managerId: m.id, deviceMac: deviceMacTag}}).success(function(rDM){ //rDM= reg-with-deviceMac
+                        if(rDM){
+                            if(mPhoneTag){rDM.deviceMac=deviceMacTag; log('deviceMac was overwritten');}
+                            rDM.roostDeviceToken=rB.device_token;
+                            rDM.save().success(function(){
+                                log('added deviceToken to deviceMac regisreration');
+                            });    
+                        }else{log('Error: no registration found with the identifiers sent from Roost');}
+                    });
+                }
+            });
+        }
+    }); 
+}
+    //function roostUnReg
+function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works OK, can try make it shorter
+    //check both tags and make isRoostActive=false
+    log('Roost Un-Register...');
+    if(mPhoneTag && deviceMacTag){ 
+        log('Roost CB sends both mPhoneTag + deviceMacTag');
+        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, roostDeviceToken:rB.device_token}}).success(function(r){ //rDM=reg with deviceMac
             if(r){
                 r.isRoostActive = false; 
-                r.save().success(function(){console.log('user un registered from ROOST, trying to send SMS');});
+                r.save().success(function(){log('user registeration by phone is now isRoostActive=fale, trying to send SMS');});
                 sendSms(r,'roost-cancelation',m);
+            }else{
+                log('Warning: the registeration has no mPhone but the the ROOST has mPhoneTag');
+                reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
+                    if(rDM){
+                        rDM.isRoostActive = false; 
+                        rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=fale');});
+                    }else{log('ERROR: Registeration has no identifiers but Roost has both tags !!!');}
+                });
             }
         });
-    }else if(tagType=='deviceMac'){ //TODO add method of make roost not active to reg instance
-        reg.find({where:{managerId:m.id, deviceMac:tagValue}}).success(function(r){
-            if(r){
-                r.isRoostActive = false; 
-                r.save().success(function(){console.log('Device token added to registration');});
-                sendSms(r,'roost-cancelation',m);
-            }
+    }else if(mPhoneTag && !deviceMacTag){
+        log('Roost CB sends only mPhoneTag');
+        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, roostDeviceToken:rB.device_token}}).success(function(rMP){ //rDM=reg with deviceMac
+            if(rMP){
+                rMP.isRoostActive = false; 
+                rMP.save().success(function(){log('user registeration by mPhone is now isRoostActive=fale');});
+            }else{log('ERROR: Registeration has no mPhone but Roost has has only mPhoneTag !!!');}
+        });
+    }else if(deviceMacTag && !mPhoneTag){
+        log('Roost CB sends only deviceMacTag');
+        reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
+            if(rDM){
+                rDM.isRoostActive = false; 
+                rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=fale');});
+            }else{log('ERROR: Registeration has no deviceMac but Roost has has only deviceMacTag !!!');}
         });
     }
 }
-*/
 //===== FUNCTIONS =====//
 //SEND SMS to a spcific reg
 function sendSms(reg, type, manager){
@@ -490,139 +556,6 @@ function sendPushNot(){
 //if only one...bla bla
 
 
-app.all('/roost-cb',function(req,res){ //TODO I think I can write this one shorter...
-    console.log(req.body);
-    var rB = req.body;
-    var mPhoneTag='';
-    var deviceMacTag='';
-    //getting the identifier (mPhone OR deviceMac)
-    for(var t in rB.tags){
-        var tagParts = rB.tags[t].split("-");
-        if(tagParts[0]=='mp'){
-            if(tagParts[1] && tagParts[1]!='null'){
-                mPhoneTag = tagParts[1];
-                log('mPhone tag found: '+tagParts[1]);
-            }
-        }else if(tagParts[0]=='dm'){
-            if(tagParts[1] && tagParts[1]!='null'){
-                deviceMacTag = tagParts[1];
-                log('deviceMac tag found: '+tagParts[1]);    
-            }
-        }
-    }
-    if(mPhoneTag || deviceMacTag){
-        manager.find({where:{roostConfKey: rB.appKey}}).success(function(m){
-            if(m){        
-                if(rB.enabled==true){
-                    roostReg(rB , mPhoneTag, deviceMacTag, m);
-                }else if(rB.enabled==false){
-                    roostUnReg(rB, mPhoneTag, deviceMacTag, m);
-                }else{log('Error: user enabled is undefined');}
-            }else{log('Error: manager not found');}
-        });
-    }else{log('Error: user has no identifiers in roost');}
-});
-
-    //function roostReg
-function roostReg(rB, mPhoneTag, deviceMacTag, m){
-    //if we have 2 identifiers create one record out of them
-    if(mPhoneTag && deviceMacTag){
-        log('call back sends mPhone+deviceMac');
-        reg.find({where:{managerId:m.id, roostDeviceToken:rB.device_token}}).success(function(eR){ //er = existing Reg
-            //Check if the roost tag is already registered
-            if(eR){
-                if(eR.mPhone && eR.deviceMac){eR.isRoostActive = true; eR.save(); log('GREAT! reg is already unified!');
-                }else if(eR.mPhone && !eR.deviceMac){
-                    eR.deviceMac = deviceMacTag;
-                    eR.isRoostActive = true;
-                    eR.save().success(function(){
-                        log('adding deivceMac to existing reg;')
-                        reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, id:{ne:eR.id}}}).success(function(rD){  //rD = Reg-to-Delete
-                            if(rD){
-                                rD.destroy().succes(function(){log('deleted un-necessary reg')});    
-                            }
-                            
-                        });
-                    });
-                }else if(eR.deviceMac && !eR.mPhone){
-                    eR.mPhone = mPhoneTag;
-                    eR.isRoostActive = true;
-                    eR.save().success(function(){
-                        log('adding deivceMac to existing reg;')
-                        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, id:{ne:eR.id}}}).success(function(rD){  //rD = Reg-to-Delete
-                            if(rD){
-                                rD.destroy().success(function(){log('deleted un-necessary reg')});    
-                            }
-                        });
-                    });
-                }else{log('Error: ther is a registration with roostId without any identifier!');}
-            }
-        });
-    }else if(mPhoneTag && !deviceMacTag){
-        log('call back sends only mPhone...')
-        reg.find({where:{mPhone: mPhoneTag, managerId:m.id}}).success(function(r){
-            if(r){
-                if(r.roostDeviceToken){consol.log('this regalready have roostDeviceToken');}
-                else{consol.log('this reg does not yet have roost device token, now adding...');}
-                r.roostDeviceToken = rB.device_token;
-                r.isRoostActive = true;
-                r.save().success(function(){log('we made sure this reg isRoostActive=true');});
-            }else{log('Error: this phone is not registered!!!');}
-        });
-    }else if(deviceMacTag && !mPhoneTag){
-        log('call back sends only deviceMac...')
-        reg.find({where:{deviceMac:deviceMacTag, managerId:m.id}}).success(function(r){
-            if(r){
-                if(r.roostDeviceToken){log('this reg already have roostDeviceToken');}
-                else{consol.log('this reg does not yet have roost device token, now adding...');}
-                r.roostDeviceToken = rB.device_token;
-                r.isRoostActive = true;
-                r.save().success(function(){log('we made sure this reg isRoostActive=true');});
-            }else{log('Error: this phone is not registered!!!');}
-        });
-    }else{log('Error: this CB from Roost has not even one identifier !!!');}
-}
-    //function roostUnReg
-function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO try make this function smarter
-    //check both tags and make isRoostActive=false
-    log('Roost Un-Register...');
-    if(mPhoneTag && deviceMacTag){ 
-        log('Roost CB sends both mPhoneTag + deviceMacTag');
-        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, roostDeviceToken:rB.device_token}}).success(function(r){ //rDM=reg with deviceMac
-            if(r){
-                r.isRoostActive = false; 
-                r.save().success(function(){log('user registeration by phone is now isRoostActive=fale, trying to send SMS');});
-                sendSms(rMP,'roost-cancelation',m);
-            }else{
-                log('Warning: the registeration has no mPhone but the the ROOST has mPhoneTag');
-                reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
-                    if(rDM){
-                        rDM.isRoostActive = false; 
-                        rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=fale');});
-                    }else{log('ERROR: Registeration has no identifiers but Roost has both tags !!!');}
-                });
-            }
-        });
-    }else if(mPhoneTag && !deviceMacTag){
-        log('Roost CB sends only mPhoneTag');
-        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, roostDeviceToken:rB.device_token}}).success(function(rMP){ //rDM=reg with deviceMac
-            if(rMP){
-                rMP.isRoostActive = false; 
-                rMP.save().success(function(){log('user registeration by mPhone is now isRoostActive=fale');});
-            }else{log('ERROR: Registeration has no mPhone but Roost has has only mPhoneTag !!!');}
-        });
-    }else if(deviceMacTag && !mPhoneTag){
-        log('Roost CB sends only deviceMacTag');
-        reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
-            if(rDM){
-                rDM.isRoostActive = false; 
-                rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=fale');});
-            }else{log('ERROR: Registeration has no deviceMac but Roost has has only deviceMacTag !!!');}
-        });
-    }
-}
-
-
 /* OLD
 function roostReg(rB, tagType, tagValue, m){
     if(tagType=='mPhone'){ //TODO add method of save device token to reg instance
@@ -663,4 +596,70 @@ function roostReg(rB, tagType, tagValue, m){
         });
     }    
 }
+
+
+function roostReg(rB, mPhoneTag, deviceMacTag, m){
+    //if we have 2 identifiers create one record out of them
+    if(mPhoneTag && deviceMacTag){
+        log('call back sends mPhone+deviceMac');
+        reg.find({where:{managerId:m.id, roostDeviceToken:rB.device_token}}).success(function(eR){ //er = existing Reg
+            //Check if the roost tag is already registered
+            log('here');
+            if(eR){
+                if(eR.mPhone && eR.deviceMac){
+                    eR.isRoostActive = true; eR.save(); log('GREAT! reg is already unified!');
+                }else if(eR.mPhone && !eR.deviceMac){
+                    eR.deviceMac = deviceMacTag;
+                    eR.isRoostActive = true;
+                    eR.save().success(function(){
+                        log('adding deivceMac to existing reg;')
+                        reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, id:{ne:eR.id}}}).success(function(rD){  //rD = Reg-to-Delete
+                            if(rD){
+                                rD.destroy().succes(function(){log('deleted un-necessary reg')});    
+                            }
+                            
+                        });
+                    });
+                }else if(eR.deviceMac && !eR.mPhone){
+                    eR.mPhone = mPhoneTag;
+                    eR.isRoostActive = true;
+                    eR.save().success(function(){
+                        log('adding deivceMac to existing reg;')
+                        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, id:{ne:eR.id}}}).success(function(rD){  //rD = Reg-to-Delete
+                            if(rD){
+                                rD.destroy().success(function(){log('deleted un-necessary reg')});    
+                            }
+                        });
+                    });
+                }else{log('Error: ther is a registration with roostId without any identifier!');}
+            }else{ // no roostDeviceToken found
+                log('Warning: Roost has 2 identifiers and but no roostDeviceToken is registered...');
+                reg.find({where:{}}).success(function(r))
+            }
+        });
+    }else if(mPhoneTag && !deviceMacTag){
+        log('call back sends only mPhone...')
+        reg.find({where:{mPhone: mPhoneTag, managerId:m.id}}).success(function(r){
+            if(r){
+                if(r.roostDeviceToken){consol.log('this regalready have roostDeviceToken');}
+                else{consol.log('this reg does not yet have roost device token, now adding...');}
+                r.roostDeviceToken = rB.device_token;
+                r.isRoostActive = true;
+                r.save().success(function(){log('we made sure this reg isRoostActive=true');});
+            }else{log('Error: this phone is not registered!!!');}
+        });
+    }else if(deviceMacTag && !mPhoneTag){
+        log('call back sends only deviceMac...')
+        reg.find({where:{deviceMac:deviceMacTag, managerId:m.id}}).success(function(r){
+            if(r){
+                if(r.roostDeviceToken){log('this reg already have roostDeviceToken');}
+                else{consol.log('this reg does not yet have roost device token, now adding...');}
+                r.roostDeviceToken = rB.device_token;
+                r.isRoostActive = true;
+                r.save().success(function(){log('we made sure this reg isRoostActive=true');});
+            }else{log('Error: this phone is not registered!!!');}
+        });
+    }else{log('Error: this CB from Roost has not even one identifier !!!');}
+}
+
  OLD ===END=== */
