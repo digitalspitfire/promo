@@ -1,6 +1,8 @@
 var express = require('express');
 var app = express()
                     .use(express.bodyParser());
+var fs = require('fs');
+var csv = require("fast-csv");
 
 app.listen(3000);
 console.log('listening in port 3000');
@@ -19,7 +21,10 @@ app.use(express.static(__dirname+'/public'));
 app.get('/dashboard',function(req,res){
 	res.sendfile('public/dashboard.html');
 });
-
+//UplodedFile
+app.get('/uploaded',function(req,res){
+    res.sendfile('public/uploaded.html');
+});
 
 //DB deffenitions
 var Sq = require('sequelize-mysql').sequelize
@@ -34,6 +39,7 @@ var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
 var reg = sq.define('registration',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, roostDeviceToken:Sq.TEXT, isRoostActive:Sq.BOOLEAN});
 var tM = sq.define('trigerredMessage',{type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT, isActive:Sq.BOOLEAN});
+var uD = sq.define('usersData',{mPhone:Sq.TEXT, filterName:Sq.TEXT, value:Sq.TEXT});
 
 manager
 	.hasMany(campaign)
@@ -41,7 +47,8 @@ manager
 	.hasMany(filter)
 	.hasMany(activation)
 	.hasMany(reg)
-    .hasMany(tM);
+    .hasMany(tM)
+    .hasMany(uD);
 campaign.belongsTo(manager);
 node.belongsTo(manager);
 filter.belongsTo(manager);
@@ -62,16 +69,18 @@ function log(message){console.log('>>> '+message);}
 //============= LISNERS ===========//
 //Listner to IVR, write to activation + update ivrId with ivrPhone
 app.get('/ivrcb',function(req,res){
-	console.log(req.query);
-	var rQ = req.query;
-	if(rQ.phone && rQ.dest && rQ.c){
-		manager.find({where:{ivrPhone:rQ.dest}}).success(function(m){
-			if(m){
-				if(m.ivrId!=rQ.c){m.ivrId=rQ.c; m.save();}
-				activation.create({mPhone:rQ.phone, managerId:m.id}).success(function(){});//TODO need to learn how to create this directly from the selected manager instance	
-			}
-		});
-	}
+	if(req.query.dest=='0722280630'){ //TODO - remove this
+        console.log(req.query);
+        var rQ = req.query;
+        if(rQ.phone && rQ.dest && rQ.c){
+            manager.find({where:{ivrPhone:rQ.dest}}).success(function(m){
+                if(m){
+                    if(m.ivrId!=rQ.c){m.ivrId=rQ.c; m.save();}
+                    activation.create({mPhone:rQ.phone, managerId:m.id}).success(function(){});//TODO need to learn how to create this directly from the selected manager instance  
+                }
+            });
+        }
+    }
 	res.send(200, 'ok');
 });
 
@@ -221,7 +230,6 @@ app.all('/roost-cb',function(req,res){ //TODO I think I can write this one short
         });
     }else{log('Error: user has no identifiers in roost');}
 });
-
     //function roostReg
 function roostReg(rB, mPhoneTag, deviceMacTag, m){
     log('Roost reg...')
@@ -312,6 +320,109 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
         });
     }
 }
+
+//===============DASHBOARD API LISTNERS ==============//
+    //File upload:
+app.all('/api/dataFileUpload/:managerId',function(req, res){
+    console.log(req.body);
+    console.log(req.files);
+    console.log(req.path);
+    fs.readFile(req.files.dataFile.path, function(err,data){
+        var newPath = __dirname+'/uploads/data-'+req.params.managerId+'.csv';
+        fs.writeFile(newPath, data, function(err){
+            if(err){
+                result = err;
+                res.redirect('back');
+            }else{
+                console.log(newPath);
+                console.log('saved file. content: '+ data);
+                res.redirect('/uploaded');    
+            }
+        });
+    });
+});
+app.get('/api/getCsvHeaders/:managerId', function(req,res){
+    manager.find({where:{id:req.params.managerId}}).success(function(m){
+        if(m){
+            var uploadedData = [];
+            var path = 'uploads/data-'+m.id+'.csv';
+            var result='';
+            console.log(path);
+            fs.readFile(path, function (err, data) {
+                if(err){
+                    console.log('No CSV file found');
+                    res.send('No CSV file found');
+                }else{
+                    var headers='';
+                    var stream = fs.createReadStream(path);
+                    csv(stream)
+                    .on("data", function(data,index){
+                        uploadedData[index]=data;
+                        console.log(data);
+                    })
+                    .on("end", function(){
+                        console.log("done");
+                        for(var h in uploadedData[0]){
+                            if(!uploadedData[0][h]){uploadedData[0].splice(h);}
+                        }
+                        res.json(uploadedData[0]);
+                    })
+                    .parse();    
+                }
+            });
+        }else{res.send('no manager found');}
+    });
+});
+
+app.get('/api/updateData/:managerId',function(req,res){
+   manager.find({where:{id:req.params.managerId}}).success(function(m){
+        if(m){
+            var uploadedData = [];
+            var path = 'uploads/data-'+m.id+'.csv';
+            var result='';
+            console.log(path);
+            fs.readFile(path, function (err, data) {
+                if(err){
+                    console.log('No CSV file found');
+                    res.send('No CSV file found');
+                }else{
+                    var headers='';
+                    var stream = fs.createReadStream(path);
+                    csv(stream)
+                    .on("data", function(data,index){
+                        uploadedData[index]=data;
+                        console.log(data);
+                    })
+                    .on("end", function(){
+                        var organizedData = [];
+                        var headers = [];
+                        console.log("done");
+                        for(var r in uploadedData){
+                            if(r==0){
+                                headers = uploadedData[0];
+                                if(headers[headers.length-1]==''){headers.splice(headers.length-1);}
+                            }else{
+                                for(var i in uploadedData[r]){
+                                    if(i!=0 && uploadedData[r][i]){
+                                        organizedData.push({managerId:m.id, mPhone:uploadedData[r][0],filterName:headers[i],value:uploadedData[r][i]});
+                                    }    
+                                }
+
+                            }    
+                        }
+                        uD.bulkCreate(organizedData)
+                            .success(function(users){
+                                console.log(users);
+                                res.json(organizedData);
+                            })
+                            .error(function(err){console.log(err);});
+                    })
+                    .parse();    
+                }
+            });
+        }else{console.log('no manager found');}
+    });
+});
 //===== FUNCTIONS =====//
 //SEND SMS to a spcific reg
 function sendSms(reg, type, manager){
@@ -387,6 +498,26 @@ function sendPushNot(reg,type,manager){
         });
     }   
 }
+
+//Parse CSV:
+function parseCSV(){
+    var stream = fs.createReadStream("uploads/data.csv");
+    csv(stream)
+     .on("data", function(data){
+         console.log(data);
+         //return data[0];
+
+     })
+     .on("end", function(){
+         console.log("done");
+     })
+     .parse();    
+}
+
+
+
+
+
 
 //Recognizing listner
 
