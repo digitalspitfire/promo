@@ -121,12 +121,36 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 									<!-- BEGIN FORM-->
 									<div id="uploaded-data-headers">
 									</div>
-									<form action="api/updateData/1" class="form-horizontal" method="GET">
+									<div class="form-horizontal">
 										<div class="form-actions">
-											<button type="submit" class="btn blue" id><i class="icon-ok"></i>עדכן את  המידע וחזור למסך הראשי</button>
+											<button type="submit" class="btn blue" id="btn-update-users-data"><i class="icon-ok"></i>עדכן את  המידע וחזור למסך הראשי</button>
 											<button type="button" class="btn">ביטול</button>
 										</div>
-									</form>
+									</div>
+									<!-- END FORM-->  
+								</div>
+							</div>
+							<div class="portlet box blue">
+								<div class="portlet-title">
+									<div class="caption">
+										<i class="icon-cogs"></i>
+										<span class="hidden-480">המידע הקיים</span>
+									</div>
+								</div>
+								<div class="portlet-body form">
+									<!-- BEGIN FORM-->
+									<table id="tbl-users-data" class="table table-striped table-bordered table-hover">
+										<thead>
+											<tr>
+												<th>מספר הטלפון</th>
+												<th>סוג הפילטר</th>
+												<th>הערך</th>
+											</tr>
+										</thead>
+										<tbody>
+										</tbody>
+										<tr></tr>
+									</table>
 									<!-- END FORM-->  
 								</div>
 							</div>
@@ -213,6 +237,26 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 						$('#uploaded-data-headers').append('<div>'+h+'</div>');
 					});
 				}	
+			});
+			$.ajax({
+				type: "get",
+				url: '/api/usersData/1',				
+				success: function(usersData){
+					console.log(usersData);
+					$.each(usersData, function(i,r){
+						$('#tbl-users-data > tbody').append('<tr><td>'+r.mPhone+'</td><td>'+r.filterName+'</td><td>'+r.value+'</td></tr>');
+					});
+				}	
+			});
+
+			$('#btn-update-users-data').on('click',function(){
+				$.ajax({
+					type: "get",
+					url: '/api/update-users-data/1',				
+					success: function(response){
+						alert(response);
+					}	
+				});				
 			});
 		});
 	</script>

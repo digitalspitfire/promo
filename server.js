@@ -374,7 +374,7 @@ app.get('/api/getCsvHeaders/:managerId', function(req,res){
     });
 });
 
-app.get('/api/updateData/:managerId',function(req,res){
+app.get('/api/update-users-data/:managerId',function(req,res){
    manager.find({where:{id:req.params.managerId}}).success(function(m){
         if(m){
             var uploadedData = [];
@@ -391,7 +391,7 @@ app.get('/api/updateData/:managerId',function(req,res){
                     csv(stream)
                     .on("data", function(data,index){
                         uploadedData[index]=data;
-                        console.log(data);
+                        //console.log(data);
                     })
                     .on("end", function(){
                         var organizedData = [];
@@ -407,17 +407,52 @@ app.get('/api/updateData/:managerId',function(req,res){
                                         organizedData.push({managerId:m.id, mPhone:uploadedData[r][0],filterName:headers[i],value:uploadedData[r][i]});
                                     }    
                                 }
-
                             }    
                         }
-                        uD.bulkCreate(organizedData)
-                            .success(function(users){
-                                console.log(users);
-                                res.json(organizedData);
-                            })
-                            .error(function(err){console.log(err);});
+                        //update usersData table:
+                        updateUserDataValue(organizedData,0, res);
+                        res.send('The data is updating....');
                     })
                     .parse();    
+                }
+            });
+        }else{console.log('no manager found'); res.send('not updated!, no manager found');}
+    });
+});
+function updateUserDataValue(organizedData , index, res){
+    
+    if(!organizedData[index]){
+        return false;
+    }
+    else{
+        var oDv = organizedData[index];
+        uD.find({where:{managerId:oDv.managerId, mPhone: oDv.mPhone, filterName:oDv.filterName}}).success(function(eV){
+            if(eV){
+                eV.value=oDv.value; 
+                eV.save();
+                updateUserDataValue(organizedData, index+1)
+                log('updated value of existing row');
+            }else{
+                uD.create(oDv).success(function(){
+                    log('created a new value');
+                    updateUserDataValue(organizedData, index+1)
+                });
+            }
+        });
+    }
+}
+//getting users data
+app.get('/api/usersData/:managerId',function(req,res){
+   manager.find({where:{id:req.params.managerId}}).success(function(m){
+        if(m){
+            uD.findAll({where:{managerId:m.id}}).success(function(users){
+                if(users){
+                    var usersData = [];
+                    for(var u in users){
+                        //console.log(users[u].dataValues);
+                        usersData.push(users[u].dataValues);
+                    }
+                    res.json(usersData);
                 }
             });
         }else{console.log('no manager found');}
