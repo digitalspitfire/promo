@@ -233,6 +233,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 											<th data-field="ivr_phone">טלפון בIVR</th>
 											<th data-field="roost_config_key">Roost Config Key</th>
 											<th data-field="roost_secret_key">Roost Secret Key</th>
+											<th data-field="roost_geo_loc">Roost Secret Key</th>
 											<th data-field="user_name">שם מתשמש</th>
 											<th data-field="password">סיסמה</th>
 											<th data-field="nodes">Nodes</th>
@@ -611,7 +612,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		function appendVendorRow(manager) //for new vendor use vendor.id=0
 		{
 			var vendorData = $.extend({},manager,{
-				"editableFields": [manager.vendor,manager.name,manager.phone,manager.email,manager.ivr_phone,manager.roost_url,manager.roost_config_key,manager.roost_secret_key,manager.redirect_url,manager.user_name,manager.password],
+				"editableFields": [manager.vendor,manager.name,manager.phone,manager.email,manager.ivr_phone,manager.roost_url,manager.roost_config_key,manager.roost_secret_key, manager.roost_geo_loc,manager.redirect_url,manager.user_name,manager.password],
 				"nodeMac": function(){return this.node_mac;},
 				"nodeId": function(){return this.id;}
 			});
@@ -862,10 +863,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			error:function(){console.log('b');}
 		});
 
-		$('#btn-upload-file').on('click',function(){
-			$('#form-data-file-upload').submit();
-//			$.post('/api/dataFileUpload',$('#form-data-file-upload').serialize(),function(response){alert(response);});
-		});
+		
 	});
 
 	function getParameterByName(name) {
