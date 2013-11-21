@@ -19,8 +19,13 @@ app.use(express.static(__dirname+'/public'));
 
 //dashboard
 app.get('/dashboard',function(req,res){
-	res.sendfile('public/dashboard.html');
+    res.sendfile('public/dashboard.html');
 });
+
+app.get('/manager',function(req,res){
+    res.sendfile('public/manager.html');
+});
+
 //UplodedFile
 app.get('/uploaded',function(req,res){
     res.sendfile('public/uploaded.html');
@@ -32,7 +37,7 @@ var mysql     = require('sequelize-mysql').mysql
 var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
-var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT});
+var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
 var campaign = sq.define('campaign',{name:Sq.TEXT, description:Sq.TEXT, hour:Sq.INTEGER, dayOfWeek:Sq.INTEGER, message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT,isRec:Sq.BOOLEAN,isActive:Sq.BOOLEAN, isCanceled:Sq.BOOLEAN});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
@@ -40,13 +45,14 @@ var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, node
 var reg = sq.define('registration',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, roostDeviceToken:Sq.TEXT, isRoostActive:Sq.BOOLEAN});
 var tM = sq.define('trigerredMessage',{type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT, isActive:Sq.BOOLEAN});
 var uD = sq.define('usersData',{mPhone:Sq.TEXT, filterName:Sq.TEXT, value:Sq.TEXT});
+var recMac = sq.define('recognisedMac',{deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
 
 manager
-	.hasMany(campaign)
-	.hasMany(node)
-	.hasMany(filter)
-	.hasMany(activation)
-	.hasMany(reg)
+    .hasMany(campaign)
+    .hasMany(node)
+    .hasMany(filter)
+    .hasMany(activation)
+    .hasMany(reg)
     .hasMany(tM)
     .hasMany(uD);
 campaign.belongsTo(manager);
@@ -60,16 +66,16 @@ sq.sync();
 
 //GENERAL FUNCTIONS
 function sendError(res,message){
-	console.log('Error: '+ message);
-	console.log('Error: '+ message);
-	res.send('Error: '+ message);
+    console.log('Error: '+ message);
+    console.log('Error: '+ message);
+    res.send('Error: '+ message);
 }
 function log(message){console.log('>>> '+message);}
 
 //============= LISNERS ===========//
 //Listner to IVR, write to activation + update ivrId with ivrPhone
 app.get('/ivrcb',function(req,res){
-	if(req.query.dest=='0722280630'){ //TODO - remove this
+    if(req.query.dest=='0722280630'){ //TODO - remove this
         console.log(req.query);
         var rQ = req.query;
         if(rQ.phone && rQ.dest && rQ.c){
@@ -81,7 +87,7 @@ app.get('/ivrcb',function(req,res){
             });
         }
     }
-	res.send(200, 'ok');
+    res.send(200);
 });
 
 //Listen to widget #1, Register+ create activation if by Wifi   //TODO- add 'register-by-device-mac'
@@ -91,30 +97,30 @@ app.all('/register-by-phone', function(req, res) {
     //res.header("Access-Control-Allow-Headers", "X-Requested-With");  //TODO make it specific here?
     var rB = req.body;
     if(rB.mPhone && rB.ivrId){
-    	manager.find({where:{ivrId:rB.ivrId}}).success(function(m){
-			if(m){
-				reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
-    				if(r){console.log('already registered'); res.send('already registered');}//do nothing
-    				else{
-    					reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
-    						if(r){
-    							r.mPhone = rB.mPhone; 
-    							r.save().success(function(){
-    								console.log('added phone to existing reg!');
-    								res.send('added phone to existing reg!');
-    							})
-    						}else{
-    							reg.create({mPhone:rB.mPhone, managerId: m.id, deviceMac:rB.deviceMac}).success(function(){
-    								console.log('new reg created');
-    								res.send('new reg created');
-    							});
-    						}
-    					});
-					}
-    			});
-    		}else{console.log('no manager found');res.send('no manager found');}
-    	});
-	}else{console.log('Error: sent from widget without mPhone & ivrId !');res.send('Error: sent from widget without mPhone & ivrId !');}
+        manager.find({where:{ivrId:rB.ivrId}}).success(function(m){
+            if(m){
+                reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
+                    if(r){console.log('already registered'); res.send('already registered');}//do nothing
+                    else{
+                        reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
+                            if(r){
+                                r.mPhone = rB.mPhone; 
+                                r.save().success(function(){
+                                    console.log('added phone to existing reg!');
+                                    res.send('added phone to existing reg!');
+                                })
+                            }else{
+                                reg.create({mPhone:rB.mPhone, managerId: m.id, deviceMac:rB.deviceMac}).success(function(){
+                                    console.log('new reg created');
+                                    res.send('new reg created');
+                                });
+                            }
+                        });
+                    }
+                });
+            }else{console.log('no manager found');res.send('no manager found');}
+        });
+    }else{console.log('Error: sent from widget without mPhone & ivrId !');res.send('Error: sent from widget without mPhone & ivrId !');}
 });
     //by wifi (here also create activation)
 app.all('/register-by-device-mac', function(req, res) {
@@ -162,38 +168,38 @@ app.all('/store-requested', function(req, res) {
     console.log(rB);
     console.log(rB.mPhone);
     console.log(rB.ivrId);
-    if(rB.mPhone!='null' && rB.ivrId!='null'){ //TODO unify with device MAc
+    if(rB.mPhone && rB.mPhone!='null' && rB.ivrId && rB.ivrId!='null'){ //TODO unify with device MAc
         console.log('store requested with mPhone');
         manager.find({where:{ivrId:rB.ivrId}}).success(function(m){
-			if(m){
-				reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
-    				if(r){
-    					if(r.roostDeviceToken && r.isRoostActive){
-                            setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},180000);
-    						console.log('sending notification for welcome back (mp)');
-    					}else{console.log('new cutomer'); res.send('new cutomer');}//do nothing
-					}else{console.log('error: reg not found'); res.send('error: reg not found');}
-				});
-			}else{console.log('error: manager not found'); res.send('error: manager not found');}
-		});
-    }else if(rB.deviceMac!='null' && rB.nodeMac!='null'){ //TODO unify with mPhone
+            if(m){
+                reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
+                    if(r){
+                        if(r.roostDeviceToken && r.isRoostActive){
+                            setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},30000);
+                            console.log('sending notification for welcome back (mp)');
+                        }else{console.log('new cutomer'); res.send('new cutomer');}//do nothing
+                    }else{console.log('error: reg not found'); res.send('error: reg not found');}
+                });
+            }else{console.log('error: manager not found'); res.send('error: manager not found');}
+        });
+    }else if(rB.deviceMac && rB.deviceMac!='null' && rB.nodeMac && rB.nodeMac!='null'){ //TODO unify with mPhone
         console.log('device');
-    	node.find({where:{nodeMac:rB.nodeMac}}).success(function(n){
-    		if(n){
-    			manager.find({where:{id:n.managerId}}).success(function(m){ //TODO add manager get by node function
-					if(m){
-						reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
-    						if(r){
-								if(r.roostDeviceToken && r.isRoostActive){
-									setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},180000);
-									console.log('sending notification for welcome back (wifi)');
-								}else{console.log('ROOSt will send notification');}//do nothing
-							}else{sendError(res, 'reg not found');}
-						});
-					}else{sendError(res, 'manager not found');}
-				});		
-    		}else{sendError(res, 'node not found');}
-    	});
+        node.find({where:{nodeMac:rB.nodeMac}}).success(function(n){
+            if(n){
+                manager.find({where:{id:n.managerId}}).success(function(m){ //TODO add manager get by node function
+                    if(m){
+                        reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
+                            if(r){
+                                if(r.roostDeviceToken && r.isRoostActive){
+                                    setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},180000);
+                                    console.log('sending notification for welcome back (wifi)');
+                                }else{console.log('ROOSt will send notification');}//do nothing
+                            }else{sendError(res, 'reg not found');}
+                        });
+                    }else{sendError(res, 'manager not found');}
+                });     
+            }else{sendError(res, 'node not found');}
+        });
     }else{sendError(res, 'no cookies sent');}
 });
 
@@ -290,8 +296,11 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
         reg.find({where:{managerId:m.id, mPhone:mPhoneTag, roostDeviceToken:rB.device_token}}).success(function(r){ //rDM=reg with deviceMac
             if(r){
                 r.isRoostActive = false; 
-                r.save().success(function(){log('user registeration by phone is now isRoostActive=fale, trying to send SMS');});
-                sendSms(r,'roost-cancelation',m);
+                r.save().success(function(){
+                    log('user registeration by phone is now isRoostActive=false, trying to send SMS');
+                    sendSms(r,'roost-cancelation',m);
+                });
+                
             }else{
                 log('Warning: the registeration has no mPhone but the the ROOST has mPhoneTag');
                 reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
@@ -307,7 +316,10 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
         reg.find({where:{managerId:m.id, mPhone:mPhoneTag, roostDeviceToken:rB.device_token}}).success(function(rMP){ //rDM=reg with deviceMac
             if(rMP){
                 rMP.isRoostActive = false; 
-                rMP.save().success(function(){log('user registeration by mPhone is now isRoostActive=fale');});
+                rMP.save().success(function(){
+                    log('user registeration by phone is now isRoostActive=false, trying to send SMS');
+                    sendSms(rMP,'roost-cancelation',m);
+                });
             }else{log('ERROR: Registeration has no mPhone but Roost has has only mPhoneTag !!!');}
         });
     }else if(deviceMacTag && !mPhoneTag){
@@ -315,11 +327,28 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
         reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
             if(rDM){
                 rDM.isRoostActive = false; 
-                rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=fale');});
+                rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=false');});
             }else{log('ERROR: Registeration has no deviceMac but Roost has has only deviceMacTag !!!');}
         });
     }
 }
+
+//Listen to Node logon call:
+app.all('/radius/online',function(req,res){
+    console.log('=================================================================');
+    console.log('>>>request from node:' + req.params);
+    console.log(req.path);
+    console.log(req.query);
+    if(req.params.mac){
+        var nodeMac='';
+        if(req.params.nasid){nodeMac=req.params.nodeMac;}
+        recMac.create({deviceMac:req.params.mac, nodeMac:nodeMac}).success(function(rM){
+            log('recognized user registered');
+            trigerRecognizedMacEvent(rM);
+        });
+    }
+    res.send(200);
+});
 
 //===============DASHBOARD API LISTNERS ==============//
     //File upload:
@@ -336,7 +365,7 @@ app.all('/api/dataFileUpload/:managerId',function(req, res){
             }else{
                 console.log(newPath);
                 console.log('saved file. content: '+ data);
-                res.redirect('/uploaded');    
+                res.redirect('/manager?uploaded=true');    
             }
         });
     });
@@ -441,7 +470,7 @@ function updateUserDataValue(organizedData , index, res){
         });
     }
 }
-//getting users data
+//get users data
 app.get('/api/usersData/:managerId',function(req,res){
    manager.find({where:{id:req.params.managerId}}).success(function(m){
         if(m){
@@ -458,6 +487,7 @@ app.get('/api/usersData/:managerId',function(req,res){
         }else{console.log('no manager found');}
     });
 });
+
 //===== FUNCTIONS =====//
 //SEND SMS to a spcific reg
 function sendSms(reg, type, manager){
@@ -467,7 +497,7 @@ function sendSms(reg, type, manager){
             if(tM){
                 var http = require('http');
                 var qs = require('querystring');
-                var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:'05'+reg.mPhone,charset:'utf-8',from:'035555555'});
+                var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:'05'+reg.mPhone,charset:'utf-8',from:'036006660'});
                 var options = {
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     host: 'www.micropay.co.il',
@@ -534,6 +564,13 @@ function sendPushNot(reg,type,manager){
     }   
 }
 
+//triggerRecognizedMac:
+function triggerRecognizedMac(rM){ //rM = recMac object
+    recMac.findAll({where:{deviceMac:rM.deviceMac}},{order:'updatedAt DESC'}).success(function(rMs){ //TODO check sybtax of query + if DESC or ASC
+        var regBeforeLast = rMs[1];
+        console.log(rMs[1].dataValues);
+    });
+}
 //Parse CSV:
 function parseCSV(){
     var stream = fs.createReadStream("uploads/data.csv");
@@ -565,37 +602,6 @@ app.all('*',function(req,res){
     res.send(200, 'OK');
 });
 */
-app.all('/radius.*/',function(req,res){
-    console.log('===================================================');
-    console.log(req.params);
-    console.log(req.query);
-    console.log('===================================================');
-    res.send(200, 'OK');
-});
-app.all('/radius.*/',function(req,res){
-    console.log('===================================================');
-    console.log(req.params);
-    console.log(req.query);
-    console.log('===================================================');
-    res.send(200, 'OK');
-});
-app.all('/radius.*/',function(req,res){
-    console.log('===================================================');
-    console.log(req.params);
-    console.log(req.query);
-    console.log('===================================================');
-    res.send(200, 'OK');
-});
-app.all('/script-sh',function(req,res){
-    console.log('===================================================');
-    console.log(req.params);
-    console.log(req.query);
-    console.log('===================================================');
-    res.send(200, 'OK');
-});
-
-
-
 
 //optional: delete the unndecessary tags from moshe and me
 
@@ -640,7 +646,7 @@ req.on('error', function(e) {
   console.error('error');
   console.error(e);
 });
-
+*/
 
 //PUT
 /*
