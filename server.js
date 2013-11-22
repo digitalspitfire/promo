@@ -38,7 +38,7 @@ var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
 var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
-var campaign = sq.define('campaign',{name:Sq.TEXT, description:Sq.TEXT, hour:Sq.INTEGER, dayOfWeek:Sq.INTEGER, message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT,isRec:Sq.BOOLEAN,isActive:Sq.BOOLEAN, isCanceled:Sq.BOOLEAN});
+var campaign = sq.define('campaign',{name:Sq.TEXT, description:Sq.TEXT,category:Sq.TEXT, hour:Sq.INTEGER, dayOfWeek:Sq.INTEGER, message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT,recurring:Sq.TEXT,isRoostGeoLoc:Sq.BOOLEAN,isActive:Sq.BOOLEAN, isCanceled:Sq.BOOLEAN});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
@@ -63,7 +63,6 @@ reg.belongsTo(manager);
 tM.belongsTo(manager);
 
 sq.sync();
-
 //GENERAL FUNCTIONS
 function sendError(res,message){
     console.log('Error: '+ message);
@@ -71,7 +70,6 @@ function sendError(res,message){
     res.send('Error: '+ message);
 }
 function log(message){console.log('>>> '+message);}
-
 //============= LISNERS ===========//
 //Listner to IVR, write to activation + update ivrId with ivrPhone
 app.get('/ivrcb',function(req,res){
@@ -85,6 +83,9 @@ app.get('/ivrcb',function(req,res){
                     activation.create({mPhone:rQ.phone, managerId:m.id}).success(function(){});//TODO need to learn how to create this directly from the selected manager instance  
                 }
             });
+        }
+        if(rQ.phonereceived=='0'){
+            sendWelcomebackSms(rQ.phone, rQ.dest);
         }
     }
     res.send(200);
@@ -402,6 +403,45 @@ app.get('/api/getCsvHeaders/:managerId', function(req,res){
         }else{res.send('no manager found');}
     });
 });
+app.post('/api/presentData/:managerId', function(req,res){
+    manager.find({where:{id:req.params.managerId}}).success(function(m){
+        if(m){
+            var cellularCol = req.body.celCol;
+            var selectedCols = req.body.selectedCols;
+            log('celCol: ' +cellularCol);
+            log('selectedCols: ' +selectedCols);
+            var organizedData = {};
+            var path = 'uploads/data-'+m.id+'.csv';
+            console.log(path);
+            fs.readFile(path, function (err, data) {
+                if(err){
+                    console.log('No CSV file found');
+                    res.send('No CSV file found');
+                }else{
+                    var headers='';
+                    var stream = fs.createReadStream(path);
+                    csv(stream)
+                    .on("data", function(data,index){
+                        organizedData[index]=[];
+                        for(var item in data){
+                            if(selectedCols.indexOf(item)>-1){
+                                organizedData[index].push(data[item]);    
+                            }
+                        }
+                        log('Raw Data: '+data);
+                        log('organized Data: '+organizedData[index]);
+                    })
+                    .on("end", function(){
+                        console.log("done");
+                        console.log(organizedData);
+                        res.send(organizedData);
+                    })
+                    .parse();    
+                }
+            });
+        }else{res.send('no manager found');}
+    });
+});
 
 app.get('/api/update-users-data/:managerId',function(req,res){
    manager.find({where:{id:req.params.managerId}}).success(function(m){
@@ -488,6 +528,31 @@ app.get('/api/usersData/:managerId',function(req,res){
     });
 });
 
+//Get campaings list by managerId:
+app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
+    console.log(req.params)
+    if(req.params.campaignId){
+        campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
+            if(c){
+                res.json(c);
+            }else{log('Error: no campaign by this Id found..');}
+        });
+    }else{
+        campaign.findAll({where:{managerId:req.params.managerId}}).success(function(cs){
+            if(cs){
+                console.log(cs);
+                for(var camp in cs){
+                    log(c);
+                    log(cs[c].dataValues);
+                }
+                //res.json(c);
+            }else{log('Error: no campaigns by this managerId...');}
+        });
+    }
+});
+   
+
+
 //===== FUNCTIONS =====//
 //SEND SMS to a spcific reg
 function sendSms(reg, type, manager){
@@ -562,6 +627,46 @@ function sendPushNot(reg,type,manager){
             }else{concole.log('Error: no triggered message of this type fot this manager');}
         });
     }   
+}
+
+//SEND SMS to a spcific on Menashe second call
+function sendWelcomebackSms(mPhone, ivrPhone){
+    log('sending welcome-back SMS....');
+    if(mPhone && ivrPhone){
+        manager.find({where:{ivrPhone:ivrPhone}}).success(function(m){
+            if(m){
+                tM.find({where:{managerId:m.id, type:'recognized'}}).success(function(tM){
+                    if(tM){
+                        var http = require('http');
+                        var qs = require('querystring');
+                        var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:mPhone,charset:'utf-8',from:'036006660'});
+                        var options = {
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                            host: 'www.micropay.co.il',
+                            method:'POST',
+                            path: '/ExtApi/ScheduleSms.php',
+                        };
+                        /*TODO the following came with the http function, need to organuize it in my code*/
+                        callback = function(response) {
+                            var str = '';
+                            //another chunk of data has been recieved, so append it to `str`
+                            response.on('data', function (chunk) {
+                                str += chunk;
+                            });
+                            //the whole response has been recieved, so we just print it out here
+                            response.on('end', function () {
+                                console.log(str);
+                            });
+                        }
+                        /*TODO the following came with the http function----END---*/
+                        var postReq = http.request(options, callback);
+                        postReq.write(smsData);
+                        postReq.end();
+                    }else{log('Error: no triggered message of this type fot this manager');}
+                });
+            }else{log('SMS not sent since reg has no mPhone (or no managerId)');}
+        });
+    }else{log('Error: no mphone OR ivrPhone for welcomeback SMS');}
 }
 
 //triggerRecognizedMac:
@@ -716,122 +821,3 @@ function sendPushNot(){
 */
 
 
-
-
-
-
-
-
-//TRMP improving the roost-cb handler:
-//the conditioning should be in the reg
-//if have 2 tags- bla bla bla
-//if only one...bla bla
-
-
-/* OLD
-function roostReg(rB, tagType, tagValue, m){
-    if(tagType=='mPhone'){ //TODO add method of save device token to reg instance
-        //Check if this device token already registered with this manager:
-        reg.find({where:{managerId:m.id, roostDeviceToken:rB.device_token}}).success(function(eR){
-            if(eR){
-                eR.mPhone = tagValue;
-                eR.roostDeviceToken = rB.device_token; //note: no need to check if it is returning customer- ROOST will send welcome anyways....
-                eR.isRoostActive = true;
-                eR.save().success(function(){
-                    console.log('Device token added to registration');
-                    reg.find({where:{mPhone: tagValue, roostDeviceToken:null}}).success(function(regToDelete){
-                        if(regToDelete){
-                            console.log()
-                            regToDelete.destroy();    
-                        }
-                    })
-                });
-            }else{//deviceToken not yet registered, add device Token
-                reg.find({where:{managerId:m.id, mPhone:tagValue}}).success(function(r){
-                    if(r){
-                        r.roostDeviceToken = rB.device_token; //note: no need to check if it is returning customer- ROOST will send welcome anyways....
-                        r.isRoostActive = true;
-                        r.save().success(function(){console.log('Device token added to registration');});
-                    }else{console.log('Error: did not find the phone number in regs table');}
-                });
-            }
-
-
-        });
-    }else if(tagType=='deviceMac'){ //TODO can to unify this and mPhone
-        reg.find({where:{managerId:m.id, deviceMac:tagValue}}).success(function(r){
-            if(r){
-                r.roostDeviceToken = rB.device_token; //note: no need to check if it is returning customer- ROOST will send welcome anyways....
-                r.isRoostActive = true;
-                r.save().success(function(){console.log('Device token added to registration');});
-            }
-        });
-    }    
-}
-
-
-function roostReg(rB, mPhoneTag, deviceMacTag, m){
-    //if we have 2 identifiers create one record out of them
-    if(mPhoneTag && deviceMacTag){
-        log('call back sends mPhone+deviceMac');
-        reg.find({where:{managerId:m.id, roostDeviceToken:rB.device_token}}).success(function(eR){ //er = existing Reg
-            //Check if the roost tag is already registered
-            log('here');
-            if(eR){
-                if(eR.mPhone && eR.deviceMac){
-                    eR.isRoostActive = true; eR.save(); log('GREAT! reg is already unified!');
-                }else if(eR.mPhone && !eR.deviceMac){
-                    eR.deviceMac = deviceMacTag;
-                    eR.isRoostActive = true;
-                    eR.save().success(function(){
-                        log('adding deivceMac to existing reg;')
-                        reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, id:{ne:eR.id}}}).success(function(rD){  //rD = Reg-to-Delete
-                            if(rD){
-                                rD.destroy().succes(function(){log('deleted un-necessary reg')});    
-                            }
-                            
-                        });
-                    });
-                }else if(eR.deviceMac && !eR.mPhone){
-                    eR.mPhone = mPhoneTag;
-                    eR.isRoostActive = true;
-                    eR.save().success(function(){
-                        log('adding deivceMac to existing reg;')
-                        reg.find({where:{managerId:m.id, mPhone:mPhoneTag, id:{ne:eR.id}}}).success(function(rD){  //rD = Reg-to-Delete
-                            if(rD){
-                                rD.destroy().success(function(){log('deleted un-necessary reg')});    
-                            }
-                        });
-                    });
-                }else{log('Error: ther is a registration with roostId without any identifier!');}
-            }else{ // no roostDeviceToken found
-                log('Warning: Roost has 2 identifiers and but no roostDeviceToken is registered...');
-                reg.find({where:{}}).success(function(r))
-            }
-        });
-    }else if(mPhoneTag && !deviceMacTag){
-        log('call back sends only mPhone...')
-        reg.find({where:{mPhone: mPhoneTag, managerId:m.id}}).success(function(r){
-            if(r){
-                if(r.roostDeviceToken){consol.log('this regalready have roostDeviceToken');}
-                else{consol.log('this reg does not yet have roost device token, now adding...');}
-                r.roostDeviceToken = rB.device_token;
-                r.isRoostActive = true;
-                r.save().success(function(){log('we made sure this reg isRoostActive=true');});
-            }else{log('Error: this phone is not registered!!!');}
-        });
-    }else if(deviceMacTag && !mPhoneTag){
-        log('call back sends only deviceMac...')
-        reg.find({where:{deviceMac:deviceMacTag, managerId:m.id}}).success(function(r){
-            if(r){
-                if(r.roostDeviceToken){log('this reg already have roostDeviceToken');}
-                else{consol.log('this reg does not yet have roost device token, now adding...');}
-                r.roostDeviceToken = rB.device_token;
-                r.isRoostActive = true;
-                r.save().success(function(){log('we made sure this reg isRoostActive=true');});
-            }else{log('Error: this phone is not registered!!!');}
-        });
-    }else{log('Error: this CB from Roost has not even one identifier !!!');}
-}
-
- OLD ===END=== */
