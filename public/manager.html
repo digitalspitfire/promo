@@ -15,6 +15,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 <!-- BEGIN HEAD -->
 <head>
 	<meta charset="utf-8" />
+
 	<meta http-equiv="Access-Control-Allow-Origin" content="*">
 	<title>Metronic | Admin Dashboard Template</title>
 	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -43,6 +44,14 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		tr.now-deleting{display:none;}
 		tr[data-id="-1"] > td {background-color:yellow !important;}
 		tr[data-id="-1"] > td > .row-details {display: none;}
+		
+
+		.tile .tile-object{bottom:8px;}
+		.tile .tile-object .number{font-size:34px;}
+		.tile .tile-object .name{font-size:15px;}
+		#campaigns .tile,#campaigns .tile:hover{border:none !important; cursor: auto;}
+		#tbl-campaigns_wrapper .row-fluid:first-child .span6:first-child{display: none;}
+		#tbl-campaigns_wrapper .row-fluid:first-child .span6:nth-child(2){margin-right: 0 !important;}
 		table#tbl-campaigns .delete, table#tbl-campaigns .edit{text-decoration: underline; color: blue;}
 		table#tbl-campaigns tr.cancelled-campaign a.delete{display:none;}
 		table#tbl-campaigns tr.cancelled-campaign td:first-child input:after{content:"dead";}
@@ -533,7 +542,33 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 													</div>
 												</div>
 											</div>
-											<div class="tab-pane" id="tab3"></div>
+											<div class="tab-pane" id="tab3">
+												<h3 class="block">סטטיסטיקה</h3>
+												<div class="tiles">
+													<div class="tile bg-blue" id="roost-history">
+														<div class="tile-body">
+															<i class="icon-bell"></i>
+														</div>
+														<div class="tile-object">
+															<div class="name">
+																PUSH
+															</div>
+															<div class="number"></div>
+														</div>
+													</div>
+												</div>
+												<div class="tile bg-green" id="sms-history">
+													<div class="tile-body">
+														<i class="icon-comments-alt"></i>
+													</div>
+													<div class="tile-object">
+														<div class="name">
+															SMS
+														</div>
+														<div class="number"></div>
+													</div>
+												</div>
+											</div>
 										</div>
 										<div class="form-actions clearfix">
 											<a href="javascript:;" class="btn button-previous" id="btn-all-campaings">
@@ -608,10 +643,11 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	<!-- BEGIN EDITABLE TABLE SCRIPTS (ido)-->
 	<!--
 	<script type="text/javascript" src="assets/plugins/select2/select2.min.js"></script>
+	-->
+
 	<script type="text/javascript" src="assets/plugins/data-tables/jquery.dataTables.js"></script>
 	<script type="text/javascript" src="assets/plugins/data-tables/DT_bootstrap.js"></script>
 
-	-->
 
 
 
@@ -629,6 +665,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	<script type="text/javascript" src="js/jquery.blockui.js"></script>
 	<script src="assets/scripts/app.js"></script>     
 	<script src="assets/scripts/form-wizard.js"></script>     
+	<!--<script src="assets/scripts/table-managed.js"></script>     -->
 	<!--NAVIGATION SCRIPT-->
 	<script>
 		$('.page-sidebar-menu li').on('click', function(){
@@ -803,6 +840,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					var fieldName = i.attr('name');
 					i.val(data[fieldName]);				
 				});
+				var sent = JSON.parse(data.sent);
+				$('#sms-history .number').html(sent.sms);
+				$('#roost-history .number').html(sent.roost);
 			}
 		}else{
 			console.log('got to secind');
@@ -815,6 +855,14 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					tbody.append(cRow);
 					console.log(c);
 				});
+				$('#tbl-campaigns').dataTable( {
+    				"bFilter": true,
+    				"bInfo": false,
+    				"bPaginate": false,
+		    		"oLanguage": {
+		   				 "sSearch": "חיפוש: "
+		  			}
+  				});
 			}
 		}
 		
@@ -826,6 +874,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	}
 	$(function(){
 		App.init();
+//	    TableManaged.init();
+		
+
 		if(getParameterByName('uploaded')=='true'){
 			
 			$('#data-upload .portlet-body .control-group').hide();

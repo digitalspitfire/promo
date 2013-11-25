@@ -83,7 +83,7 @@ app.get('/ivrcb',function(req,res){
                 }
             });
         }
-        if(rQ.phonereceived=='0'){
+        if(rQ.sms=='no'){
             sendWelcomebackSms(rQ.phone, rQ.dest);
         }
     }
@@ -626,9 +626,11 @@ function sendPushNot(reg,type,manager){
         tM.find({where:{managerId:reg.managerId, type:type}}).success(function(tM){ //TODO maybe unify with function sendSms()
             if(tM){
                 var https = require('https');
-                //var qs = require('querystring'); 
-                var data = JSON.stringify({alert:tM.text, url:tM.link,device_tokens:[reg.roostDeviceToken]}); //TODO add sound
-
+                if(ValidURL(tM.link)){
+                    var data = JSON.stringify({alert:tM.text, url:tM.link,device_tokens:[reg.roostDeviceToken]}); //TODO add sound    
+                }else{
+                    var data = JSON.stringify({alert:tM.text, device_tokens:[reg.roostDeviceToken]}); //TODO add sound
+                }            
                 var options = {
                   hostname: 'launch.alertrocket.com',
                   port: 443,
@@ -721,10 +723,11 @@ function parseCSV(){
 function sendSmsCampaign(c,smsList){
     for(var mP in smsList){
         smsList[mP]='05'+ smsList[mP];
-    }
+    }    
     var http = require('http');
     var qs = require('querystring');
-    var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:c.message,list:smsList,charset:'utf-8',from:'036006660'});
+    var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:c.message,list:smsList.toString(),charset:'utf-8',from:'036006660'});
+    console.log(smsData);
     var options = {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         host: 'www.micropay.co.il',
@@ -751,9 +754,11 @@ function sendSmsCampaign(c,smsList){
 //Send campaign via Roost
 function sendRoostCampaign(c, roostList , manager){
     var https = require('https');
-    //var qs = require('querystring'); 
-    //var data = JSON.stringify({alert:c.message, url:c.link,device_tokens:roostList}); //TODO add sound
-    var data = JSON.stringify({"alert":"bbbb", "url":"aaaa"}); //TODO add sound
+    if(ValidURL(c.link)){
+        var data = JSON.stringify({alert:c.message, url:c.link,device_tokens:roostList}); //TODO add sound        
+    }else{
+        var data = JSON.stringify({alert:c.message, device_tokens:roostList}); //TODO add sound        
+    }
     var options = {
       hostname: 'launch.alertrocket.com',
       port: 443,
@@ -782,7 +787,14 @@ function sendRoostCampaign(c, roostList , manager){
         console.error(e);
     });
 }
-
+//Validate URL
+function ValidURL(url) {
+        var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+        if (pattern.test(url)) {
+            return true;
+        } 
+            return false;
+  }
 //===============SCHEDULE CAMPAIGNS========//
 //TODO:add enums : 0:one-time // 1:daily // 2:weekly
 //ReSchedule on function init:
@@ -813,7 +825,6 @@ function scheduleCampaign(camp){
         log('fire :'+s);
         */
         var now = new Date();
-        log(now);
 
         //TEMP---END
         var s = new Date();
@@ -858,9 +869,9 @@ function fireCampaign(c){
             var smsList = [];
             for(var r in rs){                        
                 console.log('regId to send campaign to: '+rs[r].id);
-                if(rs[r].isRoostActive && rs[r].isRoostActive){
+                if(rs[r].isRoostActive && rs[r].roostDeviceToken){
                     roostList.push(rs[r].roostDeviceToken);
-                }else if(!rs[r].isRoostActive && rs[r].mPhone && rs[r].mPhone!='null'){
+                }else if(rs[r].mPhone && rs[r].mPhone!='null'){
                     smsList.push(rs[r].mPhone);
                 }
             }
@@ -966,10 +977,10 @@ req.on('error', function(e) {
 
 /*EXAMPLE FOT CONTACTING ROOST API*/
 
-/*
+
 function sendPushNot(){
     var https = require('https');
-    var qs = require('querystring'); 
+    //var qs = require('querystring'); 
     var data = JSON.stringify({alert:'MOSHE if you see this SMS me', url:'http://launch.alertrocket.com/demo'});
 
     var options = {
@@ -998,6 +1009,6 @@ function sendPushNot(){
       console.error(e);
     });
 }
-*/
+//sendPushNot();
 
 
