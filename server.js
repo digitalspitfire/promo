@@ -3,19 +3,16 @@ var app = express()
                     .use(express.bodyParser());
 var fs = require('fs');
 var csv = require("fast-csv");
+var schedule = require('node-schedule');
 
 app.listen(3000);
 console.log('listening in port 3000');
 
-app.get('/ido', function(req, res){
-  var body = 'ido maron';
-  res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Content-Length', body.length);
-  res.end(body);
-});
 
 //Loading static files:
 app.use(express.static(__dirname+'/public'));
+//Allow app.delete
+app.use(express.logger());
 
 //dashboard
 app.get('/dashboard',function(req,res){
@@ -25,7 +22,9 @@ app.get('/dashboard',function(req,res){
 app.get('/manager',function(req,res){
     res.sendfile('public/manager.html');
 });
-
+app.get('/test',function(req,res){
+    res.sendfile('public/test.html');
+});
 //UplodedFile
 app.get('/uploaded',function(req,res){
     res.sendfile('public/uploaded.html');
@@ -38,7 +37,7 @@ var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
 var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
-var campaign = sq.define('campaign',{name:Sq.TEXT, description:Sq.TEXT,category:Sq.TEXT, hour:Sq.INTEGER, dayOfWeek:Sq.INTEGER, message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT,recurring:Sq.TEXT,isRoostGeoLoc:Sq.BOOLEAN,isActive:Sq.BOOLEAN, isCanceled:Sq.BOOLEAN});
+var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, isRoostGeoLoc:Sq.BOOLEAN,sent:Sq.TEXT});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
@@ -55,11 +54,11 @@ manager
     .hasMany(reg)
     .hasMany(tM)
     .hasMany(uD);
+reg.belongsTo(manager);
 campaign.belongsTo(manager);
 node.belongsTo(manager);
 filter.belongsTo(manager);
 activation.belongsTo(manager);
-reg.belongsTo(manager);
 tM.belongsTo(manager);
 
 sq.sync();
@@ -160,7 +159,6 @@ app.all('/register-by-device-mac', function(req, res) {
         });
     }else{console.log('Error: sent from widget without device & node params !');res.send('Error: sent from widget without device & node params !');}//no params, do nothing
 });
-
 //Listen to widget #2, Send push notification on second roost download if the registeration isRoostActive: 
 app.all('/store-requested', function(req, res) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -203,7 +201,6 @@ app.all('/store-requested', function(req, res) {
         });
     }else{sendError(res, 'no cookies sent');}
 });
-
 //Listen to ROOST. 1) On reg- Update deviceTokens. 2)On un-reg- send cancelation SMS //TODO - should write it shorter....
 app.all('/roost-cb',function(req,res){ //TODO I think I can write this one shorter...
     console.log(req.body);
@@ -260,6 +257,7 @@ function roostReg(rB, mPhoneTag, deviceMacTag, m){
             reg.find({where:{managerId: m.id, mPhone: mPhoneTag}}).success(function(rMP){ //rMP = registration with mPhone
                 if(rMP){
                     if(deviceMacTag){rMP.deviceMac=deviceMacTag; log('deviceMac was overwritten');}
+                    rMP.isRoostActive=true;
                     rMP.roostDeviceToken=rB.device_token;
                     rMP.save().success(function(){
                         log('added deviceToken to mPhone regisreration');
@@ -277,6 +275,7 @@ function roostReg(rB, mPhoneTag, deviceMacTag, m){
                     reg.find({where:{managerId: m.id, deviceMac: deviceMacTag}}).success(function(rDM){ //rDM= reg-with-deviceMac
                         if(rDM){
                             if(mPhoneTag){rDM.deviceMac=deviceMacTag; log('deviceMac was overwritten');}
+                            rDM.isRoostActive=true;
                             rDM.roostDeviceToken=rB.device_token;
                             rDM.save().success(function(){
                                 log('added deviceToken to deviceMac regisreration');
@@ -333,7 +332,6 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
         });
     }
 }
-
 //Listen to Node logon call:
 app.all('/radius/online',function(req,res){
     console.log('=================================================================');
@@ -352,7 +350,7 @@ app.all('/radius/online',function(req,res){
 });
 
 //===============DASHBOARD API LISTNERS ==============//
-    //File upload:
+//Users data file upload + management
 app.all('/api/dataFileUpload/:managerId',function(req, res){
     console.log(req.body);
     console.log(req.files);
@@ -442,7 +440,6 @@ app.post('/api/presentData/:managerId', function(req,res){
         }else{res.send('no manager found');}
     });
 });
-
 app.get('/api/update-users-data/:managerId',function(req,res){
    manager.find({where:{id:req.params.managerId}}).success(function(m){
         if(m){
@@ -510,7 +507,6 @@ function updateUserDataValue(organizedData , index, res){
         });
     }
 }
-//get users data
 app.get('/api/usersData/:managerId',function(req,res){
    manager.find({where:{id:req.params.managerId}}).success(function(m){
         if(m){
@@ -527,10 +523,8 @@ app.get('/api/usersData/:managerId',function(req,res){
         }else{console.log('no manager found');}
     });
 });
-
-//Get campaings list by managerId:
+//Campaigns:
 app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
-    console.log(req.params)
     if(req.params.campaignId){
         campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
             if(c){
@@ -540,18 +534,54 @@ app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
     }else{
         campaign.findAll({where:{managerId:req.params.managerId}}).success(function(cs){
             if(cs){
-                console.log(cs);
-                for(var camp in cs){
-                    log(c);
-                    log(cs[c].dataValues);
+                var campaigns = [];
+                for(var c in cs){
+                    campaigns.push(cs[c].dataValues);
                 }
-                //res.json(c);
+                res.json(campaigns);
             }else{log('Error: no campaigns by this managerId...');}
         });
     }
 });
-   
-
+app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
+    if(req.params.campaignId){ //updating exsiting campaign
+        var rB = req.body;
+        if(req.params.campaignId && req.params.managerId){
+            campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
+                if(c){
+                    c.updateAttributes(rB).success(function(c){
+                        log('Campaign-'+c.dataValues.toString()+'was updated');
+                        if(c.dataValues.isActive){
+                            scheduleCampaign(c.dataValues);
+                        }else if(scheduledJobs[c.dataValues.id]){
+                                scheduledJobs[c.dataValues.id].cancel();
+                        }
+                    });
+                }else{log('Error: no campaign by this Id & managerId found..');}
+            });
+        }else{log('Error: no campaignId or managerId sent from client');}
+        res.send('trying to update campaign');    
+    }else{ //creating new campaign
+        campaign.create({managerId:req.params.managerId}).success(function(nC){ //nC=newCampaign
+            if(nC){
+                log('new campaign created! id: '+nC.id);
+                res.json(nC.id);
+            }
+        });
+    }    
+});
+app.delete('/api/campaigns/:managerId/:campaignId',function(req,res){
+    campaign.find({where:{id:req.params.campaignId}}).success(function(c){
+        if(c){
+            log('the c going to be deleted: '+c.id);
+            c.destroy().success(function(){
+                log('campaign deleted! id: '+c.id);
+                unSceduleCampaign(c.id);
+                res.json(c.id);
+            });
+        }
+    }); 
+});
 
 //===== FUNCTIONS =====//
 //SEND SMS to a spcific reg
@@ -589,7 +619,6 @@ function sendSms(reg, type, manager){
         });
     }else{console.log('SMS not sent since reg has no mPhone (or no managerId)');}
 }
-
 //SEND PUSH Notification to a specific reg
 function sendPushNot(reg,type,manager){
     if(reg.roostDeviceToken){
@@ -628,7 +657,6 @@ function sendPushNot(reg,type,manager){
         });
     }   
 }
-
 //SEND SMS to a spcific on Menashe second call
 function sendWelcomebackSms(mPhone, ivrPhone){
     log('sending welcome-back SMS....');
@@ -668,7 +696,6 @@ function sendWelcomebackSms(mPhone, ivrPhone){
         });
     }else{log('Error: no mphone OR ivrPhone for welcomeback SMS');}
 }
-
 //triggerRecognizedMac:
 function triggerRecognizedMac(rM){ //rM = recMac object
     recMac.findAll({where:{deviceMac:rM.deviceMac}},{order:'updatedAt DESC'}).success(function(rMs){ //TODO check sybtax of query + if DESC or ASC
@@ -690,38 +717,191 @@ function parseCSV(){
      })
      .parse();    
 }
+//Send campaign via SMS
+function sendSmsCampaign(c,smsList){
+    for(var mP in smsList){
+        smsList[mP]='05'+ smsList[mP];
+    }
+    var http = require('http');
+    var qs = require('querystring');
+    var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:c.message,list:smsList,charset:'utf-8',from:'036006660'});
+    var options = {
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        host: 'www.micropay.co.il',
+        method:'POST',
+        path: '/ExtApi/ScheduleSms.php',
+    };
+    /*TODO the following came with the http function, need to organuize it in my code*/
+    callback = function(response) {
+        var str = '';
+        //another chunk of data has been recieved, so append it to `str`
+        response.on('data', function (chunk) {
+            str += chunk;
+        });
+        //the whole response has been recieved, so we just print it out here
+        response.on('end', function () {
+            console.log(str);
+        });
+    }
+    /*TODO the following came with the http function----END---*/
+    var postReq = http.request(options, callback);
+    postReq.write(smsData);
+    postReq.end();
+}
+//Send campaign via Roost
+function sendRoostCampaign(c, roostList , manager){
+    var https = require('https');
+    //var qs = require('querystring'); 
+    //var data = JSON.stringify({alert:c.message, url:c.link,device_tokens:roostList}); //TODO add sound
+    var data = JSON.stringify({"alert":"bbbb", "url":"aaaa"}); //TODO add sound
+    var options = {
+      hostname: 'launch.alertrocket.com',
+      port: 443,
+      path: '/api/push',
+      method: 'POST',
+      //auth:manager.roostConfKey+':'+manager.roostSecretKey,
+      auth:'1f24e572334d4575b5d3ae72afd45d8f:25b45e9c29814bba8a6e41dbdd6edee4'
+      //headers: { 'Content-Type': 'application/json'}
+    };
+    log(manager.roostConfKey+':'+manager.roostSecretKey);
+    log(c.message);
+    log(c.link);
+    var req = https.request(options, function(res) {
+      console.log("statusCode: ", res.statusCode);
+      console.log("headers: ", res.headers);
 
+      res.on('data', function(d) {
+        process.stdout.write(d); //TODO WHAT IS THIS??
+      });
+    });
+    req.write(data);
+    req.end();
+    log('sent roost campaign to roost, tokens: '+roostList.toString());
+    req.on('error', function(e) {
+        console.error('error');
+        console.error(e);
+    });
+}
 
+//===============SCHEDULE CAMPAIGNS========//
+//TODO:add enums : 0:one-time // 1:daily // 2:weekly
+//ReSchedule on function init:
+var scheduledJobs = {};
 
+campaign.findAll({where:{isActive:1}}).success(function(cs){
+    log('ReScheduling existing campaigns');
+    if(cs){
+        for(var c in cs){
+            scheduleCampaign(cs[c].dataValues);
+        }
+        //log('list: ');
+        //console.log(schedule.scheduledJobs);
+    }
+});
 
+function scheduleCampaign(camp){
+    var id=camp.id;
+    if(camp.recurring==0){//create a one timejob
+        //TEMP
+        /*
+        if(s.getSeconds()<50){
+            s.setSeconds(s.getSeconds()+10);
+        }else{
+            s.setMinutes(s.getMinutes()+1);
+            s.setSeconds(0);
+        }
+        log('fire :'+s);
+        */
+        var now = new Date();
+        log(now);
 
-
-//Recognizing listner
-
+        //TEMP---END
+        var s = new Date();
+        if(s.getDay()!=camp.dayOfWeek || camp.hour>s.getHours()){ 
+            //s.setDate(s.getDate() + (s - 1 - s.getDay() + 7) % 7 + 1);    
+        }else{}//special case- the schedule is for today
+        //s.setHours(camp.hour);//temp
+        
+        //s.setMinutes(0); //temp
+        s.setSeconds(s.getSeconds()+4); //temp
+        scheduledJobs[id]= schedule.scheduleJob(s,cb(camp));
+        log('Campaign-'+id+'(single-time) was scheduled');
+    }else if(camp.recurring==1){//daily
+        var rule=new schedule.recurringRule();
+        rule.hour=camp.hour;
+        rule.minute=0;
+        scheduledJobs[id]= schedule.scheduleJob(rule,cb(camp));
+        log('Campaign-'+id+'(daily) was scheduled');
+    }else if(camp.recurring==2){//weekly
+        var rule=new schedule.recurringRule();
+        rule.dayOfWeek=camp.day;
+        rule.hour=camp.hour;
+        rule.minute=0;
+        scheduledJobs[id]= schedule.scheduleJob(rule,cb(camp));
+        log('Campaign-'+id+'(weekly) was scheduled');
+    }
+}
+function unScheduleCampaign(campaignId){
+    scheduledJobs[campaignId].cancel();
+}
+function cb(campaign) {
+    return function() {
+        fireCampaign(campaign);
+    };
+}
+function fireCampaign(c){
+    console.log(c);
+    log('Campaign-'+c.id+' is firing!');
+    manager.find({where:{id:c.managerId}}).success(function(m){
+        reg.findAll({where:{managerId:m.id}}).success(function(rs){
+            var roostList = [];
+            var smsList = [];
+            for(var r in rs){                        
+                console.log('regId to send campaign to: '+rs[r].id);
+                if(rs[r].isRoostActive && rs[r].isRoostActive){
+                    roostList.push(rs[r].roostDeviceToken);
+                }else if(!rs[r].isRoostActive && rs[r].mPhone && rs[r].mPhone!='null'){
+                    smsList.push(rs[r].mPhone);
+                }
+            }
+            console.log('smsList: '+smsList);
+            console.log('roostList: '+roostList);
+            sendSmsCampaign(c, smsList);
+            sendRoostCampaign(c, roostList, m);
+            var sentVals = JSON.parse(c.sent);
+            log(sentVals.sms);
+            log(sentVals.roost);
+            log(smsList.length);
+            log(roostList.length);
+            if(!(sentVals)){
+                log('no history');
+                sentVals={sms:smsList.length,roost:roostList.length};
+            }else{
+                log('adding to  history');
+                sentVals.sms = parseInt(sentVals.sms) + parseInt(smsList.length);
+                sentVals.roost = parseInt(sentVals.roost) + parseInt(roostList.length);
+            }
+            //NOTE: I must find it again since 'c' is not the real object (and there is a reason for that)
+            campaign.find({where:{id:c.id}}).success(function(sentCampaign){
+                console.log(sentCampaign.dataValues);
+                if(sentCampaign.dataValues){
+                    sentCampaign.dataValues.sent=JSON.stringify(sentVals);    
+                    sentCampaign.save().success(function(sC){
+                        log('This campaign totaly sent by now: '+sC.dataValues.sent);
+                    });
+                }
+            });
+        });
+    });  
+}
 /*
-app.all('*',function(req,res){
-    console.log('===================================================');
-    console.log(req.params);
-    console.log(req.query);
-    console.log('===================================================');
-    res.send(200, 'OK');
+campaign.find({where:{id:1}}).success(function(c){
+    console.log(c.dataValues);
+    c.sent=JSON.stringify({sms:'1',roost:'2'});
+    c.save().success(function(){log('hey================================');});
 });
 */
-
-//optional: delete the unndecessary tags from moshe and me
-
-// download roost and send a tag mp-544585295
-//connect to their message=ing system when on returning customer.
-//mimic ALL THIs to WIFI
-//complete scheduled campaigns
-
-
-
-
-
-
-
-
+//Recognizing listner
 
 
 /*EXAMPLE FOT CONTACTING ROOST API*/  /*WORKING*/
