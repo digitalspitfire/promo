@@ -42,7 +42,7 @@ var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
 var reg = sq.define('registration',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, roostDeviceToken:Sq.TEXT, isRoostActive:Sq.BOOLEAN});
-var tM = sq.define('trigerredMessage',{type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT, isActive:Sq.BOOLEAN});
+var tM = sq.define('triggeredMessage',{type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT, minInterval:Sq.INTEGER,isActive:Sq.BOOLEAN});
 var uD = sq.define('usersData',{mPhone:Sq.TEXT, filterName:Sq.TEXT, value:Sq.TEXT});
 var recMac = sq.define('recognisedMac',{deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
 
@@ -61,7 +61,8 @@ filter.belongsTo(manager);
 activation.belongsTo(manager);
 tM.belongsTo(manager);
 
-sq.sync();
+//sq.sync();
+
 //GENERAL FUNCTIONS
 function sendError(res,message){
     console.log('Error: '+ message);
@@ -338,14 +339,20 @@ app.all('/radius/online',function(req,res){
     console.log('>>>request from node:' + req.params);
     console.log(req.path);
     console.log(req.query);
-    if(req.params.mac){
-        var nodeMac='';
-        if(req.params.nasid){nodeMac=req.params.nodeMac;}
-        recMac.create({deviceMac:req.params.mac, nodeMac:nodeMac}).success(function(rM){
-            log('recognized user registered');
-            trigerRecognizedMacEvent(rM);
+    console.log(req.headers);
+    var rQ = req.query;
+    if(rQ.mac  && rQ.nasid){
+        var recognizedMac = rQ.mac.toLowerCase();
+        var recognizedNode = rQ.nasid.toLowerCase();
+        recognizedMac=recognizedMac.replace(/-/g,":");
+        recognizedNode=recognizedNode.replace(/-/g,":");
+        recMac.create({deviceMac:recognizedMac, nodeMac:recognizedMac}).success(function(rM){
+            console.log('Recognized user was registered:');
+            console.log(rM.dataValues);
+            
+            triggerRecognizedMac(rM.dataValues);
         });
-    }
+    }else{log('Error: nodeMac or deviceMac were not sent from node');}
     res.send(200);
 });
 
@@ -582,7 +589,24 @@ app.delete('/api/campaigns/:managerId/:campaignId',function(req,res){
         }
     }); 
 });
-
+//Triggers:
+app.get('/api/triggers/:managerId',function(req,res){
+    tM.findAll({where:{managerId:req.params.managerId}}).success(function(tMs){
+        if(tMs){
+            //var tMs = [];
+            res.json(tMs);
+        }else{log('NOTE: no triggered message to this by this managerId...');res.sond('');}
+    });
+});
+app.post('/api/triggers/:managerId',function(req,res){
+    
+    tM.findAll({where:{managerId:req.params.managerId}}).success(function(tMs){
+        if(tMs){
+            //var tMs = [];
+            res.json(tMs);
+        }else{log('NOTE: no triggered message to this by this managerId...');res.sond('');}
+    });
+});
 //===== FUNCTIONS =====//
 //SEND SMS to a spcific reg
 function sendSms(reg, type, manager){
@@ -622,7 +646,7 @@ function sendSms(reg, type, manager){
 //SEND PUSH Notification to a specific reg
 function sendPushNot(reg,type,manager){
     if(reg.roostDeviceToken){
-        console.log(reg);
+        log('Sending Push notification...')
         tM.find({where:{managerId:reg.managerId, type:type}}).success(function(tM){ //TODO maybe unify with function sendSms()
             if(tM){
                 var https = require('https');
@@ -645,7 +669,8 @@ function sendPushNot(reg,type,manager){
                   //console.log("headers: ", res.headers);
 
                   res.on('data', function(d) {
-                    //process.stdout.write(d); //TODO WHAT IS THIS??
+                    log('Push notification... was sent');
+                    process.stdout.write(d); //TODO WHAT IS THIS??
                   });
                 });
                 req.write(data);
@@ -659,7 +684,7 @@ function sendPushNot(reg,type,manager){
         });
     }   
 }
-//SEND SMS to a spcific on Menashe second call
+//SEND SMS to a spcific reg on Menashe second call
 function sendWelcomebackSms(mPhone, ivrPhone){
     log('sending welcome-back SMS....');
     if(mPhone && ivrPhone){
@@ -700,9 +725,50 @@ function sendWelcomebackSms(mPhone, ivrPhone){
 }
 //triggerRecognizedMac:
 function triggerRecognizedMac(rM){ //rM = recMac object
-    recMac.findAll({where:{deviceMac:rM.deviceMac}},{order:'updatedAt DESC'}).success(function(rMs){ //TODO check sybtax of query + if DESC or ASC
-        var regBeforeLast = rMs[1];
-        console.log(rMs[1].dataValues);
+    recMac.findAll({where:{deviceMac:rM.deviceMac},order:'id DESC'}).success(function(rMs){ //TODO check sybtax of query + if DESC or ASC
+        //Check the last reconition of this user: 
+        if(rMs[1]){
+            reg.find({where:{deviceMac:rM.deviceMac}}).success(function(r){
+                if(r){
+                    log('Recognized device registration was found');
+                    if(r.roostDeviceToken && r.isRoostActive){
+                        log('Recognized isRoostActive=true, recognized message will be sent')
+                        manager.find({where:{id:r.managerId}}).success(function(m){
+                            if(m){
+                                tM.find({where:{managerId:m.id, type:'recognized'}}).success(function(rTm){//rTm=recognized triggered message
+                                    if(rTm){
+                                        var now = new Date().getTime();
+                                        var lastRec = Date.parse(rMs[1].dataValues.updatedAt);
+                                        var diff = (now-lastRec)/1000/60/60;
+                                        console.log('Firing recognized trigger');
+                                        console.log('=====================');
+                                        console.log('TODO : CHAGE  THE TIMER < TO >');
+                                        console.log('=====================');
+                                        if(diff<rTm.minInterval){//TODO change < to >
+                                            sendPushNot(r,'recognized',m);
+                                        }else{log('Not firing recognized trriger- preavious recognition is to near');}    
+                                    }else{log('Warning this manager do not have recognized trigger');}
+                                });
+                            }else{log('Error: Manager was not found');}
+                        });
+                    }else{log('Recognized device isRoostActive-false, no push was sent');}
+                }else{log('Error: Recognized device is not registered');}
+            });
+        }else{//TODO this is written twice
+            log('This is first recognition fo this deviceMac:');
+            console.log(rM.deviceMac);
+            reg.find({where:{deviceMac:rM.deviceMac}}).success(function(r){
+                if(r){
+                    log('Recognized device registration was found');
+                    if(r.roostDeviceToken && r.isRoostActive){
+                        log('Recognized isRoostActive=true, recognized message will be sent')
+                        manager.find({where:{id:r.managerId}}).success(function(m){
+                            sendPushNot(r,'recognized',m);
+                        });
+                    }else{log('Recognized device isRoostActive-false, no push was sent');}
+                }else{log('Error: Recognized device is not registered');}
+            });
+        }
     });
 }
 //Parse CSV:
@@ -799,7 +865,7 @@ function ValidURL(url) {
 //TODO:add enums : 0:one-time // 1:daily // 2:weekly
 //ReSchedule on function init:
 var scheduledJobs = {};
-
+/*
 campaign.findAll({where:{isActive:1}}).success(function(cs){
     log('ReScheduling existing campaigns');
     if(cs){
@@ -810,7 +876,7 @@ campaign.findAll({where:{isActive:1}}).success(function(cs){
         //console.log(schedule.scheduledJobs);
     }
 });
-
+*/
 function scheduleCampaign(camp){
     var id=camp.id;
     if(camp.recurring==0){//create a one timejob
@@ -880,10 +946,15 @@ function fireCampaign(c){
             sendSmsCampaign(c, smsList);
             sendRoostCampaign(c, roostList, m);
             var sentVals = JSON.parse(c.sent);
-            log(sentVals.sms);
-            log(sentVals.roost);
-            log(smsList.length);
-            log(roostList.length);
+            
+            //temp
+            if(sentVals){
+                log(sentVals.sms);
+                log(sentVals.roost);
+                log(smsList.length);
+                log(roostList.length);    
+            }
+            
             if(!(sentVals)){
                 log('no history');
                 sentVals={sms:smsList.length,roost:roostList.length};
@@ -905,15 +976,6 @@ function fireCampaign(c){
         });
     });  
 }
-/*
-campaign.find({where:{id:1}}).success(function(c){
-    console.log(c.dataValues);
-    c.sent=JSON.stringify({sms:'1',roost:'2'});
-    c.save().success(function(){log('hey================================');});
-});
-*/
-//Recognizing listner
-
 
 /*EXAMPLE FOT CONTACTING ROOST API*/  /*WORKING*/
 /*
@@ -977,7 +1039,7 @@ req.on('error', function(e) {
 
 /*EXAMPLE FOT CONTACTING ROOST API*/
 
-
+/*
 function sendPushNot(){
     var https = require('https');
     //var qs = require('querystring'); 
@@ -1009,6 +1071,7 @@ function sendPushNot(){
       console.error(e);
     });
 }
+*/
 //sendPushNot();
 
 

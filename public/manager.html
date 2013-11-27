@@ -186,95 +186,69 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 								<div class="portlet-title">
 									<div class="caption">
 										<i class="icon-cogs"></i>
-										<span class="hidden-480">Sniffing</span>
+										<span class="hidden-480">הודעות הנשלחות אוטמטית (טריגרים)</span>
 									</div>
 								</div>
 								<div class="portlet-body form">
 									<!-- BEGIN FORM-->
-									<form action="#" class="form-horizontal">
+									<div class="form-horizontal">
+										<h4>זיהוי משתמשים באמצעות טלפון או WiFi</h4>
 										<div class="control-group">
 											<label class="control-label">תוכן ההודעה</label>
 											<div class="controls">
-												<textarea class="medium m-wrap" rows="3"></textarea>
+												<textarea class="medium m-wrap" rows="3" name="text" data-trigger-type="recognized"></textarea>
+											</div>
+										</div>
+										<div class="control-group">
+											<label class="control-label">מרווח שעות מינמלי בין הודעה להודעה</label>
+											<div class="controls">
+												<input type="text" name="minInterval" data-trigger-type="recognized"/>
+											</div>
+										</div>
+										<div class="control-group">
+											<label class="control-label">מצב פעילות:</label>
+											<div class="controls">
+												<div class="switch switch-small">
+													<input checked type="checkbox" checked class="toggle" name="isActive" data-trigger-type="recognized"/>
+												</div>
+											</div>
+										</div>
+										<hr>
+										<h4>ביטול מנוי</h4>
+										<div class="control-group">
+											<label class="control-label">תוכן ההודעה</label>
+											<div class="controls">
+												<textarea class="medium m-wrap" rows="3" name="text" data-trigger-type="roost-cancelation"></textarea>
+											</div>
+										</div>
+										<div class="control-group">
+											<label class="control-label">מצב פעילות:</label>
+											<div class="controls">
+												<div class="switch switch-small">
+													<input type="checkbox" checked class="toggle" name="isActive" data-trigger-type="roost-cancelation"/>
+												</div>
+											</div>
+										</div>
+										<hr>
+										<h4>משתמש שביטל נרשם מחדש</h4>
+										<div class="control-group">
+											<label class="control-label">תוכן ההודעה</label>
+											<div class="controls">
+												<textarea class="medium m-wrap" rows="3" name="text" data-trigger-type="roost-welcome-back"></textarea>
 											</div>
 										</div>
 										<div class="control-group">
 											<label class="control-label">שליחת הודעות אוטומטית</label>
 											<div class="controls">
 												<div class="switch switch-small">
-													<input type="checkbox" checked class="toggle"/>
+													<input type="checkbox" checked class="toggle" name="isActive" data-trigger-type="roost-welcome-back"/>
 												</div>
 											</div>
 										</div>
 										<div class="form-actions">
-											<button type="submit" class="btn blue"><i class="icon-ok"></i> שמור </button>
-											<button type="button" class="btn">ביטול</button>
+											<button type="submit" id="btn-update-triggers" class="btn blue"><i class="icon-ok"></i> שמור </button>
 										</div>
-									</form>
-									<!-- END FORM-->  
-								</div>
-							</div>
-							<div class="portlet box blue">
-								<div class="portlet-title">
-									<div class="caption">
-										<i class="icon-cogs"></i>
-										<span class="hidden-480">ביטול מנוי</span>
 									</div>
-								</div>
-								<div class="portlet-body form">
-									<!-- BEGIN FORM-->
-									<form action="#" class="form-horizontal">
-										<div class="control-group">
-											<label class="control-label">תוכן ההודעה</label>
-											<div class="controls">
-												<textarea class="medium m-wrap" rows="3"></textarea>
-											</div>
-										</div>
-										<div class="control-group">
-											<label class="control-label">שליחת הודעות אוטומטית</label>
-											<div class="controls">
-												<div class="switch switch-small">
-													<input type="checkbox" checked class="toggle"/>
-												</div>
-											</div>
-										</div>
-										<div class="form-actions">
-											<button type="submit" class="btn blue"><i class="icon-ok"></i> שמור </button>
-											<button type="button" class="btn">ביטול</button>
-										</div>
-									</form>
-									<!-- END FORM-->  
-								</div>
-							</div>
-							<div class="portlet box blue">
-								<div class="portlet-title">
-									<div class="caption">
-										<i class="icon-cogs"></i>
-										<span class="hidden-480">משתמש שביטל נרשם מחדש</span>
-									</div>
-								</div>
-								<div class="portlet-body form">
-									<!-- BEGIN FORM-->
-									<form action="#" class="form-horizontal">
-										<div class="control-group">
-											<label class="control-label">תוכן ההודעה</label>
-											<div class="controls">
-												<textarea class="medium m-wrap" rows="3"></textarea>
-											</div>
-										</div>
-										<div class="control-group">
-											<label class="control-label">שליחת הודעות אוטומטית</label>
-											<div class="controls">
-												<div class="switch switch-small">
-													<input type="checkbox" checked class="toggle"/>
-												</div>
-											</div>
-										</div>
-										<div class="form-actions">
-											<button type="submit" class="btn blue"><i class="icon-ok"></i> שמור </button>
-											<button type="button" class="btn">ביטול</button>
-										</div>
-									</form>
 									<!-- END FORM-->  
 								</div>
 							</div>
@@ -1071,6 +1045,54 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			});
 			$($(this).parents('tr')[0]).remove();
 		});
+
+
+		//TRIGGERS SECTION:
+		var triggers=[];
+		$.ajax({
+			type: "get",
+			url: '/api/triggers/'+managerId,				
+			success: function(data){
+				
+				if(data){
+					
+					$.each(data,function(i,t){						
+						console.log('triggers:');		
+						console.log(t);
+						$('textarea[name=text][data-trigger-type='+t.type+']').val(t.text);
+						$('input[name=minInterval][data-trigger-type='+t.type+']').val(t.minInterval);
+						if(!t.isActive){
+							alert(t.type+' not active');
+							$('input[name=isActive][data-trigger-type='+t.type+']').prop('checked',false);	
+							$('input[name=isActive][data-trigger-type='+t.type+']').parent().removeClass('switch-on').addClass('switch-off'); //TODO- this should happen automatically !!!
+						}
+					});
+				}
+				//$('input[name=isActive][data-trigger-type=recognized]').prop('checked',true);	
+				//$('input[name=isActive][data-trigger-type=recognized]').addClass('ido');	
+			}	
+		});
+		$('#btn-update-triggers').on('click',function(){
+			var data =[];
+			$.each($(['recognized','roost-cancelation','roost-welcome-back']),function(i,type){						
+				var trigger={};
+				trigger.type=type;
+				trigger.text=$('textarea[name=text][data-trigger-type='+type+']').val();
+				trigger.minInterval=$('input[name=minInterval][data-trigger-type='+type+']').val();
+				//trigger.isActive=fa
+				if($('input[name=isActive][data-trigger-type='+type+']').is(":checked")){alert(type+ ': true')};
+				data.push(trigger);
+			});
+			$.ajax({
+				type: "post",
+				url: '/api/triggers/'+managerId,				
+				data:JSON.stringify(data)
+				success: function(data){
+					alert('yo');
+				}
+			});
+		});
+		//TRIGGERS SECTION---END
 	});
 	</script>
 	<!-- Ido Styling END-->
