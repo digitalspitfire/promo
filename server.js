@@ -42,9 +42,12 @@ var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
 var reg = sq.define('registration',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, roostDeviceToken:Sq.TEXT, isRoostActive:Sq.BOOLEAN});
-var tM = sq.define('triggeredMessage',{type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT, minInterval:Sq.INTEGER,isActive:Sq.BOOLEAN});
+var tM = sq.define('triggeredMessage',{type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT, sound:Sq.TEXT, minInterval:Sq.INTEGER,isActive:Sq.BOOLEAN});
 var uD = sq.define('usersData',{mPhone:Sq.TEXT, filterName:Sq.TEXT, value:Sq.TEXT});
 var recMac = sq.define('recognisedMac',{deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
+var sentTrigger=sq.define('sentTrigger',{mPhone:Sq.TEXT, roostDeviceToken:Sq.TEXT, type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT});
+var sentCampaign=sq.define('sentCampaign',{mPhone:Sq.TEXT, roostDeviceToken:Sq.TEXT, campaignId:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT});
+
 
 manager
     .hasMany(campaign)
@@ -53,7 +56,9 @@ manager
     .hasMany(activation)
     .hasMany(reg)
     .hasMany(tM)
-    .hasMany(uD);
+    .hasMany(uD)
+    .hasMany(sentTrigger)
+    .hasMany(sentCampaign);
 reg.belongsTo(manager);
 campaign.belongsTo(manager);
 node.belongsTo(manager);
@@ -70,7 +75,8 @@ function sendError(res,message){
     res.send('Error: '+ message);
 }
 function log(message){console.log('>>> '+message);}
-//============= LISNERS ===========//
+//============= LISTNERS ===========//
+//IVR
 //Listner to IVR, write to activation + update ivrId with ivrPhone
 app.get('/ivrcb',function(req,res){
     if(req.query.dest=='0722280630'){ //TODO - remove this
@@ -91,6 +97,7 @@ app.get('/ivrcb',function(req,res){
     res.send(200);
 });
 
+//WIDGETS
 //Listen to widget #1, Register+ create activation if by Wifi   //TODO- add 'register-by-device-mac'
     //by phone
 app.all('/register-by-phone', function(req, res) {
@@ -175,7 +182,7 @@ app.all('/store-requested', function(req, res) {
                 reg.find({where:{mPhone:rB.mPhone, managerId: m.id}}).success(function(r){
                     if(r){
                         if(r.roostDeviceToken && r.isRoostActive){
-                            setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},30000);
+                            setTimeout(function(){sendPushNot(r,'roost-welcome-back',m); console.log('push note sent');},30000);
                             console.log('sending notification for welcome back (mp)');
                         }else{console.log('new cutomer'); res.send('new cutomer');}//do nothing
                     }else{console.log('error: reg not found'); res.send('error: reg not found');}
@@ -191,7 +198,7 @@ app.all('/store-requested', function(req, res) {
                         reg.find({where:{deviceMac:rB.deviceMac, managerId: m.id}}).success(function(r){
                             if(r){
                                 if(r.roostDeviceToken && r.isRoostActive){
-                                    setTimeout(function(){sendPushNot(r,'roost-reg-welcome-back',m); console.log('push note sent');},180000);
+                                    setTimeout(function(){sendPushNot(r,'roost-welcome-back',m); console.log('push note sent');},180000);
                                     console.log('sending notification for welcome back (wifi)');
                                 }else{console.log('ROOSt will send notification');}//do nothing
                             }else{sendError(res, 'reg not found');}
@@ -202,9 +209,10 @@ app.all('/store-requested', function(req, res) {
         });
     }else{sendError(res, 'no cookies sent');}
 });
+
+//ROOST
 //Listen to ROOST. 1) On reg- Update deviceTokens. 2)On un-reg- send cancelation SMS //TODO - should write it shorter....
 app.all('/roost-cb',function(req,res){ //TODO I think I can write this one shorter...
-    console.log(req.body);
     var rB = req.body;
     var mPhoneTag='';
     var deviceMacTag='';
@@ -328,18 +336,20 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
         reg.find({where:{managerId:m.id, deviceMac:deviceMacTag, roostDeviceToken:rB.device_token}}).success(function(rDM){ //rDM=reg with deviceMac
             if(rDM){
                 rDM.isRoostActive = false; 
-                rDM.save().success(function(){log('user registeration by deviceMac is now isRoostActive=false');});
+                rDM.save().success(function(){
+                    log('user registeration by deviceMac is now isRoostActive=false');
+                    if(rDM.mPhone){
+                        sendSms(r,'roost-cancelation',m);
+                    }
+                });
             }else{log('ERROR: Registeration has no deviceMac but Roost has has only deviceMacTag !!!');}
         });
     }
 }
+
+//NODES SH-SCRIPT
 //Listen to Node logon call:
 app.all('/radius/online',function(req,res){
-    console.log('=================================================================');
-    console.log('>>>request from node:' + req.params);
-    console.log(req.path);
-    console.log(req.query);
-    console.log(req.headers);
     var rQ = req.query;
     if(rQ.mac  && rQ.nasid){
         var recognizedMac = rQ.mac.toLowerCase();
@@ -347,9 +357,8 @@ app.all('/radius/online',function(req,res){
         recognizedMac=recognizedMac.replace(/-/g,":");
         recognizedNode=recognizedNode.replace(/-/g,":");
         recMac.create({deviceMac:recognizedMac, nodeMac:recognizedMac}).success(function(rM){
-            console.log('Recognized user was registered:');
-            console.log(rM.dataValues);
-            
+            log('Recognized user was on Wifi:');
+            console.log(rM.dataValues.deviceMac);
             triggerRecognizedMac(rM.dataValues);
         });
     }else{log('Error: nodeMac or deviceMac were not sent from node');}
@@ -357,6 +366,9 @@ app.all('/radius/online',function(req,res){
 });
 
 //===============DASHBOARD API LISTNERS ==============//
+//TODO-- we need to to add an event to create manager>> create 3 records in the triggerde messages table
+
+
 //Users data file upload + management
 app.all('/api/dataFileUpload/:managerId',function(req, res){
     console.log(req.body);
@@ -598,93 +610,30 @@ app.get('/api/triggers/:managerId',function(req,res){
         }else{log('NOTE: no triggered message to this by this managerId...');res.sond('');}
     });
 });
-app.post('/api/triggers/:managerId',function(req,res){
+app.all('/api/triggers/:managerId',function(req,res){
+    var data = '';
+    var rB = req.body;
+    var rP = req.params;
+    console.log('body: ');
+    console.log(rB);
     
-    tM.findAll({where:{managerId:req.params.managerId}}).success(function(tMs){
-        if(tMs){
-            //var tMs = [];
-            res.json(tMs);
-        }else{log('NOTE: no triggered message to this by this managerId...');res.sond('');}
-    });
-});
-//===== FUNCTIONS =====//
-//SEND SMS to a spcific reg
-function sendSms(reg, type, manager){
-    if(reg.managerId && reg.mPhone){
-        console.log(reg);
-        tM.find({where:{managerId:reg.managerId, type:type}}).success(function(tM){
-            if(tM){
-                var http = require('http');
-                var qs = require('querystring');
-                var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:'05'+reg.mPhone,charset:'utf-8',from:'036006660'});
-                var options = {
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    host: 'www.micropay.co.il',
-                    method:'POST',
-                    path: '/ExtApi/ScheduleSms.php',
-                };
-                /*TODO the following came with the http function, need to organuize it in my code*/
-                callback = function(response) {
-                    var str = '';
-                    //another chunk of data has been recieved, so append it to `str`
-                    response.on('data', function (chunk) {
-                        str += chunk;
-                    });
-                    //the whole response has been recieved, so we just print it out here
-                    response.on('end', function () {
-                        console.log(str);
+    tM.findAll({where:{managerId:rP.managerId}}).success(function(tMs){
+        for(var trigger in tMs){
+            for(var t in rB){
+                if(rB[t].type==tMs[trigger].type){
+                    tMs[trigger].updateAttributes(rB[t]).success(function() {
+                        log('a');
                     });
                 }
-                /*TODO the following came with the http function----END---*/
-                var postReq = http.request(options, callback);
-                postReq.write(smsData);
-                postReq.end();
-            }else{concole.log('Error: no triggered message of this type fot this manager');}
-        });
-    }else{console.log('SMS not sent since reg has no mPhone (or no managerId)');}
-}
-//SEND PUSH Notification to a specific reg
-function sendPushNot(reg,type,manager){
-    if(reg.roostDeviceToken){
-        log('Sending Push notification...')
-        tM.find({where:{managerId:reg.managerId, type:type}}).success(function(tM){ //TODO maybe unify with function sendSms()
-            if(tM){
-                var https = require('https');
-                if(ValidURL(tM.link)){
-                    var data = JSON.stringify({alert:tM.text, url:tM.link,device_tokens:[reg.roostDeviceToken]}); //TODO add sound    
-                }else{
-                    var data = JSON.stringify({alert:tM.text, device_tokens:[reg.roostDeviceToken]}); //TODO add sound
-                }            
-                var options = {
-                  hostname: 'launch.alertrocket.com',
-                  port: 443,
-                  path: '/api/push',
-                  method: 'POST',
-                  auth:manager.roostConfKey+':'+manager.roostSecretKey,
-                  //headers: { 'Content-Type': 'application/json','Content-Length': userString.length}
-                };
+            }
+        }
+    });
+});
 
-                var req = https.request(options, function(res) {
-                  //console.log("statusCode: ", res.statusCode);
-                  //console.log("headers: ", res.headers);
 
-                  res.on('data', function(d) {
-                    log('Push notification... was sent');
-                    process.stdout.write(d); //TODO WHAT IS THIS??
-                  });
-                });
-                req.write(data);
-                req.end();
-
-                req.on('error', function(e) {
-                  console.error('error');
-                  console.error(e);
-                });
-            }else{concole.log('Error: no triggered message of this type fot this manager');}
-        });
-    }   
-}
-//SEND SMS to a spcific reg on Menashe second call
+//==============TRIGGERS=============//
+//Recognized:
+//TODO - change this function name!
 function sendWelcomebackSms(mPhone, ivrPhone){
     log('sending welcome-back SMS....');
     if(mPhone && ivrPhone){
@@ -711,6 +660,11 @@ function sendWelcomebackSms(mPhone, ivrPhone){
                             //the whole response has been recieved, so we just print it out here
                             response.on('end', function () {
                                 console.log(str);
+                                if(str.indexOf('OK')!=-1){
+                                    var mPhoneList=[mPhone];
+                                    var roostList=[];
+                                    updateSentTriggers(m.id,mPhoneList,roostList,'recognized',tM.text,'');
+                                }
                             });
                         }
                         /*TODO the following came with the http function----END---*/
@@ -725,7 +679,7 @@ function sendWelcomebackSms(mPhone, ivrPhone){
 }
 //triggerRecognizedMac:
 function triggerRecognizedMac(rM){ //rM = recMac object
-    recMac.findAll({where:{deviceMac:rM.deviceMac},order:'id DESC'}).success(function(rMs){ //TODO check sybtax of query + if DESC or ASC
+    recMac.findAll({where:{deviceMac:rM.deviceMac},order:'id DESC'}).success(function(rMs){
         //Check the last reconition of this user: 
         if(rMs[1]){
             reg.find({where:{deviceMac:rM.deviceMac}}).success(function(r){
@@ -740,13 +694,10 @@ function triggerRecognizedMac(rM){ //rM = recMac object
                                         var now = new Date().getTime();
                                         var lastRec = Date.parse(rMs[1].dataValues.updatedAt);
                                         var diff = (now-lastRec)/1000/60/60;
-                                        console.log('Firing recognized trigger');
-                                        console.log('=====================');
-                                        console.log('TODO : CHAGE  THE TIMER < TO >');
-                                        console.log('=====================');
-                                        if(diff<rTm.minInterval){//TODO change < to >
+                                        log('Firing recognized trigger');
+                                        if(diff>rTm.minInterval){
                                             sendPushNot(r,'recognized',m);
-                                        }else{log('Not firing recognized trriger- preavious recognition is to near');}    
+                                        }else{log('Not firing recognized triger- preavious recognition is to near');}    
                                     }else{log('Warning this manager do not have recognized trigger');}
                                 });
                             }else{log('Error: Manager was not found');}
@@ -771,6 +722,91 @@ function triggerRecognizedMac(rM){ //rM = recMac object
         }
     });
 }
+
+
+//SMS & PUSH Functions:
+//SEND SMS or PUSH to a spcific reg
+function sendSms(reg, type, manager){
+    if(reg.managerId && reg.mPhone){
+        tM.find({where:{managerId:reg.managerId, type:type}}).success(function(tM){
+            if(tM){
+                var http = require('http');
+                var qs = require('querystring');
+                var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:'05'+reg.mPhone,charset:'utf-8',from:'036006660'});
+                var options = {
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    host: 'www.micropay.co.il',
+                    method:'POST',
+                    path: '/ExtApi/ScheduleSms.php',
+                };
+                /*TODO the following came with the http function, need to organuize it in my code*/
+                callback = function(response) {
+                    var str = '';
+                    //another chunk of data has been recieved, so append it to `str`
+                    response.on('data', function (chunk) {
+                        str += chunk;
+                    });
+                    //the whole response has been recieved, so we just print it out here
+                    response.on('end', function () {
+                        console.log(str);
+                        if(str.indexOf('OK')!=-1){
+                            var mPhoneList=['05'+reg.mPhone];
+                            var roostList=[];
+                            updateSentTriggers(manager.id,mPhoneList,roostList,type,tM.text,'');
+                        }
+                    });
+                }
+                /*TODO the following came with the http function----END---*/
+                var postReq = http.request(options, callback);
+                postReq.write(smsData);
+                postReq.end();
+            }else{concole.log('Error: no triggered message of this type fot this manager');}
+        });
+    }else{console.log('SMS not sent since reg has no mPhone (or no managerId)');}
+}
+function sendPushNot(reg,type,manager){//TODO try to make this https request look like the http req on senSMS()
+    if(reg.roostDeviceToken){
+        log('Sending Push notification...')
+        tM.find({where:{managerId:reg.managerId, type:type}}).success(function(tM){ //TODO maybe unify with function sendSms()
+            if(tM){
+                var https = require('https');
+                if(ValidURL(tM.link)){
+                    var data = JSON.stringify({alert:tM.text, url:tM.link,device_tokens:[reg.roostDeviceToken]}); //TODO add sound    
+                }else{
+                    var data = JSON.stringify({alert:tM.text, device_tokens:[reg.roostDeviceToken]}); //TODO add sound
+                }            
+                var options = {
+                  hostname: 'launch.alertrocket.com',
+                  port: 443,
+                  path: '/api/push',
+                  method: 'POST',
+                  auth:manager.roostConfKey+':'+manager.roostSecretKey,
+                  //headers: { 'Content-Type': 'application/json','Content-Length': userString.length}
+                };
+
+                var req = https.request(options, function(res) {
+                  //console.log("statusCode: ", res.statusCode);
+                  //console.log("headers: ", res.headers);
+
+                  res.on('data', function(d) {
+                    log('Push notification... was sent');
+                    process.stdout.write(d); //TODO WHAT IS THIS??
+                    updateSentTriggers(manager.id,[],[reg.roostDeviceToken],type,tM.text,tM.link);
+                  });
+                });
+                req.write(data);
+                req.end();
+
+                req.on('error', function(e) {
+                  console.error('error');
+                  console.error(e);
+                });
+            }else{console.log('Error: no triggered message of this type fot this manager');}
+        });
+    }   
+}
+
+//////////////////////////////////////
 //Parse CSV:
 function parseCSV(){
     var stream = fs.createReadStream("uploads/data.csv");
@@ -853,6 +889,35 @@ function sendRoostCampaign(c, roostList , manager){
         console.error(e);
     });
 }
+function updateSentTriggers(managerId,arrPhoneList,arrRoostList,type,text,link){
+    var arrSentTriggers=[]
+    for(var mPhone in arrPhoneList){
+        var obj={};
+        obj.managerId=managerId;
+        obj.mPhone=arrPhoneList[mPhone];
+        obj.roostDeviceToken='';
+        obj.type=type;
+        obj.text=text;
+        obj.link=link;
+        console.log()
+        arrSentTriggers.push(obj);
+    }
+    for(var token in arrRoostList){
+        var obj={};
+        obj.managerId=managerId;
+        obj.mPhone='';
+        obj.roostDeviceToken=arrRoostList[token];
+        obj.type=type;
+        obj.text=text;
+        obj.link=link;
+        arrSentTriggers.push(obj);
+    }
+    console.log(arrSentTriggers);
+    
+    sentTrigger.bulkCreate(arrSentTriggers).success(function(){
+        log('sentTrigger table was updated');
+    });
+}
 //Validate URL
 function ValidURL(url) {
         var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
@@ -860,7 +925,8 @@ function ValidURL(url) {
             return true;
         } 
             return false;
-  }
+}
+
 //===============SCHEDULE CAMPAIGNS========//
 //TODO:add enums : 0:one-time // 1:daily // 2:weekly
 //ReSchedule on function init:

@@ -69,27 +69,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	
 	</style>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </head>
 <body class="page-header-fixed">
 	<!-- BEGIN HEADER -->   
@@ -179,7 +158,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				</div>
 				<!-- END PAGE HEADER-->
 				<div id="dashboard">
-					<div class="row-fluid" id="triggers">
+					<div class="row-fluid" id="triggers"> <!--TODO; make these 3 triggers repeating templates one template-->
 						<div class="span12">
 							<!-- BEGIN SAMPLE FORM PORTLET-->   
 							<div class="portlet box blue">
@@ -192,56 +171,113 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 								<div class="portlet-body form">
 									<!-- BEGIN FORM-->
 									<div class="form-horizontal">
-										<h4>זיהוי משתמשים באמצעות טלפון או WiFi</h4>
-										<div class="control-group">
-											<label class="control-label">תוכן ההודעה</label>
-											<div class="controls">
-												<textarea class="medium m-wrap" rows="3" name="text" data-trigger-type="recognized"></textarea>
+										<div data-trigger-type="recognized">
+											<h4>זיהוי משתמשים באמצעות טלפון או WiFi</h4>
+											<div class="control-group">
+												<label class="control-label">תוכן ההודעה</label>
+												<div class="controls">
+													<textarea class="medium m-wrap" rows="3" name="text" ></textarea>
+												</div>
 											</div>
-										</div>
-										<div class="control-group">
-											<label class="control-label">מרווח שעות מינמלי בין הודעה להודעה</label>
-											<div class="controls">
-												<input type="text" name="minInterval" data-trigger-type="recognized"/>
+											<div class="control-group">
+												<label class="control-label">לינק</label>
+												<div class="controls">
+													<input type="text" class="span2 m-wrap" name="link" />
+												</div>
 											</div>
-										</div>
-										<div class="control-group">
-											<label class="control-label">מצב פעילות:</label>
-											<div class="controls">
-												<div class="switch switch-small">
-													<input checked type="checkbox" checked class="toggle" name="isActive" data-trigger-type="recognized"/>
+											<div class="control-group">
+												<label class="control-label">צליל</label>
+												<div class="controls">
+													<select name="sound" data-trigger-type="recognized" class="span2">
+														<!--<option value="">Select</option>-->
+														<option value="alarm">alarm</option>
+														<option value="alarm">bell</option>
+														<option value="ring">ring</option>
+													</select>
+												</div>
+											</div>
+											<div class="control-group">
+												<label class="control-label">מרווח שעות מינמלי בין הודעה להודעה</label>
+												<div class="controls">
+													<input type="text" class="span2"  name="minInterval"/>
+												</div>
+											</div>
+											<div class="control-group">
+												<label class="control-label">מצב פעילות:</label>
+												<div class="controls">
+													<div class="switch switch-small">
+														<input checked type="checkbox" checked class="toggle" name="isActive"/>
+													</div>
 												</div>
 											</div>
 										</div>
 										<hr>
-										<h4>ביטול מנוי</h4>
-										<div class="control-group">
-											<label class="control-label">תוכן ההודעה</label>
-											<div class="controls">
-												<textarea class="medium m-wrap" rows="3" name="text" data-trigger-type="roost-cancelation"></textarea>
+										<div data-trigger-type="roost-cancelation">
+											<h4>ביטול מנוי</h4>
+											<div class="control-group">
+												<label class="control-label">תוכן ההודעה</label>
+												<div class="controls">
+													<textarea class="medium m-wrap" rows="3" name="text"></textarea>
+												</div>
 											</div>
-										</div>
-										<div class="control-group">
-											<label class="control-label">מצב פעילות:</label>
-											<div class="controls">
-												<div class="switch switch-small">
-													<input type="checkbox" checked class="toggle" name="isActive" data-trigger-type="roost-cancelation"/>
+											<div class="control-group">
+												<label class="control-label">לינק</label>
+												<div class="controls">
+													<input type="text" class="span2 m-wrap" name="link" />
+												</div>
+											</div>
+											<div class="control-group">
+												<label class="control-label">צליל</label>
+												<div class="controls">
+													<select name="sound" class="span2">
+														<!--<option value="">Select</option>-->
+														<option value="alarm">alarm</option>
+														<option value="alarm">bell</option>
+														<option value="ring">ring</option>
+													</select>
+												</div>
+											</div>
+											<div class="control-group">
+												<label class="control-label">מצב פעילות:</label>
+												<div class="controls">
+													<div class="switch switch-small">
+														<input type="checkbox" checked class="toggle" name="isActive" />
+													</div>
 												</div>
 											</div>
 										</div>
 										<hr>
-										<h4>משתמש שביטל נרשם מחדש</h4>
-										<div class="control-group">
-											<label class="control-label">תוכן ההודעה</label>
-											<div class="controls">
-												<textarea class="medium m-wrap" rows="3" name="text" data-trigger-type="roost-welcome-back"></textarea>
+										<div data-trigger-type="roost-welcome-back">
+											<h4>משתמש שביטל נרשם מחדש</h4>
+											<div class="control-group">
+												<label class="control-label">תוכן ההודעה</label>
+												<div class="controls">
+													<textarea class="medium m-wrap" rows="3" name="text" ></textarea>
+												</div>
 											</div>
-										</div>
-										<div class="control-group">
-											<label class="control-label">שליחת הודעות אוטומטית</label>
-											<div class="controls">
-												<div class="switch switch-small">
-													<input type="checkbox" checked class="toggle" name="isActive" data-trigger-type="roost-welcome-back"/>
+											<div class="control-group">
+												<label class="control-label">לינק</label>
+												<div class="controls">
+													<input type="text" class="span2 m-wrap" name="link" />
+												</div>
+											</div>
+											<div class="control-group">
+												<label class="control-label">צליל</label>
+												<div class="controls">
+													<select name="sound" class="span2">
+														<!--<option value="">Select</option>-->
+														<option value="alarm">alarm</option>
+														<option value="alarm">bell</option>
+														<option value="ring">ring</option>
+													</select>
+												</div>
+											</div>
+											<div class="control-group">
+												<label class="control-label">מצב פעילות</label>
+												<div class="controls">
+													<div class="switch switch-small">
+														<input type="checkbox" checked class="toggle" name="isActive" />
+													</div>
 												</div>
 											</div>
 										</div>
@@ -621,16 +657,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 	<script type="text/javascript" src="assets/plugins/data-tables/jquery.dataTables.js"></script>
 	<script type="text/javascript" src="assets/plugins/data-tables/DT_bootstrap.js"></script>
-
-
-
-
-
-
-
-
-
-
 
 
 	<!-- END EDITABLE TABLE SCRIPTS -->
@@ -1057,14 +1083,16 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				if(data){
 					
 					$.each(data,function(i,t){						
+						var cntr=$('div[data-trigger-type='+t.type+']');
 						console.log('triggers:');		
 						console.log(t);
-						$('textarea[name=text][data-trigger-type='+t.type+']').val(t.text);
-						$('input[name=minInterval][data-trigger-type='+t.type+']').val(t.minInterval);
+						cntr.find('textarea[name=text]').val(t.text);
+						cntr.find('input[name=link]').val(t.link);
+						cntr.find('select[name=sound]').val(t.sound);
+						cntr.find('input[name=minInterval]').val(t.minInterval);
 						if(!t.isActive){
-							alert(t.type+' not active');
-							$('input[name=isActive][data-trigger-type='+t.type+']').prop('checked',false);	
-							$('input[name=isActive][data-trigger-type='+t.type+']').parent().removeClass('switch-on').addClass('switch-off'); //TODO- this should happen automatically !!!
+							cntr.find('input[name=isActive]').prop('checked',false);	
+							cntr.find('input[name=isActive]').parent().removeClass('switch-on').addClass('switch-off'); //TODO- this should happen automatically !!!
 						}
 					});
 				}
@@ -1075,20 +1103,29 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		$('#btn-update-triggers').on('click',function(){
 			var data =[];
 			$.each($(['recognized','roost-cancelation','roost-welcome-back']),function(i,type){						
+				var cntr=$('div[data-trigger-type='+type+']');
 				var trigger={};
 				trigger.type=type;
-				trigger.text=$('textarea[name=text][data-trigger-type='+type+']').val();
-				trigger.minInterval=$('input[name=minInterval][data-trigger-type='+type+']').val();
-				//trigger.isActive=fa
-				if($('input[name=isActive][data-trigger-type='+type+']').is(":checked")){alert(type+ ': true')};
+				trigger.text=cntr.find('textarea[name=text]').val();
+				trigger.link=cntr.find('input[name=link]').val();
+				trigger.sound=cntr.find('select[name=sound]').val();	
+				if(type=='recognized'){
+					trigger.minInterval=cntr.find('input[name=minInterval]').val();	
+				}
+				trigger.isActive=cntr.find('input[name=isActive]').is(":checked");
 				data.push(trigger);
 			});
+			//var json = JSON.stringify(data);
+			//console.log('this is the json: '+json);
+			console.log('this is the data that will be sent: ');
+			console.log(JSON.stringify(data));
 			$.ajax({
-				type: "post",
-				url: '/api/triggers/'+managerId,				
-				data:JSON.stringify(data)
+				type: "POST",
+				url: '/api/triggers/'+managerId,
+				contentType: "application/json",				
+				data: JSON.stringify(data),
 				success: function(data){
-					alert('yo');
+					console.log(json);
 				}
 			});
 		});
