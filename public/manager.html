@@ -360,7 +360,8 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 										<tr>
 											<th data-field="name">שם</th>
 											<th data-field="category">קטגוריה</th>
-											<th data-field="is_active">סטטוס</th>											
+											<th data-field="createdAt">תאריך הקמה</th>
+											<th data-field="is_active">סטטוס</th>									
 											<th>עריכה</th>
 											<th>מחיקה</th>
 										</tr>
@@ -397,12 +398,19 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 													<li class="span3">
 														<a href="#tab2" data-toggle="tab" class="step">
 															<span class="number">2</span>
-															<span class="desc"><i class="icon-ok"></i>עריכת תוכן, תזמון, הפעלה</span>   
+															<span class="desc"><i class="icon-ok"></i>מיקוד הנמענים</span>   
 														</a>
 													</li>
 													<li class="span3">
 														<a href="#tab3" data-toggle="tab" class="step">
 															<span class="number">3</span>
+															<span class="desc"><i class="icon-ok"></i>עריכת תוכן, תזמון, הפעלה</span>   
+														</a>
+													</li>
+													
+													<li class="span3">
+														<a href="#tab4" data-toggle="tab" class="step">
+															<span class="number">4</span>
 															<span class="desc"><i class="icon-ok"></i> תוצאות</span>   
 														</a>
 													</li>
@@ -462,6 +470,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 												</div>
 											</div>
 											<div class="tab-pane" id="tab2">
+												<h3 class="block">מיקוד הנמענים</h3>
+												<div id="campaign-filters" filters></div>
+											</div>
+											<div class="tab-pane" id="tab3">
 												<h3 class="block">עריכת תוכן ותזמון</h3>
 												<div class="control-group">
 													<label class="control-label">הודעה</label>
@@ -552,7 +564,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 													</div>
 												</div>
 											</div>
-											<div class="tab-pane" id="tab3">
+											<div class="tab-pane" id="tab4">
 												<h3 class="block">סטטיסטיקה</h3>
 												<div class="tiles">
 													<div class="tile bg-blue" id="roost-history">
@@ -812,13 +824,28 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		if(id){
 			console.log('got to first');
 			var parseCampaigns = function(data){
-				console.log('campaign data: '+data);
+				console.log('campaign data: ');
+				console.log(data);
+
+				//the manger filters must come BEFORE the campaigns data:
+				$.each(data.managerFilters, function(a,o){
+					var str ='';
+					str+='<h3>'+a+'</h3>';
+					$.each(o.values,function(val, count){
+						str+='<div>'+val+'-'+parseInt(100*parseInt(count)/parseInt(o.total))+'%<input type="checkbox" data-filter-attribute="'+a+'" data-filter-value="'+val+'"></div>';
+					});
+					$('#tab2 > div').append(str);
+				});
+
 				var wizard = $('#edit-campaign');
 				wizard.attr('data-id',campaignId);
 				var textInputs = wizard.find('input[type="text"]');
 				var chbxInputs = wizard.find('input[type="checkbox"]');
 				var selectInputs = wizard.find('select');
 				var textAreas = wizard.find('textarea');
+				var chbxFilters = wizard.find('#campaign-filters input[type="checkbox"]');
+
+				//Campaigns data:
 				$.each(textInputs, function(index,i){
 					i = $(i);
 					var fieldName = i.attr('name');
@@ -841,8 +868,21 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					i.val(data[fieldName]);				
 				});
 				var sent = JSON.parse(data.sent);
-				$('#sms-history .number').html(sent.sms);
-				$('#roost-history .number').html(sent.roost);
+				$('#sms-history .number').html(sent ? sent.sms : '0');
+				$('#roost-history .number').html(sent ? sent.roost : '0');
+				var filters = JSON.parse(data.filters);
+				console.log(filters);
+				console.log(chbxFilters.length);
+				$.each(chbxFilters, function(index,i){
+					i = $(i);
+					var attr = i.attr('data-filter-attribute');
+					var val = i.attr('data-filter-value');
+					if(filters[attr]){
+						if(filters[attr].indexOf(val)>-1){
+							i.prop('checked', true);		
+						}
+					}					
+				});
 			}
 		}else{
 			console.log('got to secind');
@@ -851,7 +891,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				console.log('campaings data: '+data);
 				var tbody = $('#tbl-campaigns > tbody');
 				$.each(data,function(i,c){
-					var cRow = '<tr class="campaign" data-id="'+c.id+'"><td>'+c.name+'</td><td>'+c.category+'</td><td>'+c.isActive+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
+					var cRow = '<tr class="campaign" data-id="'+c.id+'"><td>'+c.name+'</td><td>'+c.category+'</td><td>'+c.createdAt+'</td><td>'+c.isActive+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
 					tbody.append(cRow);
 					console.log(c);
 				});
@@ -1017,6 +1057,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			var textInputs = wizard.find('input[type="text"]');
 			var selectInputs = wizard.find('select');
 			var textAreas = wizard.find('textarea');
+			var chbxFilters = wizard.find('#campaign-filters input[type="checkbox"]');
 			$.each(textInputs, function(index,i){
 				i = $(i);
 				if(!i.is(':disabled')){
@@ -1040,6 +1081,21 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				var fieldName = i.attr('name');
 				data[fieldName] = i.val();				
 			});
+			//Filters:
+			var filtersData={};
+			$.each(chbxFilters, function(index,i){
+				i = $(i);
+				if(i.is(':checked')){
+					var attr = i.attr('data-filter-attribute');
+					var val = i.attr('data-filter-value');
+					alert('o');
+					if(!filtersData[attr]){
+						filtersData[attr]=[];	
+					}
+					filtersData[attr].push(val);
+				}						
+			});
+			data.filters=JSON.stringify(filtersData);
 			console.log(data);
 			if(id>0){
 				console.log('ajax');

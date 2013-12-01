@@ -37,7 +37,7 @@ var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
 var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
-var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, isRoostGeoLoc:Sq.BOOLEAN,sent:Sq.TEXT});
+var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, isRoostGeoLoc:Sq.BOOLEAN,filters:Sq.TEXT,sent:Sq.TEXT});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
@@ -213,6 +213,7 @@ app.all('/store-requested', function(req, res) {
 //ROOST
 //Listen to ROOST. 1) On reg- Update deviceTokens. 2)On un-reg- send cancelation SMS //TODO - should write it shorter....
 app.all('/roost-cb',function(req,res){ //TODO I think I can write this one shorter...
+    log('Call from Roost');
     var rB = req.body;
     var mPhoneTag='';
     var deviceMacTag='';
@@ -544,14 +545,22 @@ app.get('/api/usersData/:managerId',function(req,res){
 });
 //Campaigns:
 app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
-    if(req.params.campaignId){
-        campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
+    var rP=req.params;
+    if(rP.campaignId){
+        campaign.find({where:{id:rP.campaignId,managerId:rP.managerId}}).success(function(c){
             if(c){
-                res.json(c);
+                uD.findAll({where:{managerId:rP.managerId}}).success(function(uDs){
+                    if(uDs){
+                        log('Getting managersFilters');
+                        c.dataValues['managerFilters'] = getManagerFilters(uDs);
+                        console.log(c.dataValues);
+                    }
+                    res.json(c.dataValues);    
+                });                
             }else{log('Error: no campaign by this Id found..');}
         });
     }else{
-        campaign.findAll({where:{managerId:req.params.managerId}}).success(function(cs){
+        campaign.findAll({where:{managerId:rP.managerId}}).success(function(cs){
             if(cs){
                 var campaigns = [];
                 for(var c in cs){
@@ -565,6 +574,7 @@ app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
 app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
     if(req.params.campaignId){ //updating exsiting campaign
         var rB = req.body;
+        console.log(rB);
         if(req.params.campaignId && req.params.managerId){
             campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
                 if(c){
@@ -821,6 +831,32 @@ function parseCSV(){
      })
      .parse();    
 }
+//Get manager's filter:
+function getManagerFilters(uDs){
+    var managerFilters = {};
+    for(var d in uDs)
+    {
+        var attr = uDs[d].dataValues.filterName;
+        var value = uDs[d].dataValues.value;
+        //Creating attribute object if needed
+        if(!managerFilters[attr]){
+            managerFilters[attr]={};   
+            managerFilters[attr]['total']=0;
+            managerFilters[attr]['values']={};
+        }
+        //Create the value object if needed:
+        if(!managerFilters[attr]['values'][value]){
+            managerFilters[attr]['values'][value]=1;
+        }else{
+            managerFilters[attr]['values'][value]++;    
+        }
+        //In any case, add to the total attribute count:
+        managerFilters[attr]['total']++;
+    }
+
+    console.log(managerFilters);
+    return managerFilters;
+}
 //Send campaign via SMS
 function sendSmsCampaign(c,smsList){
     for(var mP in smsList){
@@ -846,6 +882,11 @@ function sendSmsCampaign(c,smsList){
         //the whole response has been recieved, so we just print it out here
         response.on('end', function () {
             console.log(str);
+            if(str.indexOf('OK')!=-1){
+                var mPhoneList=smsList;
+                var roostList=[];
+                updateSentCampaigns(manager.id,mPhoneList,roostList,c.id,c.message,'');
+            }
         });
     }
     /*TODO the following came with the http function----END---*/
@@ -878,7 +919,11 @@ function sendRoostCampaign(c, roostList , manager){
       console.log("headers: ", res.headers);
 
       res.on('data', function(d) {
+        log('Push notification Campaign was sent');
         process.stdout.write(d); //TODO WHAT IS THIS??
+        console.log('===========================================');
+        console.log(d);
+        updateSentCampaigns(manager.id,[],roostList,c.id,c.message,c.link);
       });
     });
     req.write(data);
@@ -917,6 +962,44 @@ function updateSentTriggers(managerId,arrPhoneList,arrRoostList,type,text,link){
     sentTrigger.bulkCreate(arrSentTriggers).success(function(){
         log('sentTrigger table was updated');
     });
+}
+function updateSentCampaigns(managerId,arrPhoneList,arrRoostList,campaignId,text,link){
+    var arrSentCampaigns=[];
+    for(var mPhone in arrPhoneList){
+        var obj={};
+        obj.managerId=managerId;
+        obj.mPhone=arrPhoneList[mPhone];
+        obj.roostDeviceToken='';
+        obj.campaignId=campaignId;
+        obj.text=text;
+        obj.link=link;
+        console.log()
+        arrSentCampaigns.push(obj);
+        console.log('arrSentCampaigns: ');
+        console.log(arrSentCampaigns);
+        console.log('yo yo');
+        sentCampaign.bulkCreate(arrSentCampaigns).success(function(){
+            log('arrSentCampaigns table was updated');
+        });
+    }
+    for(var token in arrRoostList){
+        console.log('ROOST CAMPAIGNS: ');    
+        var obj={};
+        obj.managerId=managerId;
+        obj.mPhone='';
+        obj.roostDeviceToken=arrRoostList;
+        obj.campaignId=campaignId;
+        obj.text=text;
+        obj.link=link;
+        arrSentCampaigns.push(obj);
+        console.log('arrSentCampaigns: ');
+        console.log(arrSentCampaigns);
+        console.log('yo yo');
+        sentCampaign.bulkCreate(arrSentCampaigns).success(function(){
+            log('arrSentCampaigns table was updated');
+        });
+    }
+    
 }
 //Validate URL
 function ValidURL(url) {
