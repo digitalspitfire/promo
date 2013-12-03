@@ -375,6 +375,8 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 							<div class="portlet-title">
 								<div class="caption">
 									<i class="icon-reorder"></i> עריכת קמפיין
+									<span>---</span>
+									<span class="status-display"></span>
 								</div>
 								<div class="tools hidden-phone">
 									<a href="javascript:;" class="collapse"></a>
@@ -428,16 +430,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 											</div>
 											<div class="tab-pane active" id="tab1">
 												<h3 class="block">ראשי</h3>
-												<div class="control-group">
-													<label class="control-label">פעיל</label>
-													<div class="controls">
-														<div class="input-line-holder">
-															<label class="checkbox line">
-																<input type="checkbox" name="isActive" id="isActive" value="1" /> 
-															</label>
-														</div>
-													</div>
-												</div>
 												<div class="control-group">
 													<label class="control-label">שם הקמפיין</label>
 													<div class="controls">
@@ -556,9 +548,19 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 												<div class="control-group">
 													<label class="control-label">מבוסס מיקום</label>
 													<div class="controls">
+														<select name="locationBase" id="locationBase" class="span3">
+															<option value="2" selected="selected">ארצי</option>
+															<option value="1">אזורי</option>
+															<option value="0">מקומי</option>
+														</select>
+													</div>
+												</div>
+												<div class="control-group">
+													<label class="control-label">פעיל</label>
+													<div class="controls">
 														<div class="input-line-holder">
 															<label class="checkbox line">
-																<input type="checkbox" name="isRoostGeoLoc" value="1" /> 
+																<input type="checkbox" name="isActive" id="isActive" value="1" /> 
 															</label>
 														</div>
 													</div>
@@ -839,6 +841,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 				var wizard = $('#edit-campaign');
 				wizard.attr('data-id',campaignId);
+				var statusDisplay=wizard.find('span.status-display');
 				var textInputs = wizard.find('input[type="text"]');
 				var chbxInputs = wizard.find('input[type="checkbox"]');
 				var selectInputs = wizard.find('select');
@@ -846,6 +849,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				var chbxFilters = wizard.find('#campaign-filters input[type="checkbox"]');
 
 				//Campaigns data:
+				var status;
+				if(data.isTerminated==1){status='הסתיים';}
+				else{status = data.isActive ? 'פעיל' : 'לא פעיל';}
+				statusDisplay.html(status);
 				$.each(textInputs, function(index,i){
 					i = $(i);
 					var fieldName = i.attr('name');
@@ -877,11 +884,13 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					i = $(i);
 					var attr = i.attr('data-filter-attribute');
 					var val = i.attr('data-filter-value');
-					if(filters[attr]){
-						if(filters[attr].indexOf(val)>-1){
-							i.prop('checked', true);		
-						}
-					}					
+					if(filters){
+						if(filters[attr]){
+							if(filters[attr].indexOf(val)>-1){
+								i.prop('checked', true);		
+							}
+						}					
+					}
 				});
 			}
 		}else{
@@ -891,7 +900,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				console.log('campaings data: '+data);
 				var tbody = $('#tbl-campaigns > tbody');
 				$.each(data,function(i,c){
-					var cRow = '<tr class="campaign" data-id="'+c.id+'"><td>'+c.name+'</td><td>'+c.category+'</td><td>'+c.createdAt+'</td><td>'+c.isActive+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
+					var status;
+					if(c.isTerminated==1){status='הסתיים';}
+					else{status = c.isActive ? 'פעיל' : 'לא פעיל';}
+					var cRow = '<tr class="campaign" data-id="'+c.id+'"><td>'+c.name+'</td><td>'+c.category+'</td><td>'+c.createdAt+'</td><td>'+status+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
 					tbody.append(cRow);
 					console.log(c);
 				});

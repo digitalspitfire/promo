@@ -37,7 +37,7 @@ var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
 var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
-var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, isRoostGeoLoc:Sq.BOOLEAN,filters:Sq.TEXT,sent:Sq.TEXT});
+var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, locationBase:Sq.BOOLEAN,filters:Sq.TEXT,sent:Sq.TEXT, isTerminated:{type:Sq.BOOLEAN, defaultValue:false}});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
@@ -384,7 +384,7 @@ app.all('/api/dataFileUpload/:managerId',function(req, res){
             }else{
                 console.log(newPath);
                 console.log('saved file. content: '+ data);
-                res.redirect('/manager?uploaded=true');    
+                res.redirect('/manager?managerId=1&uploaded=true');    
             }
         });
     });
@@ -508,7 +508,14 @@ app.get('/api/update-users-data/:managerId',function(req,res){
 function updateUserDataValue(organizedData , index, res){
     
     if(!organizedData[index]){
-        return false;
+        if(organizedData[0]){
+            campaign.update({isTerminated:true},{managerId:organizedData[0].managerId}).success(function(){
+                log('All the campaigns of managerId='+organizedData[0].managerId+' where terminated');
+                return false;
+            });
+        }else{
+            return false;    
+        }
     }
     else{
         var oDv = organizedData[index];
@@ -605,7 +612,7 @@ app.delete('/api/campaigns/:managerId/:campaignId',function(req,res){
             log('the c going to be deleted: '+c.id);
             c.destroy().success(function(){
                 log('campaign deleted! id: '+c.id);
-                unSceduleCampaign(c.id);
+                unScheduleCampaign(c.id);
                 res.json(c.id);
             });
         }
@@ -653,7 +660,8 @@ function sendWelcomebackSms(mPhone, ivrPhone){
                     if(tM){
                         var http = require('http');
                         var qs = require('querystring');
-                        var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:mPhone,charset:'utf-8',from:'036006660'});
+                        var smsText = tM.text + ' ' + tM.link;
+                        var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:smsText,list:mPhone,charset:'utf-8',from:'036006660'});
                         var options = {
                             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                             host: 'www.micropay.co.il',
@@ -742,7 +750,8 @@ function sendSms(reg, type, manager){
             if(tM){
                 var http = require('http');
                 var qs = require('querystring');
-                var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:tM.text,list:'05'+reg.mPhone,charset:'utf-8',from:'036006660'});
+                var smsText = tM.text + ' ' + tM.link;
+                var smsData = qs.stringify({post:2,uid:'2561',un:'promonim',msg:smsText,list:'05'+reg.mPhone,charset:'utf-8',from:'036006660'});
                 var options = {
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     host: 'www.micropay.co.il',
@@ -885,7 +894,7 @@ function sendSmsCampaign(c,smsList){
             if(str.indexOf('OK')!=-1){
                 var mPhoneList=smsList;
                 var roostList=[];
-                updateSentCampaigns(manager.id,mPhoneList,roostList,c.id,c.message,'');
+                updateSentCampaigns(c.managerId,mPhoneList,roostList,c.id,c.message,'');
             }
         });
     }
@@ -1068,62 +1077,82 @@ function scheduleCampaign(camp){
     }
 }
 function unScheduleCampaign(campaignId){
-    scheduledJobs[campaignId].cancel();
+    if(scheduledJobs[campaignId]){
+        scheduledJobs[campaignId].cancel();    
+    }
 }
 function cb(campaign) {
     return function() {
         fireCampaign(campaign);
     };
 }
-function fireCampaign(c){
-    console.log(c);
-    log('Campaign-'+c.id+' is firing!');
-    manager.find({where:{id:c.managerId}}).success(function(m){
-        reg.findAll({where:{managerId:m.id}}).success(function(rs){
-            var roostList = [];
-            var smsList = [];
-            for(var r in rs){                        
-                console.log('regId to send campaign to: '+rs[r].id);
-                if(rs[r].isRoostActive && rs[r].roostDeviceToken){
-                    roostList.push(rs[r].roostDeviceToken);
-                }else if(rs[r].mPhone && rs[r].mPhone!='null'){
-                    smsList.push(rs[r].mPhone);
-                }
-            }
-            console.log('smsList: '+smsList);
-            console.log('roostList: '+roostList);
-            sendSmsCampaign(c, smsList);
-            sendRoostCampaign(c, roostList, m);
-            var sentVals = JSON.parse(c.sent);
-            
-            //temp
-            if(sentVals){
-                log(sentVals.sms);
-                log(sentVals.roost);
-                log(smsList.length);
-                log(roostList.length);    
-            }
-            
-            if(!(sentVals)){
-                log('no history');
-                sentVals={sms:smsList.length,roost:roostList.length};
-            }else{
-                log('adding to  history');
-                sentVals.sms = parseInt(sentVals.sms) + parseInt(smsList.length);
-                sentVals.roost = parseInt(sentVals.roost) + parseInt(roostList.length);
-            }
-            //NOTE: I must find it again since 'c' is not the real object (and there is a reason for that)
-            campaign.find({where:{id:c.id}}).success(function(sentCampaign){
-                console.log(sentCampaign.dataValues);
-                if(sentCampaign.dataValues){
-                    sentCampaign.dataValues.sent=JSON.stringify(sentVals);    
-                    sentCampaign.save().success(function(sC){
-                        log('This campaign totaly sent by now: '+sC.dataValues.sent);
+function fireCampaign(cVals){
+    console.log(cVals);
+    log('Campaign-'+cVals.id+' is firing!');
+    //NOTE: I must find it again since 'c' is not the real object (and there is a reason for that)
+    campaign.find({where:{id:cVals.id}}).success(function(c){
+        if(c){
+            //if(c.isActive && !c.isTerminated){
+            if(c.isActive || !c.isTerminated){
+                var roostList = [];
+                var smsList = [];
+                var users = {};
+                var filters = JSON.parse(c.filters);
+                manager.find({where:{id:c.managerId}}).success(function(m){
+                    uD.findAll({where:{managerId:m.id}}).success(function(uDs){
+                        for(var uVal in uDs){
+                            var vR = uDs[uVal]; //vR = value record
+                            if(users[uDs[uVal].mPhone]){//Already exist
+                               //users lala
+                            }
+                        }
+                        console.log(c.filters);
                     });
-                }
-            });
-        });
-    });  
+                    /*reg.findAll({where:{managerId:m.id}}).success(function(rs){
+                        for(var r in rs){                        
+                            console.log('regId to send campaign to: '+rs[r].id);
+                            if(rs[r].isRoostActive && rs[r].roostDeviceToken){
+                                roostList.push(rs[r].roostDeviceToken);
+                            }else if(rs[r].mPhone && rs[r].mPhone!='null'){
+                                smsList.push(rs[r].mPhone);
+                            }
+                        }
+                        console.log('smsList: '+smsList);
+                        console.log('roostList: '+roostList);
+                        sendSmsCampaign(c, smsList);
+                        sendRoostCampaign(c, roostList, m);
+                        var sentVals = JSON.parse(c.sent);
+                        
+                        //temp
+                        if(sentVals){
+                            log(sentVals.sms);
+                            log(sentVals.roost);
+                            log(smsList.length);
+                            log(roostList.length);    
+                        }
+                        
+                        if(!(sentVals)){
+                            log('no history');
+                            sentVals={sms:smsList.length,roost:roostList.length};
+                        }else{
+                            log('adding to  history');
+                            sentVals.sms = parseInt(sentVals.sms) + parseInt(smsList.length);
+                            sentVals.roost = parseInt(sentVals.roost) + parseInt(roostList.length);
+                        }
+                        //updating history:
+                        c.sent=JSON.stringify(sentVals);    
+                        //Terminated a single time campiang:
+                        if(c.recurring=='0'){
+                            c.isTerminated=true;    
+                        }
+                        c.save().success(function(sC){//sC= saved campaign
+                            log('This campaign totaly sent by now: '+sC.dataValues.sent);
+                        });
+                    });*/
+                });  
+            }else{log('Campaign-'+c.id+' was not sent since isActive=false');}
+        }
+    });
 }
 
 /*EXAMPLE FOT CONTACTING ROOST API*/  /*WORKING*/
