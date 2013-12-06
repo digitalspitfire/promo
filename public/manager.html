@@ -428,6 +428,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 												<button class="close" data-dismiss="alert"></button>
 												Your form validation is successful!
 											</div>
+											
 											<div class="tab-pane active" id="tab1">
 												<h3 class="block">ראשי</h3>
 												<div class="control-group">
@@ -463,7 +464,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 											</div>
 											<div class="tab-pane" id="tab2">
 												<h3 class="block">מיקוד הנמענים</h3>
-												<div id="campaign-filters" filters></div>
+												<div id="campaign-filters"></div>
 											</div>
 											<div class="tab-pane" id="tab3">
 												<h3 class="block">עריכת תוכן ותזמון</h3>
@@ -549,10 +550,26 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 													<label class="control-label">מבוסס מיקום</label>
 													<div class="controls">
 														<select name="locationBase" id="locationBase" class="span3">
-															<option value="2" selected="selected">ארצי</option>
+															<option value="2">ארצי</option>
 															<option value="1">אזורי</option>
 															<option value="0">מקומי</option>
 														</select>
+													</div>
+												</div>
+												<div class="control-group">
+													<label class="control-label">זמן שהייה מקסימלי באתר</label>
+													<div class="controls">
+														<input type="text" class="span4 m-wrap" name="localMinTimeGap" id="localMinTimeGap"/>
+													</div>
+												</div>
+												<div class="control-group">
+													<label class="control-label">קמפיין גיוס לקוחות חדשים</label>
+													<div class="controls">
+														<div class="input-line-holder">
+															<label class="checkbox line">
+																<input type="checkbox" name="isRecruiting" id="isRecruiting" value="1" /> 
+															</label>
+														</div>
 													</div>
 												</div>
 												<div class="control-group">
@@ -824,9 +841,8 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	function loadCampaigns(managerId,campaignId){
 		var id = campaignId ? campaignId : '';
 		if(id){
-			console.log('got to first');
 			var parseCampaigns = function(data){
-				console.log('campaign data: ');
+				console.log('campaign to edit: ');
 				console.log(data);
 
 				//the manger filters must come BEFORE the campaigns data:
@@ -878,8 +894,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				$('#sms-history .number').html(sent ? sent.sms : '0');
 				$('#roost-history .number').html(sent ? sent.roost : '0');
 				var filters = JSON.parse(data.filters);
-				console.log(filters);
-				console.log(chbxFilters.length);
 				$.each(chbxFilters, function(index,i){
 					i = $(i);
 					var attr = i.attr('data-filter-attribute');
@@ -894,10 +908,8 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				});
 			}
 		}else{
-			console.log('got to secind');
 			$('#tbl-campaigns > tbody').html('');
 			var parseCampaigns =  function(data){
-				console.log('campaings data: '+data);
 				var tbody = $('#tbl-campaigns > tbody');
 				$.each(data,function(i,c){
 					var status;
@@ -905,7 +917,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					else{status = c.isActive ? 'פעיל' : 'לא פעיל';}
 					var cRow = '<tr class="campaign" data-id="'+c.id+'"><td>'+c.name+'</td><td>'+c.category+'</td><td>'+c.createdAt+'</td><td>'+status+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
 					tbody.append(cRow);
+					console.log('campaign row:');
 					console.log(c);
+
 				});
 				$('#tbl-campaigns').dataTable( {
     				"bFilter": true,
@@ -1051,7 +1065,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					data: {},
 					success: function(newId) {
 						alert(newId);
-						console.log(newId);
 						loadCampaigns(1,newId);	//TODO this could be made with just one call...					
 						$('#campaigns-list').hide();
 						$('#edit-campaign').show();
@@ -1065,7 +1078,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			var data = {};
 			var wizard = $($(this).parents('#edit-campaign')[0]);
 			var id= wizard.attr('data-id');
-			var chbxInputs = wizard.find('input[type="checkbox"]');
+			var chbxInputs = wizard.find('#tab3 input[type="checkbox"]');//all checkboxes are in tab3
 			var textInputs = wizard.find('input[type="text"]');
 			var selectInputs = wizard.find('select');
 			var textAreas = wizard.find('textarea');
@@ -1100,14 +1113,16 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				if(i.is(':checked')){
 					var attr = i.attr('data-filter-attribute');
 					var val = i.attr('data-filter-value');
-					alert('o');
-					if(!filtersData[attr]){
-						filtersData[attr]=[];	
-					}
-					filtersData[attr].push(val);
+					if(attr && val){
+						if(!filtersData[attr]){
+							filtersData[attr]=[];	
+						}
+						filtersData[attr].push(val);
+					}	
 				}						
 			});
 			data.filters=JSON.stringify(filtersData);
+			console.log('data before send to update:');
 			console.log(data);
 			if(id>0){
 				console.log('ajax');
@@ -1124,7 +1139,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		});
 		$('#tbl-campaigns').on('click','.edit',function(){
 			var campaignId = $($(this).parents('tr')[0]).attr('data-id');
-			console.log(campaignId);
 			loadCampaigns(1,campaignId);
 			$('#campaigns-list').hide();
 			$('#edit-campaign').show();
@@ -1152,8 +1166,6 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					
 					$.each(data,function(i,t){						
 						var cntr=$('div[data-trigger-type='+t.type+']');
-						console.log('triggers:');		
-						console.log(t);
 						cntr.find('textarea[name=text]').val(t.text);
 						cntr.find('input[name=link]').val(t.link);
 						cntr.find('select[name=sound]').val(t.sound);
