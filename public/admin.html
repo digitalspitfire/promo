@@ -64,8 +64,14 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		.input-line-holder {display: inline-block; padding: 0 20px;}
 		#data-upload .portlet-body .control-group{display:none;}
 		#data-upload .portlet-body .control-group:first-child{display:block;}
-		
-	/*scheaduled messages*/
+
+
+
+		/*Campaigns & Managers lists*/
+		.table-toolbar{text-align: left; margin-bottom: -32px; margin-top: 15px;}
+		#tbl-managers_wrapper .row-fluid .span6:first-child{display: none;}
+		#tbl-managers_wrapper .row-fluid .span6{margin-right: 0;}
+		#tbl-managers,#tbl-campaigns{margin-top: 10px;}
 	
 	</style>
 
@@ -113,7 +119,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		<div class="page-sidebar nav-collapse collapse">
 			<!-- BEGIN SIDEBAR MENU -->        
 			<ul class="page-sidebar-menu">
-				<li data-section="campaigns">
+				<li data-section="managers">
 					<a href="#">
 						<i class="icon-cogs"></i> 
 						<span class="title">ניהול משתמשים</span>
@@ -148,7 +154,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 						<!-- BEGIN EXAMPLE TABLE PORTLET-->
 						<div class="portlet box light-grey" id="managers-list">
 							<div class="portlet-title">
-								<div class="caption"><i class="icon-globe"></i>כל הקמפיינים</div>
+								<div class="caption"><i class="icon-globe"></i>כל המשתמשים</div>
 							</div>
 							<div class="portlet-body">
 								<div class="table-toolbar">
@@ -174,238 +180,113 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 								</table>
 							</div>
 						</div>
-						<div class="portlet box blue" id="edit-manager" data-id="">
+						<div class="portlet box blue tabbable" id="edit-item">
 							<div class="portlet-title">
-								<div class="caption">
-									<i class="icon-reorder"></i> עריכת מנהל
-									<span>---</span>
-									<span class="status-display"></span>
-								</div>
-								<div class="tools hidden-phone">
-									<a href="javascript:;" class="collapse"></a>
-									<a href="#portlet-config" data-toggle="modal" class="config"></a>
-									<a href="javascript:;" class="reload"></a>
-									<a href="javascript:;" class="remove"></a>
-								</div>
+								<div class="caption"><i class="icon-reorder"></i>עריכת מנהל</div>
 							</div>
 							<div class="portlet-body form">
-								<div class="form-horizontal">
-									<div class="form-wizard">
-										<div class="navbar steps">
-											<div class="navbar-inner">
-												<ul class="row-fluid">
-													<li class="span3 active">
-														<a href="#tab1" data-toggle="tab" class="step active">
-															<span class="number">1</span>
-															<span class="desc"><i class="icon-ok"></i>פרטי איש הקשר</span>
-														</a>
-													</li>
-													<li class="span3">
-														<a href="#tab2" data-toggle="tab" class="step">
-															<span class="number">2</span>
-															<span class="desc"><i class="icon-ok"></i>מיקוד הנמענים</span>   
-														</a>
-													</li>
-													<li class="span3">
-														<a href="#tab3" data-toggle="tab" class="step">
-															<span class="number">3</span>
-															<span class="desc"><i class="icon-ok"></i>עריכת תוכן, תזמון, הפעלה</span>   
-														</a>
-													</li>
-													
-													<li class="span3">
-														<a href="#tab4" data-toggle="tab" class="step">
-															<span class="number">4</span>
-															<span class="desc"><i class="icon-ok"></i> תוצאות</span>   
-														</a>
-													</li>
-												</ul>
-											</div>
-										</div>
+								<div class="tabbable portlet-tabs">
+									<ul class="nav nav-tabs">
+										<li><a href="#portlet_tab4" data-toggle="tab">Roost</a></li>
+										<li><a href="#portlet_tab3" data-toggle="tab">Free WiFi</a></li>
+										<li><a href="#portlet_tab2" data-toggle="tab">IVR / SMS</a></li>
+										<li class="active"><a href="#portlet_tab1" data-toggle="tab">פרטי איש הקשר</a></li>
+									</ul>
+									<form class="form-horizontal">
 										<div class="tab-content">
-											<div class="alert alert-error hide">
-												<button class="close" data-dismiss="alert"></button>
-												You have some form errors. Please check below.
-											</div>
-											<div class="alert alert-success hide">
-												<button class="close" data-dismiss="alert"></button>
-												Your form validation is successful!
-											</div>
-											<div class="tab-pane active" id="tab1">
-												<h3 class="block">ראשי</h3>
+											<div class="tab-pane active" id="portlet_tab1">
 												<div class="control-group">
-													<label class="control-label">שם הקמפיין</label>
+													<label class="control-label">שם העסק</label>
 													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="name" id="name"/>
+														<input type="text" name="name" placeholder="שם העסק" class="m-wrap medium" />
 													</div>
 												</div>
 												<div class="control-group">
-													<label class="control-label">תאריך יצירה</label>
+													<label class="control-label">שם איש הקשר</label>
 													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="createdAt" disabled/>
+														<input type="text" name="vendorName" placeholder="שם איש הקשר" class="m-wrap medium" />
 													</div>
 												</div>
 												<div class="control-group">
-													<label class="control-label">קטגוריה</label>
+													<label class="control-label">אימייל</label>
 													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="category" id="category"/>
+														<input type="text" name="email" placeholder="אימייל" class="m-wrap medium" />
 													</div>
 												</div>
 												<div class="control-group">
-													<label class="control-label">יעדים</label>
+													<label class="control-label">טלפון</label>
 													<div class="controls">
-														<textarea class="span6 m-wrap" rows="3" name="goals" id="goals"></textarea>
-													</div>												
+														<input type="text" name="phoneNumber" placeholder="טלפון" class="m-wrap medium" />
+													</div>
 												</div>
 												<div class="control-group">
-													<label class="control-label">תקציב</label>
+													<label class="control-label">שם משתמש במערכת</label>
 													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="budget" id="budget"/>
+														<input type="text" name="user" placeholder="שם משתמש במערכת" class="m-wrap medium" />
+													</div>
+												</div>
+												<div class="control-group">
+													<label class="control-label">סיסמה</label>
+													<div class="controls">
+														<input type="text" name="pass" placeholder="סיסמה" class="m-wrap medium" />
 													</div>
 												</div>
 											</div>
-											<div class="tab-pane" id="tab2">
-												<h3 class="block">מיקוד הנמענים</h3>
-												<div id="campaign-filters" filters></div>
+											<div class="tab-pane" id="portlet_tab2">
+												<div class="control-group">
+													<label class="control-label">הטלפון במערכת IVR</label>
+													<div class="controls">
+														<input type="text" name="ivrPhone" placeholder="טלפון IVR" class="m-wrap medium" />
+													</div>
+												</div>
+												<div class="control-group">
+													<label class="control-label">IVR ID</label>
+													<div class="controls">
+														<input type="text" name="ivrId" placeholder="IVR ID" class="m-wrap medium" />
+													</div>
+												</div>
 											</div>
-											<div class="tab-pane" id="tab3">
-												<h3 class="block">עריכת תוכן ותזמון</h3>
+											<div class="tab-pane" id="portlet_tab3">
 												<div class="control-group">
-													<label class="control-label">הודעה</label>
 													<div class="controls">
-														<textarea class="span6 m-wrap" rows="3" name="message"></textarea>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">לינק</label>
-													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="link" id="link"/>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">צליל</label>
-													<div class="controls">
-														<select name="sound" id="sound" class="span3">
-															<option value="">Select</option>
-															<option value="alarm">alarm</option>
-															<option value="alarm">bell</option>
-															<option value="ring">ring</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">תזמון</label>
-													<div class="controls">
-														<select name="recurring" id="recurring" class="span3">
-															<option value="0">חד פעמי</option>
-															<option value="1">יומי</option>
-															<option value="2">שבועי</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">שעה</label>
-													<div class="controls">
-														<select name="dayOfWeek" id="dayOfWeek" class="span3">
-															<option value="0">ראשון</option>
-															<option value="1">שני</option>
-															<option value="2">שלישי</option>
-															<option value="3">רביעי</option>
-															<option value="4">חמישי</option>
-															<option value="5">שישי</option>
-															<option value="6">שבת</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">שעה</label>
-													<div class="controls">
-														<select name="hour" id="hour" class="span3">
-															<option value="0">0:00</option>
-															<option value="1">1:00</option>
-															<option value="2">2:00</option>
-															<option value="3">3:00</option>
-															<option value="4">4:00</option>
-															<option value="5">5:00</option>
-															<option value="6">6:00</option>
-															<option value="7">7:00</option>
-															<option value="8">8:00</option>
-															<option value="9">9:00</option>
-															<option value="10">10:00</option>
-															<option value="11">11:00</option>
-															<option value="12">12:00</option>
-															<option value="13">13:00</option>
-															<option value="14">14:00</option>
-															<option value="15">15:00</option>
-															<option value="16">16:00</option>
-															<option value="17">17:00</option>
-															<option value="18">18:00</option>
-															<option value="19">19:00</option>
-															<option value="20">20:00</option>
-															<option value="21">21:00</option>
-															<option value="22">22:00</option>
-															<option value="23">23:00</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">מבוסס מיקום</label>
-													<div class="controls">
-														<select name="locationBase" id="locationBase" class="span3">
-															<option value="2" selected="selected">ארצי</option>
-															<option value="1">אזורי</option>
-															<option value="0">מקומי</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">פעיל</label>
-													<div class="controls">
-														<div class="input-line-holder">
-															<label class="checkbox line">
-																<input type="checkbox" name="isActive" id="isActive" value="1" /> 
-															</label>
+														<div class="btn-group" >
+															<button type="button" id="btn-add-node" class="btn green">
+																<i class="icon-plus"></i> הוסף NODE 
+															</button>
 														</div>
 													</div>
 												</div>
 											</div>
-											<div class="tab-pane" id="tab4">
-												<h3 class="block">סטטיסטיקה</h3>
-												<div class="tiles">
-													<div class="tile bg-blue" id="roost-history">
-														<div class="tile-body">
-															<i class="icon-bell"></i>
-														</div>
-														<div class="tile-object">
-															<div class="name">
-																PUSH
-															</div>
-															<div class="number"></div>
-														</div>
+											<div class="tab-pane" id="portlet_tab4">
+												<div class="control-group">
+													<label class="control-label">Roost geo-location</label>
+													<div class="controls">
+														<input type="text" name="roostGeoLoc" placeholder="Roost geo-location" class="m-wrap large" />
 													</div>
 												</div>
-												<div class="tile bg-green" id="sms-history">
-													<div class="tile-body">
-														<i class="icon-comments-alt"></i>
+												<div class="control-group">
+													<label class="control-label">Roost config key</label>
+													<div class="controls">
+														<input type="text" name="roostConfKey" placeholder="Roost config key" class="m-wrap large" />
 													</div>
-													<div class="tile-object">
-														<div class="name">
-															SMS
-														</div>
-														<div class="number"></div>
+												</div>
+												<div class="control-group">
+													<label class="control-label">Roost secret key</label>
+													<div class="controls">
+														<input type="text" name="roostSecretKey" placeholder="Roost config key" class="m-wrap large" />
 													</div>
 												</div>
 											</div>
 										</div>
-										<div class="form-actions clearfix">
-											<a href="javascript:;" class="btn button-previous" id="btn-all-campaings">
-											<i class="m-icon-swapleft"></i> חזרה לכל הקמפיינים
-											</a>
-											<a href="javascript:;" class="btn green button-submit" id="btn-save-campaign">
-											שמור שינויים <i class="m-icon-swapright m-icon-white"></i>
-											</a>
-										</div>
-									</div>
+									</form>
+								</div>
+								<div class="form-actions clearfix">
+									<a href="javascript:;" class="btn button-previous" id="btn-all-items">
+									<i class="m-icon-swapleft"></i> חזרה לכל המשתמשים
+									</a>
+									<a href="javascript:;" class="btn green button-submit" id="btn-save-item">
+									שמור שינויים <i class="m-icon-swapright m-icon-white"></i>
+									</a>
 								</div>
 							</div>
 						</div>
@@ -495,33 +376,46 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		});
 		
 		$(document).ready(function(){
-			$('.page-sidebar-menu li:nth-child(3)').trigger('click');
+			$('.page-sidebar-menu li:nth-child(1)').trigger('click');
 		});
 	</script>
 
 	<!--CAMPAIGNS -->
 	<script>	
+	function addNewNode(nodeMac){
+		var str ='<div class="control-group">';
+		str +='<label class="control-label">Node MAC</label>';
+		str +='<div class="controls">';
+		str +='<input type="text" placeholder="Node MAC" class="m-wrap medium node-mac" value="'+nodeMac+'"/>';
+		str +='</div>';
+		str +='</div>';
+		$('#portlet_tab3').append(str);
+	}
 	function loadManagers(managerId){
 		var id = managerId ? managerId : '';
 		if(id){
-			console.log('got to first');
+			console.log('Loadign an item');
 			var parseManagers = function(data){
-				console.log('manager data: ');
+				console.log('manager data from server: ');
 				console.log(data);
-
-				var wizard = $('#edit-manager');
+				var wizard = $('#edit-item');
 				wizard.attr('data-id',managerId);
-				var textInputs = wizard.find('input[type="text"]');
+				var textInputs = wizard.find('input[type="text"]:not(.node-mac)');
 				//var chbxInputs = man.find('input[type="checkbox"]');
 				//var selectInputs = man.find('select');
 				//var textAreas = man.find('textarea');
 				//var chbxFilters = man.find('#campaign-filters input[type="checkbox"]');
+
 
 				//Manager data:
 				$.each(textInputs, function(index,i){
 					i = $(i);
 					var fieldName = i.attr('name');
 					i.val(data[fieldName]);
+				});
+				//Nodes:
+				$.each(data.nodes, function(i,n){
+					addNewNode(n);
 				});
 				/*$.each(chbxInputs, function(index,i){
 					i = $(i);
@@ -559,15 +453,16 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				});*/
 			}
 		}else{
-			console.log('got to secind');
+			console.log('Loading managers list:');
 			$('#tbl-managers > tbody').html('');
 			var parseManagers =  function(data){
-				console.log('managers data: '+data);
+				console.log('managers data: ');
+				console.log(data);
 				var tbody = $('#tbl-managers > tbody');
 				$.each(data,function(i,m){
 					var status;
 					var mRow = '<tr class="manager" data-id="'+m.id+'"><td>'+m.name+'</td><td>'+m.vendorName+'</td><td>'+m.phoneNumber+'</td><td>'+m.email+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
-					tbody.append(cRow);
+					tbody.append(mRow);
 					console.log(m);
 				});
 				$('#tbl-managers').dataTable( {
@@ -596,14 +491,14 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			updateManagers();
 		});		
 
-		/*===============CAMPAIGN==========*/
-		$('#btn-all-managerss').on('click',function(){ //TODO add dynamic managerId
+		/*===============ITEMS (Managers or Campaigns) ==========*/
+		$('#btn-all-items').on('click',function(){ //TODO add dynamic managerId
 			loadCampaigns(1);
 			$('#managers-list').show();
 			$('#edit-manager').hide();
 		}); 
 		//Add new manager:
-		$('#add-new-manager:not(.creating-campaign)').on('click',function(){
+		$('#add-new-manager:not(.creating-manager)').on('click',function(){
 			$(this).addClass('creating-manger');
 			$.ajax({
 					type: "post",
@@ -619,14 +514,16 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				});
 		});
 		//load single campagin
-		loadMangers();
+		loadManagers();
 		//save campaign:
-		$('#btn-save-manger').on('click',function(){
+		$('#btn-save-item').on('click',function(){
 			var data = {};
-			var wizard = $($(this).parents('#edit-manager')[0]);
+			var wizard = $($(this).parents('#edit-item')[0]);
 			var id= wizard.attr('data-id');
+			var textInputs = wizard.find('input[type="text"]:not(.node-mac)');
+			var nodeMacs = wizard.find('input.node-mac[type="text"]');
 			var chbxInputs = wizard.find('input[type="checkbox"]');
-			var textInputs = wizard.find('input[type="text"]');
+
 			var selectInputs = wizard.find('select');
 			var textAreas = wizard.find('textarea');
 			var chbxFilters = wizard.find('#campaign-filters input[type="checkbox"]');
@@ -635,6 +532,19 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				if(!i.is(':disabled')){
 					var fieldName = i.attr('name');
 					data[fieldName]=i.val();
+				}
+			});
+			//Nodes:
+			var nodes=[];//TODO
+			console.log(nodeMacs.length);
+			$.each(nodeMacs, function(index,i){
+				i = $(i);
+				if(!i.is(':disabled')){
+					var val = i.val();
+//					var obj = {managerId:id,nodeMac:val};
+					if( nodes.indexOf(val)<=-1 ){
+						nodes.push(val);
+					}
 				}
 			});
 			/*$.each(chbxInputs, function(index,i){
@@ -653,10 +563,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				var fieldName = i.attr('name');
 				data[fieldName] = i.val();				
 			});*/
-			//Nodes:
-			var nodes={};//TODO
-
-			data.nodes=JSON.stringify(nodes);
+			
+			//data.nodes=JSON.stringify(nodes);
+			data.nodes=nodes;
+			console.log('manager data from GUI: ');
 			console.log(data);
 			if(id>0){
 				console.log('ajax');
@@ -673,7 +583,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		});
 		$('#tbl-managers').on('click','.edit',function(){
 			var managerId = $($(this).parents('tr')[0]).attr('data-id');
-			console.log(campaignId);
+			console.log(managerId);
 			loadManagers(managerId);
 			$('#managers-list').hide();
 			$('#edit-manager').show();
@@ -688,6 +598,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			});
 			$($(this).parents('tr')[0]).remove();
 		});
+
+		$('#btn-add-node').on('click',function(){
+			addNewNode('');
+		}); 
 		//TRIGGERS SECTION:
 	});
 	</script>

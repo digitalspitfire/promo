@@ -19,6 +19,10 @@ app.get('/dashboard',function(req,res){
     res.sendfile('public/dashboard.html');
 });
 
+app.get('/admin',function(req,res){
+    res.sendfile('public/admin.html');
+});
+
 app.get('/manager',function(req,res){
     res.sendfile('public/manager.html');
 });
@@ -559,6 +563,90 @@ app.get('/api/usersData/:managerId',function(req,res){
         }else{console.log('no manager found');}
     });
 });
+//Managers:
+app.get('/api/managers/:managerId?',function(req,res){
+    var rP=req.params;
+    if(rP.managerId){
+        manager.findAll({where:{id:rP.managerId},include:[node]}).success(function(ms){
+            if(ms){
+                var manager=ms[0].dataValues;
+                var nodes = [];
+                for(var m in ms){
+                    var nodeMac = ms[m].nodes[0].dataValues.nodeMac;
+                    nodes.push(nodeMac);
+                }
+                manager.nodes = nodes;
+                res.json(manager);    
+            }else{log('Error: no manager by this Id found...');}
+        });
+    }else{
+        manager.findAll().success(function(ms){
+            if(ms){
+                var managers = [];
+                for(var m in ms){
+                    managers.push(ms[m].dataValues);
+                }
+                res.json(managers);
+            }else{log('Error: no managers found...');}
+        });
+    }
+});
+app.post('/api/managers/:managerId?',function(req,res){
+    if(req.params.managerId){ //updating exsiting manager
+        var rP = req.params;
+        var rB = req.body;
+        console.log(rB);
+        manager.find({where:{id:rP.managerId}}).success(function(m){
+            if(m){
+                m.updateAttributes(rB).success(function(c){
+                    log('Manager-'+m.dataValues.id+' was updated');
+                    //Get the nodeMacs list:
+                    var nodes = [];
+                    for(var n in rB.nodes){
+                        var nodeMac = rB.nodes[n].toString().trim().toLowerCase();
+                        if(nodeMac.length==17){
+                            nodes.push({managerId:rP.managerId,nodeMac:nodeMac});
+                        }
+                    }
+                    node.findAll({where:{managerId:rP.managerId}}).success(function(nTds){ //TODO delete all old ones !!!
+                        //List older nodes of this manager:
+                        var nodesIdToDel = [];
+                        for(var nTd in nTds){
+                            nodesIdToDel.push(nTds[nTd].dataValues.id);
+                        }
+                        //Insert new nodes
+                        node.bulkCreate(nodes).success(function(x){
+                            //Delete old nodes
+                            node.destroy({id:nodesIdToDel}).success(function(){
+                                log('Manager-'+m.dataValues.id+' NODES were updated');
+                                res.send('Manager-'+m.dataValues.id+' was updated');    
+                            });
+                        });
+                    });
+                });
+            }else{log('Error: No manager found by this Id...');}
+        });
+    }else{ //creating new campaign
+        manager.create().success(function(nM){ //nC=newCampaign
+            if(nM){
+                log('New manager added! id: '+nM.id);
+                res.json(nM.id);
+            }
+        });
+    }    
+});
+app.delete('/api/managers/:managerId',function(req,res){
+    campaign.find({where:{id:req.params.managerId}}).success(function(m){
+        if(m){
+            log('This manager id going to be deleted: '+m.id);
+            m.destroy().success(function(){
+                log('manager deleted! id: '+m.id);
+                res.json(m.id);
+            });
+        }
+    }); 
+});
+
 //Campaigns:
 app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
     var rP=req.params;
