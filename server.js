@@ -41,7 +41,7 @@ var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
 var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
-var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, locationBase:Sq.TEXT, localMinTimeGap:{type:Sq.INTEGER, defaultValue:0},isRecruiting:Sq.BOOLEAN, filters:Sq.TEXT,sent:Sq.TEXT, isTerminated:{type:Sq.BOOLEAN, defaultValue:false}});
+var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, locationBase:Sq.TEXT, localMinTimeGap:{type:Sq.INTEGER, defaultValue:0},isRecruiting:{type:Sq.BOOLEAN, defaultValue:false}, filters:Sq.TEXT,sent:Sq.TEXT, isTerminated:{type:Sq.BOOLEAN, defaultValue:false}});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
@@ -572,8 +572,10 @@ app.get('/api/managers/:managerId?',function(req,res){
                 var manager=ms[0].dataValues;
                 var nodes = [];
                 for(var m in ms){
-                    var nodeMac = ms[m].nodes[0].dataValues.nodeMac;
-                    nodes.push(nodeMac);
+                    if(ms[m].nodes[0]){
+                        var nodeMac = ms[m].nodes[0].dataValues.nodeMac;
+                        nodes.push(nodeMac);
+                    }
                 }
                 manager.nodes = nodes;
                 res.json(manager);    
@@ -600,28 +602,34 @@ app.post('/api/managers/:managerId?',function(req,res){
             if(m){
                 m.updateAttributes(rB).success(function(c){
                     log('Manager-'+m.dataValues.id+' was updated');
-                    //Get the nodeMacs list:
+                    //Get the new nodes:
                     var nodes = [];
-                    for(var n in rB.nodes){
-                        var nodeMac = rB.nodes[n].toString().trim().toLowerCase();
-                        if(nodeMac.length==17){
-                            nodes.push({managerId:rP.managerId,nodeMac:nodeMac});
-                        }
+                    if(rB.nodes){
+                        for(var n in rB.nodes){
+                            var nodeMac = rB.nodes[n].toString().trim().toLowerCase();
+                            if(nodeMac.length==17){
+                                nodes.push({managerId:rP.managerId,nodeMac:nodeMac});
+                            }
+                        }    
                     }
                     node.findAll({where:{managerId:rP.managerId}}).success(function(nTds){ //TODO delete all old ones !!!
-                        //List older nodes of this manager:
+                        //List old nodes:
                         var nodesIdToDel = [];
-                        for(var nTd in nTds){
-                            nodesIdToDel.push(nTds[nTd].dataValues.id);
+                        if(nTds){
+                            for(var nTd in nTds){
+                                nodesIdToDel.push(nTds[nTd].dataValues.id);
+                            }
                         }
                         //Insert new nodes
-                        node.bulkCreate(nodes).success(function(x){
+                        if(nodes[0]){
+                            node.bulkCreate(nodes).success(function(x){
                             //Delete old nodes
                             node.destroy({id:nodesIdToDel}).success(function(){
                                 log('Manager-'+m.dataValues.id+' NODES were updated');
                                 res.send('Manager-'+m.dataValues.id+' was updated');    
                             });
                         });
+                        }
                     });
                 });
             }else{log('Error: No manager found by this Id...');}
@@ -684,9 +692,12 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
                     c.updateAttributes(rB).success(function(c){
                         log('Campaign-'+c.dataValues.id+' was updated');
                         res.send('Campaign-'+c.dataValues.id+'was updated');    
-                        if(c.dataValues.isActive){
+                        
+                        if(c.dataValues.isActive!=0){
+                            console.log('SSSSSSSSSSSSS');
                             scheduleCampaign(c.dataValues);
                         }else if(scheduledJobs[c.dataValues.id]){
+                                console.log('NNNNNNNNNNN');
                                 scheduledJobs[c.dataValues.id].cancel();
                         }
                     });
@@ -978,18 +989,24 @@ function scheduleCampaign(camp){
         scheduledJobs[id]= schedule.scheduleJob(s,cb(camp));
         log('Campaign-'+id+' was scheduled (single-time campaign)');
     }else if(camp.recurring==1){//daily
-        var rule=new schedule.recurringRule();
+        var rule=new schedule.RecurrenceRule();
         rule.hour=camp.hour;
         rule.minute=0;
         scheduledJobs[id]= schedule.scheduleJob(rule,cb(camp));
         log('Campaign-'+id+' was scheduled (daily campaign)');
     }else if(camp.recurring==2){//weekly
-        var rule=new schedule.recurringRule();
-        rule.dayOfWeek=camp.day;
-        rule.hour=camp.hour;
-        rule.minute=0;
-        scheduledJobs[id]= schedule.scheduleJob(rule,cb(camp));
-        log('Campaign-'+id+' was scheduled (weekly campaign)');
+        if(camp.dayOfWeek && camp.hour){
+            var day= parseInt(camp.dayOfWeek);
+            var hour= parseInt(camp.hour);
+            if(day<7 && hour<24){
+                var rule = {hour:hour,minute:0, dayOfWeek:day};
+                console.log(rule)
+                scheduledJobs[id]= schedule.scheduleJob({hour:hour,minute:0, dayOfWeek:day},cb(camp));
+            }
+            log('Campaign-'+id+' was scheduled (weekly campaign)');    
+        }else{
+            log('Campaign-'+id+' was not scheduled - due to missing details');    
+        }
     }
 }
 function unScheduleCampaign(campaignId){

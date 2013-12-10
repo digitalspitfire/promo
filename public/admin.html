@@ -32,48 +32,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	<link href="assets/plugins/bootstrap-switch/static/stylesheets/bootstrap-switch-metro-rtl.css" rel="stylesheet" type="text/css"/>
 	<link rel="stylesheet" type="text/css" href="assets/plugins/chosen-bootstrap/chosen/chosen-rtl.css" />
 	<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-toggle-buttons/static/stylesheets/bootstrap-toggle-buttons-rtl.css" />
+	<link rel="stylesheet" type="text/css" href="assets/plugins/data-tables/DT_bootstrap_rtl.css" />
 	<link rel="shortcut icon" href="favicon.ico" />
-
-
-	<!-- Ido Styling -->
-	<style type="text/css">
-		.dataTable .row-details{width: auto; padding-left: 18px;}
-		#dashboard > .row-fluid{display:none;}
-		#dashboard #managers.row-fluid{min-width: 51.46em;}
-		table.nodes thead{display:none;}
-		tr.now-deleting{display:none;}
-		tr[data-id="-1"] > td {background-color:yellow !important;}
-		tr[data-id="-1"] > td > .row-details {display: none;}
-		
-
-		.tile .tile-object{bottom:8px;}
-		.tile .tile-object .number{font-size:34px;}
-		.tile .tile-object .name{font-size:15px;}
-		#campaigns .tile,#campaigns .tile:hover{border:none !important; cursor: auto;}
-		#tbl-campaigns_wrapper .row-fluid:first-child .span6:first-child{display: none;}
-		#tbl-campaigns_wrapper .row-fluid:first-child .span6:nth-child(2){margin-right: 0 !important;}
-		table#tbl-campaigns .delete, table#tbl-campaigns .edit{text-decoration: underline; color: blue;}
-		table#tbl-campaigns tr.cancelled-campaign a.delete{display:none;}
-		table#tbl-campaigns tr.cancelled-campaign td:first-child input:after{content:"dead";}
-		#edit-campaign{display: none;}
-		input[type="text"]{width: auto;}
-
-		/*temp (solve problem of 2 large managers table */
-		/*.portlet-body{overflow: auto;}*/
-
-		.input-line-holder {display: inline-block; padding: 0 20px;}
-		#data-upload .portlet-body .control-group{display:none;}
-		#data-upload .portlet-body .control-group:first-child{display:block;}
-
-
-
-		/*Campaigns & Managers lists*/
-		.table-toolbar{text-align: left; margin-bottom: -32px; margin-top: 15px;}
-		#tbl-managers_wrapper .row-fluid .span6:first-child{display: none;}
-		#tbl-managers_wrapper .row-fluid .span6{margin-right: 0;}
-		#tbl-managers,#tbl-campaigns{margin-top: 10px;}
-	
-	</style>
+	<link href="style-ido.css" rel="stylesheet" type="text/css"/>
 
 </head>
 <body class="page-header-fixed">
@@ -152,7 +113,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				<div id="dashboard">
 					<div class="row-fluid" id="managers">
 						<!-- BEGIN EXAMPLE TABLE PORTLET-->
-						<div class="portlet box light-grey" id="managers-list">
+						<div class="portlet box blue" id="managers-list">
 							<div class="portlet-title">
 								<div class="caption"><i class="icon-globe"></i>כל המשתמשים</div>
 							</div>
@@ -382,6 +343,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 	<!--CAMPAIGNS -->
 	<script>	
+	/*Global vars*/
+	var numOfRows=0;
+	var oTable;
+
 	function addNewNode(nodeMac){
 		var str ='<div class="control-group">';
 		str +='<label class="control-label">Node MAC</label>';
@@ -417,6 +382,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				$.each(data.nodes, function(i,n){
 					addNewNode(n);
 				});
+				$('#managers-list').hide();
+				$('#edit-item').show();
+			
 				/*$.each(chbxInputs, function(index,i){
 					i = $(i);
 					var fieldName = i.attr('name');
@@ -454,24 +422,40 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			}
 		}else{
 			console.log('Loading managers list:');
-			$('#tbl-managers > tbody').html('');
+//			$('#tbl-managers > tbody').html('');
 			var parseManagers =  function(data){
 				console.log('managers data: ');
 				console.log(data);
-				var tbody = $('#tbl-managers > tbody');
+				var tbody = $('#tbl-managers > tbody');				
+				var aaData = [];
 				$.each(data,function(i,m){
-					var status;
-					var mRow = '<tr class="manager" data-id="'+m.id+'"><td>'+m.name+'</td><td>'+m.vendorName+'</td><td>'+m.phoneNumber+'</td><td>'+m.email+'</td><td><a class="edit">Edit</a></td><td><a class="delete">Delete</a></td></tr>';
-					tbody.append(mRow);
-					console.log(m);
+					var editCell = '<button class="btn green mini edit" data-id="'+m.id+'">Edit</button>';
+					var deleteCell = '<button class="btn red mini edit" data-id="'+m.id+'">Delete</button>';
+					var manager = [m.name,m.vendorName,m.phoneNumber,m.email,editCell,deleteCell];
+					
+					aaData.push(manager);
 				});
-				$('#tbl-managers').dataTable( {
+				if($('#tbl-managers').hasClass('initialized')){
+					oTable.fnDestroy();
+				}
+				/*alert('initializing table');*/
+				oTable = $('#tbl-managers').addClass('initialized').dataTable( {
+    				"aaData":aaData,
     				"bFilter": true,
     				"bInfo": false,
     				"bPaginate": false,
 		    		"oLanguage": {
-		   				 "sSearch": "חיפוש: "
-		  			}
+		   				 "sSearch": "חיפוש: ",
+		   				 "sZeroRecords": "לא נמצאו תוצאות"
+		  			},
+	 	 			"aoColumns": [
+						{ "asSorting": [ "desc", "asc"] },
+						{ "asSorting": [ "desc", "asc"] },
+						{ "asSorting": [ "desc", "asc"] },
+						{ "asSorting": [ "desc", "asc"] },
+						null,
+						null
+					]
   				});
 			}
 		}
@@ -493,16 +477,16 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 		/*===============ITEMS (Managers or Campaigns) ==========*/
 		$('#btn-all-items').on('click',function(){ //TODO add dynamic managerId
-			loadCampaigns(1);
+			loadManagers();
+			$('#edit-item').hide();
 			$('#managers-list').show();
-			$('#edit-manager').hide();
 		}); 
 		//Add new manager:
 		$('#add-new-manager:not(.creating-manager)').on('click',function(){
 			$(this).addClass('creating-manger');
 			$.ajax({
 					type: "post",
-					url: '/api/managers/1',
+					url: '/api/managers',
 					data: {},
 					success: function(newId) {
 						alert(newId);
@@ -510,6 +494,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 						loadManagers(newId);	//TODO this could be made with just one call...					
 						$('#managers-list').hide();
 						$('#edit-manger').show();
+
+						//Adding row to the table:
+						//oTable.fnAddData( [" "," "," "," ","<a>edit</a>","<a>delete</a>" ] );
 					}
 				});
 		});
@@ -582,11 +569,11 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			}
 		});
 		$('#tbl-managers').on('click','.edit',function(){
-			var managerId = $($(this).parents('tr')[0]).attr('data-id');
+			var managerId = $(this).attr('data-id');
 			console.log(managerId);
 			loadManagers(managerId);
 			$('#managers-list').hide();
-			$('#edit-manager').show();
+			$('#edit-item').show();
 		});
 		$('#tbl-managers').on('click','.delete',function(){
 			var managerId = $($(this).closest('tr')[0]).attr('data-id');
