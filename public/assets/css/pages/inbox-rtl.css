@@ -21,8 +21,9 @@ Inbox Page
 
 /*Imbox Menu*/
 .inbox .inbox-nav {
+  margin: 0;
+  padding: 0;
   list-style: none;
-  margin-right: 0 !important;
 }
 
 .inbox .inbox-nav li {
@@ -72,11 +73,6 @@ Inbox Page
   background: #35aa47;
 }
 
-.inbox .inbox-nav li.compose-btn a:hover {
-  background-color: #1d943b !important;
-}
-
-
 .inbox .inbox-nav li.compose-btn i,
 .inbox .inbox-nav li.compose-btn:hover i {
   top: 1px;
@@ -84,6 +80,10 @@ Inbox Page
   font-size: 15px;
   position: relative;
   background: none !important;
+}
+
+.inbox .inbox-nav li.compose-btn a:hover {
+  background-color: #1d943b !important;
 }
 
 /*Inbox Content*/
@@ -95,6 +95,17 @@ Inbox Page
   margin: 0;
   color: #666;
   margin-bottom: 10px;
+}
+
+.inbox .pagination-control {
+  text-align: left;
+}
+
+.inbox .pagination-control .pagination-info {
+  display: inline-block;
+  padding-left: 10px;
+  font-size: 14px;
+  line-height: 14px;
 }
 
 .inbox tr {
@@ -367,7 +378,7 @@ Inbox Page
   margin-left: 3px;
 }
 
-.inbox-compose .inbox-control-group {
+.inbox-compose .inbox-form-group {
   margin-bottom: 0;
   position: relative;
   border-bottom: solid 1px #eee;
@@ -377,7 +388,7 @@ Inbox Page
   margin-right: 85px;
 }
 
-.inbox-compose .inbox-control-group > label {
+.inbox-compose .inbox-form-group > label {
   width: 80px;
   float: right;
   color: #979797;
@@ -392,64 +403,14 @@ Inbox Page
 }
 
 .inbox-compose .controls-cc {
-  padding-left: 15px;
+  padding-left: 20px;
 }
 
 .inbox-compose .controls-bcc {
-  padding-left: 15px;
+  padding-left: 20px;
 }
 
-.inbox-compose .tag {
-  font-size: 12px;
-  font-weight: 300 !important;
-  margin-top: 6px;
-  margin-right: 5px;
-  color: #333;
-  text-shadow: none !important;
-  background-color: #eee;
-  display: inline-block !important;
-  padding: 3px !important;
-}
-
-.inbox-compose .tag .close {
-  margin-top: -2px;
-  display: inline-block !important;
-  float: none !important;
-
-}
-
-.inbox-compose .tags {
-  border: none !important;
-  font-size: 13px;
-  padding: 0px;
-  margin-bottom: 0px;
-  margin-left: 50px;
-  box-shadow: none !important;
-}
-
-.inbox-compose .tags-hover {
-  border: 1px solid #ddd;
-  border: none !important;
-  box-shadow: none !important;
-  background: none !important;
-}
-
-.inbox-compose .tags input[type="text"],
-.inbox-compose .tags input[type="text"]:focus {
-  display: inline-block !important;
-  border: none !important;
-  font-size: 14px !important;
-  vertical-align: top;  
-  outline: 0;
-  margin: 0;
-  padding: 0;
-  width: auto;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
-}
-
-.inbox-compose .inbox-control-group a.close {
+.inbox-compose .inbox-form-group a.close {
   top: 13px;
   left: 10px;
   position: absolute;
@@ -515,7 +476,7 @@ ul.wysihtml5-toolbar a.btn.wysihtml5-command-active {
 
 @media (max-width: 480px) {
 
-  .inbox-compose .inbox-control-group > label {
+  .inbox-compose .inbox-form-group > label {
     margin-top: 7px;
   }
 

@@ -1,0 +1,64 @@
+
+.dataTable .row-details{width: auto; padding-left: 18px;}
+#dashboard > .row-fluid{display:none;}
+#dashboard #managers.row-fluid{min-width: 51.46em;}
+table.nodes thead{display:none;}
+tr.now-deleting{display:none;}
+tr[data-id="-1"] > td {background-color:yellow !important;}
+tr[data-id="-1"] > td > .row-details {display: none;}
+
+
+.tile .tile-object{bottom:8px;}
+.tile .tile-object .number{font-size:34px;}
+.tile .tile-object .name{font-size:15px;}
+#campaigns .tile,#campaigns .tile:hover{border:none !important; cursor: auto;}
+#tbl-campaigns_wrapper .row-fluid:first-child .span6:first-child{display: none;}
+#tbl-campaigns_wrapper .row-fluid:first-child .span6:nth-child(2){margin-right: 0 !important;}
+table#tbl-campaigns tr.cancelled-campaign a.delete{display:none;}
+table#tbl-campaigns tr.cancelled-campaign td:first-child input:after{content:"dead";}
+input[type="text"]{width: auto;}
+
+/*temp (solve problem of 2 large managers table */
+/*.portlet-body{overflow: auto;}*/
+
+.input-line-holder {display: inline-block; padding: 0 20px;}
+#data-upload .portlet-body .control-group{display:none;}
+#data-upload .portlet-body .control-group:first-child{display:block;}
+
+
+
+
+
+/*Campaigns & Managers lists*/
+
+.table-toolbar{text-align: left; margin-bottom: -32px; margin-top: 15px;}
+.dataTables_wrapper .row .col-md-6:first-child{display: none;}
+.dataTables_wrapper .row .col-md-6{margin-right: 0;}
+.items-list{margin-top: 10px;}
+.dataTables_filter{float:right;}
+/*From Managers*/
+
+/*Edit Campaign & Manager item*/
+#items-list{display: none;}/*toggled by JS on page load...*/
+#edit-item .portlet-title .tools{margin-top: 1px;}
+
+
+/*Edit campaign wizrd:*/
+.form-wizard li.active .desc{font-size: 26px; font-weight: bold;}
+.form-wizard li.status-indicator{padding-top: 7px; margin-right:-42px;}
+.form-wizard .label.large-status-indicator {font-size: 26px; font-weight: bold; padding: 10px;}
+.form-wizard .form-group .checkbox-cntr{padding-top:8px;}
+#isActive-input .label-cntr{margin-top: 8px; display: none;}
+
+/*.form-horizontal .form-wizard .control-group .control-label{text-align: center;}
+.form-horizontal .form-wizard .control-group.span4 .control-label{text-align: center;}*/
+
+#campaign-filters{margin-right: 25%; width:33.33%;}
+#localMinTimeGap-input{display: none;}
+
+
+
+/*Data upload*/
+/*temp:*/
+.tab-content{min-height: 100px;}
+#temp{position:absolute; top:270px; z-index:999; right: 335px;}

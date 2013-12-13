@@ -1,992 +1,314 @@
 <!DOCTYPE html>
-<!--notes ido:
-	Still need to clean the assets/plugin , assets/scripts, assets/img  folders....
--->
 <!-- 
-Template Name: Metronic - Responsive Admin Dashboard Template build with Twitter Bootstrap 2.3.2
-Version: 1.4
+Template Name: Metronic - Responsive Admin Dashboard Template build with Twitter Bootstrap 3.0.3
+Version: 1.5.5
 Author: KeenThemes
-Website: http://www.keenthemes.com/preview/?theme=metronic
-Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469
+Website: http://www.keenthemes.com/
+Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469?ref=keenthemes
 -->
-<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
-<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
-<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en" class="no-js">
+<!--<![endif]-->
 <!-- BEGIN HEAD -->
 <head>
-	<meta charset="utf-8" />
+<meta charset="utf-8"/>
+<title>Metronic | Form Stuff - Form Components</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="" name="description"/>
+<meta content="" name="author"/>
+<meta name="MobileOptimized" content="320">
+<!-- BEGIN GLOBAL MANDATORY STYLES -->
+<link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="assets/plugins/bootstrap/css/bootstrap-rtl.min.css" rel="stylesheet" type="text/css"/>
+<link href="assets/plugins/uniform/css/uniform.default.css" rel="stylesheet" type="text/css"/>
+<!-- END GLOBAL MANDATORY STYLES -->
+<!-- BEGIN PAGE LEVEL STYLES -->
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-fileupload/bootstrap-fileupload.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/gritter/css/jquery.gritter-rtl.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/select2/select2_metro_rtl.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/clockface/css/clockface.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5-rtl.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-datepicker/css/datepicker.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-timepicker/compiled/timepicker.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-colorpicker/css/colorpicker.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-daterangepicker/daterangepicker-bs3.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-datetimepicker/css/datetimepicker.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/jquery-multi-select/css/multi-select-rtl.css"/>
+<link href="assets/plugins/bootstrap-switch/static/stylesheets/bootstrap-switch-metro-rtl.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/jquery-tags-input/jquery.tagsinput-rtl.css"/>
+<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css">
 
-	<meta http-equiv="Access-Control-Allow-Origin" content="*">
-	<title>Metronic | Admin Dashboard Template</title>
-	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
-	<meta content="" name="description" />
-	<meta content="" name="author" />
-	<!-- BEGIN GLOBAL MANDATORY STYLES -->
-	<link href="assets/plugins/bootstrap/css/bootstrap-rtl.min.css" rel="stylesheet" type="text/css"/>
-	<link href="assets/plugins/bootstrap/css/bootstrap-responsive-rtl.min.css" rel="stylesheet" type="text/css"/>
-	<link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/> <!--icons-->
-	<link href="assets/css/style-metro-rtl.css" rel="stylesheet" type="text/css"/>
-	<link href="assets/css/style-rtl.css" rel="stylesheet" type="text/css"/>
-	<link href="assets/css/style-responsive-rtl.css" rel="stylesheet" type="text/css"/>
-	<link href="assets/css/themes/default-rtl.css" rel="stylesheet" type="text/css" id="style_color"/>
-	<link href="assets/plugins/bootstrap-switch/static/stylesheets/bootstrap-switch-metro-rtl.css" rel="stylesheet" type="text/css"/>
-	<link rel="stylesheet" type="text/css" href="assets/plugins/chosen-bootstrap/chosen/chosen-rtl.css" />
-	<link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-toggle-buttons/static/stylesheets/bootstrap-toggle-buttons-rtl.css" />
-	<link rel="stylesheet" type="text/css" href="assets/plugins/data-tables/DT_bootstrap_rtl.css" />
-	<link rel="shortcut icon" href="favicon.ico" />
-
-	<link href="style-ido.css" rel="stylesheet" type="text/css"/>
-	
-
+<link rel="stylesheet" type="text/css" href="assets/plugins/data-tables/DT_bootstrap_rtl.css" />
+<!-- END PAGE LEVEL STYLES -->
+<!-- BEGIN THEME STYLES -->
+<link href="assets/css/style-metronic-rtl.css" rel="stylesheet" type="text/css"/>
+<link href="assets/css/style-rtl.css" rel="stylesheet" type="text/css"/>
+<link href="assets/css/style-responsive-rtl.css" rel="stylesheet" type="text/css"/>
+<link href="assets/css/plugins-rtl.css" rel="stylesheet" type="text/css"/>
+<link href="assets/css/themes/default-rtl.css" rel="stylesheet" type="text/css" id="style_color"/>
+<link href="assets/css/custom-rtl.css" rel="stylesheet" type="text/css"/>
+<!-- END THEME STYLES -->
+<!-- BEGIN IDO STYLES -->
+<link href="ido-assets/style-ido.css" rel="stylesheet" type="text/css"/>
+<!-- END IDO STYLES -->
+<link rel="shortcut icon" href="favicon.ico"/>
 </head>
+<!-- END HEAD -->
+<!-- BEGIN BODY -->
 <body class="page-header-fixed">
-	<!-- BEGIN HEADER -->   
+	<!-- BEGIN HEADER -->
 	<div class="header navbar navbar-inverse navbar-fixed-top">
 		<!-- BEGIN TOP NAVIGATION BAR -->
-		<div class="navbar-inner">
-			<div class="container-fluid">
-				<!-- BEGIN LOGO -->
-				<a class="brand" href="index.html">
-				<img src="assets/img/logo.png" alt="logo" />
-				</a>
-				<!-- END LOGO -->
-				<!-- BEGIN RESPONSIVE MENU TOGGLER -->
-				<a href="javascript:;" class="btn-navbar collapsed" data-toggle="collapse" data-target=".nav-collapse">
-				<img src="assets/img/menu-toggler.png" alt="" />
-				</a>          
-				<!-- END RESPONSIVE MENU TOGGLER -->            
-				<!-- BEGIN TOP NAVIGATION MENU -->              
-				<ul class="nav pull-left">
-					<!-- BEGIN USER LOGIN DROPDOWN -->
-					<li class="dropdown user">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-						<span class="username">Bob Nilson</span>
-						<i class="icon-angle-down"></i>
-						</a>
-						<ul class="dropdown-menu">
-							<li><a href="login.html"><i class="icon-key"></i> Log Out</a></li>
-						</ul>
-					</li>
-					<!-- END USER LOGIN DROPDOWN -->
-					<!-- END USER LOGIN DROPDOWN -->
-				</ul>
-				<!-- END TOP NAVIGATION MENU --> 
-			</div>
+		<div class="header-inner">
+			<!-- BEGIN LOGO -->
+			<a class="navbar-brand" href="index.html">
+			<img src="assets/img/logo.png" alt="logo" class="img-responsive"/>
+			</a>
+			<!-- END LOGO -->
+			<!-- BEGIN RESPONSIVE MENU TOGGLER -->
+			<a href="javascript:;" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+			<img src="assets/img/menu-toggler.png" alt=""/>
+			</a>
+			<!-- END RESPONSIVE MENU TOGGLER -->
+			<!-- BEGIN TOP NAVIGATION MENU -->
+			<ul class="nav navbar-nav pull-right">
+				<li class="dropdown user">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+					<img alt="" src="assets/img/avatar1_small.jpg"/>
+					<span class="username">
+						Ido Maron
+					</span>
+					<i class="fa fa-angle-down"></i>
+					</a>
+				</li>
+				<!-- END USER LOGIN DROPDOWN -->
+			</ul>
+			<!-- END TOP NAVIGATION MENU -->
 		</div>
 		<!-- END TOP NAVIGATION BAR -->
 	</div>
 	<!-- END HEADER -->
+	<div class="clearfix">
+	</div>
 	<!-- BEGIN CONTAINER -->
 	<div class="page-container">
 		<!-- BEGIN SIDEBAR -->
-		<div class="page-sidebar nav-collapse collapse">
-			<!-- BEGIN SIDEBAR MENU -->        
-			<ul class="page-sidebar-menu">
-				<li data-section="data-upload">
-					<a href="#">
-						<i class="icon-envelope"></i> 
-						<span class="title">קליטת נתונים</span>
-						<span class="selected"></span>
-					</a>
-				</li>
-				<li data-section="triggers">
-					<a href="#">
-						<i class="icon-cogs"></i> 
-						<span class="title">טריגרים</span>
-						<span class="selected"></span>
-					</a>
-				</li>
-				<li data-section="campaigns">
-					<a href="#">
-						<i class="icon-cogs"></i> 
-						<span class="title">קמפיינים</span>
-						<span class="selected"></span>
-					</a>
-				</li>
-			</ul>
-			<!-- END SIDEBAR MENU -->
+		<div class="page-sidebar-wrapper">
+			<div class="page-sidebar navbar-collapse collapse">
+				<!-- BEGIN SIDEBAR MENU -->
+				<ul class="page-sidebar-menu">
+					<li class="start">
+						<a href="#" data-template="campaigns">
+						<i class="fa fa-bookmark-o"></i>
+						<span class="title">
+							קמפיינים
+						</span>
+						</a>
+					</li>
+					<li class="active ">
+						<a href="#" data-template="triggers">
+							<i class="fa fa-table"></i>
+							<span class="title">
+								טריגרים
+							</span>
+							<span class="selected">
+							</span>
+						</a>
+					</li>
+					<li class="last">
+						<a href="#" data-template="dataUpload">
+							<i class="fa fa-bar-chart-o"></i>
+							<span class="title">
+								קליטת נתונים
+							</span>
+						</a>
+					</li>
+				</ul>
+				<!-- END SIDEBAR MENU -->
+			</div>
 		</div>
 		<!-- END SIDEBAR -->
-		<!-- BEGIN PAGE -->
-		<div class="page-content">
-			<!-- BEGIN PAGE CONTAINER-->
-			<div class="container-fluid">
-				<!-- BEGIN PAGE HEADER-->
-				<div class="row-fluid">
-					<div class="span12">
-						<!-- BEGIN STYLE CUSTOMIZER -->
-							<!-- IDO DELETED -->
-						<!-- END STYLE CUSTOMIZER -->    
+		<!-- BEGIN CONTENT -->
+		<div class="page-content-wrapper">
+			<div class="page-content">
+				<!-- BEGIN SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+				<div class="modal fade" id="portlet-config" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+								<h4 class="modal-title">Modal title</h4>
+							</div>
+							<div class="modal-body">
+								 Widget settings form goes here
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn blue">Save changes</button>
+								<button type="button" class="btn default" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+						<!-- /.modal-content -->
+					</div>
+					<!-- /.modal-dialog -->
+				</div>
+				<!-- /.modal -->
+				<div class="row" id="page-header">
+					<div class="col-md-12">
 						<!-- BEGIN PAGE TITLE & BREADCRUMB-->
 						<h3 class="page-title">
-							פרומונים
-							<small>מעשיות וסיפורים</small>
+							פרומונים<small>מעשיות וסיפורים</small>
 						</h3>
-						<!-- END PAGE TITLE & BREADCRUMB-->
 					</div>
 				</div>
 				<!-- END PAGE HEADER-->
-				<div id="dashboard">
-					<div class="row-fluid" id="triggers"> <!--TODO; make these 3 triggers repeating templates one template-->
-						<div class="span12">
-							<!-- BEGIN SAMPLE FORM PORTLET-->   
-							<div class="portlet box blue">
-								<div class="portlet-title">
-									<div class="caption">
-										<i class="icon-cogs"></i>
-										<span class="hidden-480">הודעות הנשלחות אוטמטית (טריגרים)</span>
-									</div>
-								</div>
-								<div class="portlet-body form">
-									<!-- BEGIN FORM-->
-									<div class="form-horizontal">
-										<div data-trigger-type="recognized">
-											<h4>זיהוי משתמשים באמצעות טלפון או WiFi</h4>
-											<div class="control-group">
-												<label class="control-label">תוכן ההודעה</label>
-												<div class="controls">
-													<textarea class="medium m-wrap" rows="3" name="text" ></textarea>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">לינק</label>
-												<div class="controls">
-													<input type="text" class="span2 m-wrap" name="link" />
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">צליל</label>
-												<div class="controls">
-													<select name="sound" data-trigger-type="recognized" class="span2">
-														<!--<option value="">Select</option>-->
-														<option value="alarm">alarm</option>
-														<option value="alarm">bell</option>
-														<option value="ring">ring</option>
-													</select>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">מרווח שעות מינמלי בין הודעה להודעה</label>
-												<div class="controls">
-													<input type="text" class="span2"  name="minInterval"/>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">מצב פעילות:</label>
-												<div class="controls">
-													<div class="switch switch-small">
-														<input checked type="checkbox" checked class="toggle" name="isActive"/>
-													</div>
-												</div>
-											</div>
-										</div>
-										<hr>
-										<div data-trigger-type="roost-cancelation">
-											<h4>ביטול מנוי</h4>
-											<div class="control-group">
-												<label class="control-label">תוכן ההודעה</label>
-												<div class="controls">
-													<textarea class="medium m-wrap" rows="3" name="text"></textarea>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">לינק</label>
-												<div class="controls">
-													<input type="text" class="span2 m-wrap" name="link" />
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">צליל</label>
-												<div class="controls">
-													<select name="sound" class="span2">
-														<!--<option value="">Select</option>-->
-														<option value="alarm">alarm</option>
-														<option value="alarm">bell</option>
-														<option value="ring">ring</option>
-													</select>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">מצב פעילות:</label>
-												<div class="controls">
-													<div class="switch switch-small">
-														<input type="checkbox" checked class="toggle" name="isActive" />
-													</div>
-												</div>
-											</div>
-										</div>
-										<hr>
-										<div data-trigger-type="roost-welcome-back">
-											<h4>משתמש שביטל נרשם מחדש</h4>
-											<div class="control-group">
-												<label class="control-label">תוכן ההודעה</label>
-												<div class="controls">
-													<textarea class="medium m-wrap" rows="3" name="text" ></textarea>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">לינק</label>
-												<div class="controls">
-													<input type="text" class="span2 m-wrap" name="link" />
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">צליל</label>
-												<div class="controls">
-													<select name="sound" class="span2">
-														<!--<option value="">Select</option>-->
-														<option value="alarm">alarm</option>
-														<option value="alarm">bell</option>
-														<option value="ring">ring</option>
-													</select>
-												</div>
-											</div>
-											<div class="control-group">
-												<label class="control-label">מצב פעילות</label>
-												<div class="controls">
-													<div class="switch switch-small">
-														<input type="checkbox" checked class="toggle" name="isActive" />
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="form-actions">
-											<button type="submit" id="btn-update-triggers" class="btn blue"><i class="icon-ok"></i> שמור </button>
-										</div>
-									</div>
-									<!-- END FORM-->  
-								</div>
-							</div>
-							<!-- END SAMPLE FORM PORTLET-->
-						</div>
-					</div>
-					<div class="clearfix"></div>
-					<div class="row-fluid" id="data-upload"><!--zz-->
-						<!-- BEGIN EXAMPLE TABLE PORTLET-->
-						<div class="portlet box blue">
-							<div class="portlet-title">
-								<div class="caption"><i class="icon-globe"></i>העלאת קובץ חדש</div>
-							</div>
-							<div class="portlet-body form">
-								<div class="form-horizontal">
-									<div class="control-group" id="file-upload">
-										<form action="/api/dataFileUpload/1" method="post" enctype="multipart/form-data" id="form-data-file-upload">
-											<label class="control-label">בחירת קובץ</label>
-											<div class="controls">
-												<input type="file" name="dataFile" id="dataFile">
-											</div>
-										</form>
-										<button id="btn-upload-file" class="btn green">
-											העלה קובץ <i class="icon-plus"></i>
-										</button>
-									</div>
-									<div class="control-group" id="data-settings" >
-										<div class="controls" id="cellular-column"></div>
-										<div class="controls" id="selected-columns"></div>
-										<div class="controls">
-											<button id="btn-present-data" type="button" class="btn blue">הצג מידע</button>
-											<button type="button" class="btn red btn-restart-data-upload">בחר קובץ אחר</button>
-										</div>
-									</div>
-									<div class="control-group" id="data-present">
-										<div class="controls">
-											<div class="portlet-body">
-												<table class="table table-striped table-hover" id="tbl-present-data">
-													<thead></thead>
-													<tbody></tbody>
-												</table>
-											</div>	
-										</div>
-										<div class="controls">
-											<button id="btn-update-users-data" type="button" class="btn blue">עדכן מסד נתונים</button>
-											<button type="button" class="btn red btn-restart-data-upload">בחר קובץ אחר</button>
-										</div>
-									</div>
-									<div class="control-group" id="data-upload-approve">
-										<div class="controls">המידע נשמר בהצלחה</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="clearfix"></div>
-					<div class="row-fluid" id="campaigns">
-						<!-- BEGIN EXAMPLE TABLE PORTLET-->
-						<div class="portlet box blue" id="campaigns-list">
-							<div class="portlet-title">
-								<div class="caption"><i class="icon-globe"></i>כל הקמפיינים</div>
-							</div>
-							<div class="portlet-body">
-								<div class="table-toolbar">
-									<div class="btn-group">
-										<button id="add-new-campaign" class="btn green">
-											Add New <i class="icon-plus"></i>
-										</button>
-									</div>
-								</div>
-								<table class="table table-striped table-bordered table-hover" id="tbl-campaigns">
-									<thead>
-										<tr>
-											<th data-field="name">שם</th>
-											<th data-field="category">קטגוריה</th>
-											<th data-field="createdAt">תאריך הקמה</th>
-											<th data-field="is_active">סטטוס</th>									
-											<th>עריכה</th>											
-										</tr>
-									</thead>
-									<tbody>
-									</tbody>
-								</table>
-							</div>
-						</div>
-						<div class="portlet box blue" id="edit-campaign" data-id="1">
-							<div class="portlet-title">
-								<div class="caption">
-									<i class="icon-reorder"></i> עריכת קמפיין
-									<span>---</span>
-									<span class="status-display"></span>
-								</div>
-								<div class="tools hidden-phone">
-									<a href="javascript:;" class="collapse"></a>
-									<a href="#portlet-config" data-toggle="modal" class="config"></a>
-									<a href="javascript:;" class="reload"></a>
-									<a href="javascript:;" class="remove"></a>
-								</div>
-							</div>
-							<div class="portlet-body form">
-								<div class="form-horizontal">
-									<div class="form-wizard">
-										<div class="navbar steps">
-											<div class="navbar-inner">
-												<ul class="row-fluid">
-													<li class="span3 active">
-														<a href="#tab1" data-toggle="tab" class="step active">
-															<span class="number">1</span>
-															<span class="desc"><i class="icon-ok"></i> ראשי</span>   
-														</a>
-													</li>
-													<li class="span3">
-														<a href="#tab2" data-toggle="tab" class="step">
-															<span class="number">2</span>
-															<span class="desc"><i class="icon-ok"></i>מיקוד הנמענים</span>   
-														</a>
-													</li>
-													<li class="span3">
-														<a href="#tab3" data-toggle="tab" class="step">
-															<span class="number">3</span>
-															<span class="desc"><i class="icon-ok"></i>תוכן, תזמון, הפעלה</span>   
-														</a>
-													</li>
-													<li class="span2">
-														<a href="#tab4" data-toggle="tab" class="step">
-															<span class="number">4</span>
-															<span class="desc"><i class="icon-ok"></i> תוצאות</span>   
-														</a>
-													</li>
-													<li class="span1 status-indicator">
-
-													</li>
-												</ul>
-											</div>
-										</div>
-										<div class="tab-content">
-											<div class="alert alert-error hide">
-												<button class="close" data-dismiss="alert"></button>
-												You have some form errors. Please check below.
-											</div>
-											<div class="alert alert-success hide">
-												<button class="close" data-dismiss="alert"></button>
-												Your form validation is successful!
-											</div>
-											<div class="tab-pane active" id="tab1">
-												<div class="control-group span4">
-													<label class="control-label">שם הקמפיין</label>
-													<input type="text" class="m-wrap" name="name" id="name"/>
-												</div>
-												<div class="control-group span4">
-													<label class="control-label">תאריך יצירה</label>
-													<input type="text" class="m-wrap" name="createdAt" disabled/>
-												</div>
-												<div class="control-group span4">										
-													<label class="control-label">קטגוריה</label>
-													<input type="text" class="m-wrap" name="category" id="category"/>
-												</div>
-												<div class="control-group">
-													<label class="control-label">יעדים</label>
-													<textarea class="m-wrap span6" rows="3" name="goals" id="goals"></textarea>
-												</div>
-												<div class="control-group">
-													<label class="control-label">תקציב</label>
-													<input type="text" class="span6 m-wrap" name="budget" id="budget"/>
-												</div>
-											</div>
-											<div class="tab-pane" id="tab2">
-												<div id="campaign-filters"></div>
-											</div>
-											<div class="tab-pane" id="tab3">
-												<div class="control-group">
-													<label class="control-label">הודעה</label>
-													<div class="controls">
-														<textarea class="span6 m-wrap" rows="3" name="message"></textarea>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">לינק</label>
-													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="link" id="link"/>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">צליל</label>
-													<div class="controls">
-														<select name="sound" id="sound" class="span3">
-															<option value="">Select</option>
-															<option value="alarm">alarm</option>
-															<option value="alarm">bell</option>
-															<option value="ring">ring</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">תזמון</label>
-													<div class="controls">
-														<select name="recurring" id="recurring" class="span3">
-															<option value="0">חד פעמי</option>
-															<option value="1">יומי</option>
-															<option value="2">שבועי</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">שעה</label>
-													<div class="controls">
-														<select name="dayOfWeek" id="dayOfWeek" class="span3">
-															<option value="0">ראשון</option>
-															<option value="1">שני</option>
-															<option value="2">שלישי</option>
-															<option value="3">רביעי</option>
-															<option value="4">חמישי</option>
-															<option value="5">שישי</option>
-															<option value="6">שבת</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">שעה</label>
-													<div class="controls">
-														<select name="hour" id="hour" class="span3">
-															<option value="0">0:00</option>
-															<option value="1">1:00</option>
-															<option value="2">2:00</option>
-															<option value="3">3:00</option>
-															<option value="4">4:00</option>
-															<option value="5">5:00</option>
-															<option value="6">6:00</option>
-															<option value="7">7:00</option>
-															<option value="8">8:00</option>
-															<option value="9">9:00</option>
-															<option value="10">10:00</option>
-															<option value="11">11:00</option>
-															<option value="12">12:00</option>
-															<option value="13">13:00</option>
-															<option value="14">14:00</option>
-															<option value="15">15:00</option>
-															<option value="16">16:00</option>
-															<option value="17">17:00</option>
-															<option value="18">18:00</option>
-															<option value="19">19:00</option>
-															<option value="20">20:00</option>
-															<option value="21">21:00</option>
-															<option value="22">22:00</option>
-															<option value="23">23:00</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">מבוסס מיקום</label>
-													<div class="controls">
-														<select name="locationBase" id="locationBase" class="span3">
-															<option value="2">ארצי</option>
-															<option value="1">אזורי</option>
-															<option value="0">מקומי</option>
-														</select>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">זמן שהייה מקסימלי באתר</label>
-													<div class="controls">
-														<input type="text" class="span4 m-wrap" name="localMinTimeGap" id="localMinTimeGap"/>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">קמפיין גיוס לקוחות חדשים</label>
-													<div class="controls">
-														<div class="input-line-holder">
-															<label class="checkbox line">
-																<input type="checkbox" name="isRecruiting" id="isRecruiting" value="1" /> 
-															</label>
-														</div>
-													</div>
-												</div>
-												<div class="control-group">
-													<label class="control-label">פעיל</label>
-													<div class="controls">
-														<div class="input-line-holder">
-															<label class="checkbox line">
-																<input type="checkbox" name="isActive" id="isActive" value="1" /> 
-															</label>
-														</div>
-													</div>
-												</div>
-											</div>
-											<div class="tab-pane" id="tab4">
-												<div class="tiles">
-													<div class="tile bg-blue" id="roost-history">
-														<div class="tile-body">
-															<i class="icon-bell"></i>
-														</div>
-														<div class="tile-object">
-															<div class="name">
-																PUSH
-															</div>
-															<div class="number"></div>
-														</div>
-													</div>
-												</div>
-												<div class="tile bg-green" id="sms-history">
-													<div class="tile-body">
-														<i class="icon-comments-alt"></i>
-													</div>
-													<div class="tile-object">
-														<div class="name">
-															SMS
-														</div>
-														<div class="number"></div>
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="form-actions clearfix">
-											<a href="javascript:;" class="btn button-previous" id="btn-all-campaings">
-											<i class="m-icon-swapleft"></i> חזרה לכל הקמפיינים
-											</a>
-											<a href="javascript:;" class="btn green button-submit" id="btn-save-campaign">
-											שמור שינויים <i class="m-icon-swapright m-icon-white"></i>
-											</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+				<!-- BEGIN PAGE CONTENT-->
 			</div>
-			<!-- END PAGE CONTAINER-->    
+			<!-- END PAGE CONTENT-->
 		</div>
-		<!-- END PAGE -->
+		<!-- END CONTENT -->
 	</div>
 	<!-- END CONTAINER -->
 	<!-- BEGIN FOOTER -->
 	<div class="footer">
 		<div class="footer-inner">
-			2013 &copy; Metronic by keenthemes.
+			 2013 &copy; Metronic by keenthemes.
+		</div>
+		<div class="footer-tools">
+			<span class="go-top">
+				<i class="fa fa-angle-up"></i>
+			</span>
 		</div>
 	</div>
-	<!-- END FOOTER -->
-	<!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
-	<!-- BEGIN CORE PLUGINS -->   
-	<script src="assets/plugins/jquery-1.10.1.min.js" type="text/javascript"></script>
-	<!--
-	<script src="assets/plugins/jquery-migrate-1.2.1.min.js" type="text/javascript"></script> //removed for deployment
-	<!-- IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
-	<script src="assets/plugins/jquery-ui/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>      
-	<script src="assets/plugins/bootstrap/js/bootstrap-rtl.min.js" type="text/javascript"></script>
-	<!--
-	<script src="assets/plugins/bootstrap-hover-dropdown/twitter-bootstrap-hover-dropdown.min.js" type="text/javascript" ></script>
-	<!--[if lt IE 9]>
-	<script src="assets/plugins/excanvas.min.js"></script>
-	<script src="assets/plugins/respond.min.js"></script>  
-	<![endif]-->   
-	
-	<!--<script src="assets/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>-->
-	<script src="assets/plugins/jquery.blockui.min.js" type="text/javascript"></script>  
+<!-- END FOOTER -->
+<!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+<!-- BEGIN CORE PLUGINS -->
+<!--[if lt IE 9]>
+<script src="assets/plugins/respond.min.js"></script>
+<script src="assets/plugins/excanvas.min.js"></script> 
+<![endif]-->
+<script src="assets/plugins/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="assets/plugins/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap/js/bootstrap2-typeahead.min.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap-hover-dropdown/twitter-bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
+<script src="assets/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+<script src="assets/plugins/jquery.blockui.min.js" type="text/javascript"></script>
+<script src="assets/plugins/jquery.cokie.min.js" type="text/javascript"></script>
+<script src="assets/plugins/uniform/jquery.uniform.min.js" type="text/javascript"></script>
+<!-- END CORE PLUGINS -->
+<!-- BEGIN PAGE LEVEL PLUGINS -->
+<script type="text/javascript" src="assets/plugins/fuelux/js/spinner.min.js"></script>
+<script type="text/javascript" src="assets/plugins/ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-fileupload/bootstrap-fileupload.js"></script>
+<script type="text/javascript" src="assets/plugins/select2/select2.min.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+<script type="text/javascript" src="assets/plugins/clockface/js/clockface.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-daterangepicker/moment.min.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-daterangepicker/daterangepicker.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-timepicker/js/bootstrap-timepicker.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery.input-ip-address-control-1.0.min.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-multi-select/js/jquery.multi-select.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-multi-select/js/jquery.quicksearch.js"></script>
+<script src="assets/plugins/jquery.pwstrength.bootstrap/src/pwstrength.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap-switch/static/js/bootstrap-switch.min.js" type="text/javascript"></script>
+<script src="assets/plugins/jquery-tags-input/jquery.tagsinput.min.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap-markdown/js/bootstrap-markdown.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap-markdown/lib/markdown.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap-maxlength/bootstrap-maxlength.min.js" type="text/javascript"></script>
+<script src="assets/plugins/bootstrap-touchspin/bootstrap.touchspin.js" type="text/javascript"></script>
 
-	<!--<script src="assets/plugins/uniform/jquery.uniform.min.js" type="text/javascript" ></script>-->
-	<!-- END CORE PLUGINS -->
-	<!-- BEGIN PAGE LEVEL PLUGINS -->
-	<!--
-	<script src="assets/plugins/flot/jquery.flot.js" type="text/javascript"></script>
-	<script src="assets/plugins/flot/jquery.flot.resize.js" type="text/javascript"></script>
-	<script src="assets/plugins/jquery.pulsate.min.js" type="text/javascript"></script>
-	<script src="assets/plugins/bootstrap-daterangepicker/date.js" type="text/javascript"></script>
-	<script src="assets/plugins/bootstrap-daterangepicker/daterangepicker-rtl.js" type="text/javascript"></script>     
-	<script src="assets/plugins/gritter/js/jquery.gritter.js" type="text/javascript"></script>
-	<script src="assets/plugins/fullcalendar/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
-	<script src="assets/plugins/jquery-easy-pie-chart/jquery.easy-pie-chart.js" type="text/javascript"></script>
-	<script src="assets/plugins/jquery.sparkline.min.js" type="text/javascript"></script>
-	-->
-	<script src="assets/plugins/bootstrap-switch/static/js/bootstrap-switch.js" type="text/javascript" ></script><!-- for ON/Off switch -->  
-	
-	 <script src="assets/plugins/mustache.js" type="text/javascript"></script> <!-- mustache -->
-	 <script src="assets/plugins/jquery.ba-throttle-debounce.js" type="text/javascript"></script> <!-- jquery throtle -->
-	
-	<!-- END PAGE LEVEL PLUGINS -->
-	<!-- BEGIN PAGE LEVEL SCRIPTS -->
-	<!--<script src="assets/scripts/table-editable.js"></script>-->
-	<script type="text/javascript" src="assets/plugins/bootstrap-toggle-buttons/static/js/jquery.toggle.buttons.js"></script>
-	<!-- END PAGE LEVEL SCRIPTS -->
-	
-	<!-- BEGIN EDITABLE TABLE SCRIPTS (ido)-->
-	<!--
-	<script type="text/javascript" src="assets/plugins/select2/select2.min.js"></script>
-	-->
+<!--from here added by Ido-->
+<script type="text/javascript" src="assets/plugins/data-tables/jquery.dataTables.js"></script>
+<script type="text/javascript" src="assets/plugins/data-tables/DT_bootstrap.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-validation/dist/jquery.validate.min.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-validation/dist/additional-methods.min.js"></script>
+<script src="assets/plugins/bootstrap-hover-dropdown/twitter-bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
+<!-- END PAGE LEVEL PLUGINS -->
 
-	<script type="text/javascript" src="assets/plugins/data-tables/jquery.dataTables.js"></script>
-	<script type="text/javascript" src="assets/plugins/data-tables/DT_bootstrap.js"></script>
-
-
-	<!-- END EDITABLE TABLE SCRIPTS -->
-	<!-- BEGIN IDO JS: -->
-	<script type="text/javascript" src="js/jquery.jeditable.js"></script>
-	<script type="text/javascript" src="js/jquery.blockui.js"></script>
-	<script src="assets/scripts/app.js"></script>     
-	<script src="assets/scripts/form-wizard.js"></script>     
+<!-- BEGIN PAGE LEVEL SCRIPTS -->
+<script src="assets/scripts/app.js"></script>
+<script src="assets/scripts/form-components.js"></script>
 
 
-	<script src="general-ido.js"></script>     
-	<script src="data-upload.js"></script>     
-	<!--<script src="assets/scripts/table-managed.js"></script>     -->
-	<!--NAVIGATION SCRIPT-->
-	<script>
-		$('.page-sidebar-menu li').on('click', function(){
-			$('.page-sidebar-menu li').removeClass('active');
-			$(this).addClass('active');
-			
-			$('#dashboard > .row-fluid').hide();
-			var section = $(this).attr('data-section'); 
-			$('#dashboard #' + section + '.row-fluid').fadeIn();
-		});
-		
-		$(document).ready(function(){
-			$('.page-sidebar-menu li:nth-child(3)').trigger('click');
-		});
-	</script>
+<!--from here added by Ido-->
+<script src="assets/scripts/form-samples.js"></script>
+<script src="assets/scripts/form-wizard.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script> 
 
-	<!--CAMPAIGNS -->
-	<script>
-	/*Global vars*/
-	var numOfRows=0;
-	var oTable;
+<!-- END PAGE LEVEL SCRIPTS -->
+<script>
+function initClient(templateName){
 
-	//Campaigns:
-	function loadCampaigns(managerId,campaignId){
-		var id = campaignId ? campaignId : '';
-		if(id){
-			var parseCampaigns = function(data){
-				console.log('campaign to edit: ');
-				console.log(data);
+}
+jQuery(document).ready(function() {       
+   // initiate layout and plugins
+   /*App.init();
+   FormComponents.init();
+   FormWizard.init();*/
 
-				//the manger filters must come BEFORE the campaigns data:
-				$.each(data.managerFilters, function(a,o){
-					var str ='';
-					str+='<h3>'+a+'</h3>';
-					$.each(o.values,function(val, count){
-						str+='<div>'+val+'-'+parseInt(100*parseInt(count)/parseInt(o.total))+'%<input type="checkbox" data-filter-attribute="'+a+'" data-filter-value="'+val+'"></div>';
-					});
-					$('#tab2 > div').append(str);
-				});
-
-				var wizard = $('#edit-campaign');
-				wizard.attr('data-id',campaignId);
-				var statusDisplay=wizard.find('li.status-indicator');
-				var textInputs = wizard.find('input[type="text"]');
-				var chbxInputs = wizard.find('input[type="checkbox"]');
-				var selectInputs = wizard.find('select');
-				var textAreas = wizard.find('textarea');
-				var chbxFilters = wizard.find('#campaign-filters input[type="checkbox"]');
-
-				//Campaigns data:
-				var status;
-				if(data.isTerminated==1){status='<span class="label">הסתיים</span>';}
-				else{status = data.isActive ? '<span class="label label-success">פעיל</span>' : '<span class="label label-important">לא פעיל</span>';}
-				statusDisplay.html(status);
-
-				$.each(textInputs, function(index,i){
-					i = $(i);
-					var fieldName = i.attr('name');
-					i.val(data[fieldName]);
-				});
-				$.each(chbxInputs, function(index,i){
-					i = $(i);
-					var fieldName = i.attr('name');
-					i.prop('checked', data[fieldName] ? true : false);
-				});
-				$.each(selectInputs, function(index,i){
-					i=$(i);
-					var fieldName = i.attr('name');
-					if(data[fieldName]){i.val(data[fieldName]);}
-					console.log(fieldName +': '+data[fieldName]);
-				});
-				$.each(textAreas, function(index,i){
-					i=$(i);
-					var fieldName = i.attr('name');
-					i.val(data[fieldName]);				
-				});
-				var sent = JSON.parse(data.sent);
-				$('#sms-history .number').html(sent ? sent.sms : '0');
-				$('#roost-history .number').html(sent ? sent.roost : '0');
-				var filters = JSON.parse(data.filters);
-				$.each(chbxFilters, function(index,i){
-					i = $(i);
-					var attr = i.attr('data-filter-attribute');
-					var val = i.attr('data-filter-value');
-					if(filters){
-						if(filters[attr]){
-							if(filters[attr].indexOf(val)>-1){
-								i.prop('checked', true);		
-							}
-						}					
-					}
-				});
-			}
-		}else{
-			var parseCampaigns =  function(data){
-				console.log('campaigns data: ');
-				console.log(data);
-				var tbody = $('#tbl-campaigns > tbody');
-				var aaData = [];
-				$.each(data,function(index,i){
-					var status;
-					if(i.isTerminated==1){status='<span class="label">הסתיים</span>';}
-					else{status = i.isActive ? '<span class="label label-success">פעיל</span>' : '<span class="label label-important">לא פעיל</span>';}
-					var editCell = '<button class="btn green mini edit" data-id="'+i.id+'">Edit</button>';
-					var item = [i.name,i.category,i.createdAt,status,editCell];
-					aaData.push(item);
-				});
-				if($('#tbl-campaigns').hasClass('initialized')){
-					oTable.fnDestroy();
-				}
-				/*alert('initializing table');*/
-				oTable = $('#tbl-campaigns').addClass('initialized').dataTable( {
-    				"aaData":aaData,
-    				"bFilter": true,
-    				"bInfo": false,
-    				"bPaginate": false,
-		    		"oLanguage": {
-		   				 "sSearch": "חיפוש: ",
-		   				 "sZeroRecords": "לא נמצאו תוצאות"
-		  			},
-		  			"aoColumns": [
-						{ "asSorting": [ "desc", "asc"] },
-						{ "asSorting": [ "desc", "asc"] },
-						{ "asSorting": [ "desc", "asc"] },
-						{ "asSorting": [ "desc", "asc"] },
-						{ "asSorting": [] }
-					]
-  				});
-			}
-		}
-		
-		$.ajax({
-			type: "get",
-			url: '/api/campaigns/'+managerId+'/'+id,
-			success: parseCampaigns
-		});
-	}
-	
-
-	$(function(){
-		App.init();
-
-		//Getting manager's campaigns:
-		var managerId = getParameterByName('managerId');
-		/*
-		$.ajax({
-			type:"get",
-			url:'api/1/campaigns/'+managerId, //TODO dynamic managerId  //TODO very bad loop fix with Ilan
-			success: function(campaigns){
-				console.log('hey');
-				console.log(campaigns);
-				$.each(campaigns,function(index,c){prependCampaignRow(c);});
-			},
-			error:function(){console.log('b');}
-		});
-		*/
-
-		/*===============CAMPAIGN==========*/
-		//Load campagin list:
-		$('#btn-all-campaings').on('click',function(){ //TODO add dynamic managerId
-			loadCampaigns(managerId);
-			$('#campaigns-list').show();
-			$('#edit-campaign').hide();
-
-		}); 
-		//Add new campaign:
-		$('#add-new-campaign:not(.creating-campaign)').on('click',function(){
-			$(this).addClass('creating-campaign');
-			$.ajax({
-					type: "post",
-					url: '/api/campaigns/1',	//TODO add dynamic managerId
-					data: {},
-					success: function(newId) {
-						alert(newId);
-						loadCampaigns(1,newId);	//TODO this could be made with just one call...					
-						$('#campaigns-list').hide();
-						$('#edit-campaign').show();
-					}
-				});
-		});
-		//load single campagin
-		loadCampaigns(1);
-		//save campaign:
-		$('#btn-save-campaign').on('click',function(){
-			var data = {};
-			var wizard = $($(this).parents('#edit-campaign')[0]);
-			var id= wizard.attr('data-id');
-			var chbxInputs = wizard.find('#tab3 input[type="checkbox"]');//all checkboxes are in tab3
-			var textInputs = wizard.find('input[type="text"]');
-			var selectInputs = wizard.find('select');
-			var textAreas = wizard.find('textarea');
-			var chbxFilters = wizard.find('#campaign-filters input[type="checkbox"]');
-			$.each(textInputs, function(index,i){
-				i = $(i);
-				if(!i.is(':disabled')){
-					var fieldName = i.attr('name');
-					data[fieldName]=i.val();
-				}
-			});
-			$.each(chbxInputs, function(index,i){
-				i = $(i);
-				var fieldName = i.attr('name');
-				data[fieldName]=i.is(':checked') ? 1 : 0;
-			});
-			$.each(selectInputs, function(index,i){
-				i=$(i);
-				var fieldName = i.attr('name');
-				data[fieldName] = $(i.children('option:selected')[0]).attr('value');
-				console.log('select found---'+fieldName);
-			});
-			$.each(textAreas, function(index,i){
-				i=$(i);
-				var fieldName = i.attr('name');
-				data[fieldName] = i.val();				
-			});
-			//Filters:
-			var filtersData={};
-			$.each(chbxFilters, function(index,i){
-				i = $(i);
-				if(i.is(':checked')){
-					var attr = i.attr('data-filter-attribute');
-					var val = i.attr('data-filter-value');
-					if(attr && val){
-						if(!filtersData[attr]){
-							filtersData[attr]=[];	
-						}
-						filtersData[attr].push(val);
-					}	
-				}						
-			});
-			data.filters=JSON.stringify(filtersData);
-			console.log('data before send to update:');
-			console.log(data);
-			if(id>0){
-				console.log('ajax');
-				$.ajax({
-					type: "post",
-					url: '/api/campaigns/1/'+id,	//TODO add dynamic managerId
-					data: data,
-					success: function(response) {
-						console.log(response);
-						//TODO add an "saved" notification
-					}
-				});
-			}
-		});
-		$('#tbl-campaigns').on('click','.edit',function(){
-			var campaignId = $(this).attr('data-id');
-			loadCampaigns(1,campaignId);
-			$('#campaigns-list').hide();
-			$('#edit-campaign').show();
-		});
-		$('#tbl-campaigns').on('click','.delete',function(){
-			var campaignId = $($(this).closest('tr')[0]).attr('data-id');
-			console.log('before delete -campaignId: '+campaignId);
-			$.ajax({
-				type: "delete",
-				url: '/api/campaigns/'+getParameterByName('managerId')+'/'+campaignId,
-				success: function(deletedId){console.log('deleted! id: '+deletedId);}
-			});
-			$($(this).parents('tr')[0]).remove();
-		});
+App.init();
+FormComponents.init();
+FormSamples.init();
 
 
-		//TRIGGERS SECTION:
-		var triggers=[];
-		$.ajax({
-			type: "get",
-			url: '/api/triggers/'+managerId,				
-			success: function(data){
-				
-				if(data){
-					
-					$.each(data,function(i,t){						
-						var cntr=$('div[data-trigger-type='+t.type+']');
-						cntr.find('textarea[name=text]').val(t.text);
-						cntr.find('input[name=link]').val(t.link);
-						cntr.find('select[name=sound]').val(t.sound);
-						cntr.find('input[name=minInterval]').val(t.minInterval);
-						if(!t.isActive){
-							cntr.find('input[name=isActive]').prop('checked',false);	
-							cntr.find('input[name=isActive]').parent().removeClass('switch-on').addClass('switch-off'); //TODO- this should happen automatically !!!
-						}
-					});
-				}
-				//$('input[name=isActive][data-trigger-type=recognized]').prop('checked',true);	
-				//$('input[name=isActive][data-trigger-type=recognized]').addClass('ido');	
-			}	
-		});
-		$('#btn-update-triggers').on('click',function(){
-			var data =[];
-			$.each($(['recognized','roost-cancelation','roost-welcome-back']),function(i,type){						
-				var cntr=$('div[data-trigger-type='+type+']');
-				var trigger={};
-				trigger.type=type;
-				trigger.text=cntr.find('textarea[name=text]').val();
-				trigger.link=cntr.find('input[name=link]').val();
-				trigger.sound=cntr.find('select[name=sound]').val();	
-				if(type=='recognized'){
-					trigger.minInterval=cntr.find('input[name=minInterval]').val();	
-				}
-				trigger.isActive=cntr.find('input[name=isActive]').is(":checked");
-				data.push(trigger);
-			});
-			//var json = JSON.stringify(data);
-			//console.log('this is the json: '+json);
-			console.log('this is the data that will be sent: ');
-			console.log(JSON.stringify(data));
-			$.ajax({
-				type: "POST",
-				url: '/api/triggers/'+managerId,
-				contentType: "application/json",				
-				data: JSON.stringify(data),
-				success: function(data){
-					console.log(json);
-				}
-			});
-		});
-		//TRIGGERS SECTION---END
-	});
-	</script>
+
+});
+</script>
+<!-- BEGIN IDO SCRIPTS -->
+<script src="ido-assets/ido-main.js"></script>     
+<!--<script src="ido-assets/data-upload.js"></script>-->
+<script src="ido-assets/campaign-wizard.js"></script>
+<script src="ido-assets/triggers.js"></script>
+<script src="ido-assets/data-upload.js"></script>
+<!-- END IDO SCRIPTS -->
+<script type="text/javascript">
+/*Global vars*/
+var numOfRows=0;
+var oTable;
+
+var init = {};
+</script>
+
+
+<script>
+/*function initCampaigns(){alert('hey');}*/
+/*initClient['campaigns'] = function(){*/
+$('.page-sidebar-menu li a').on('click', function(){
+	$('.page-sidebar-menu li').removeClass('active');
+	$(this).parent().addClass('active');
+	var templateName = $(this).attr('data-template');
+	console.log(templateName);
+	loadTemplate(templateName);
+});
+
+$(document).ready(function(){
+	init = {
+		campaigns: initCampaings,
+		triggers: initTriggers,
+		dataUpload: initDataUpload
+	};
+	/*$('.page-sidebar-menu li:nth-child(3)').trigger('click');*/
+
+});
+</script>
 
 
 
 
-	<!-- Ido Styling END-->
-	
-	<!-- new plugin End-->
-	
-	<!-- END JAVASCRIPTS -->
-	
+
+
+
+
+<!-- END JAVASCRIPTS -->
 </body>
 <!-- END BODY -->
 </html>

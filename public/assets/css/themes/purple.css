@@ -10,7 +10,7 @@ body {
 /***
 Page header
 ***/
-.header .navbar-inner {
+.header {
   filter: none !important;
   background-image: none !important;
   background-color: #470d54 !important;
@@ -18,12 +18,81 @@ Page header
 .header .btn-navbar {
   background-color: #470d54 !important;
 }
-.header .nav .dropdown-toggle:hover,
-.header .nav .dropdown.open .dropdown-toggle {
+.header .navbar-nav .dropdown-toggle:hover,
+.header .navbar-nav .dropdown.open .dropdown-toggle {
   background-color: #69147b !important;
 }
-.header .nav li.dropdown .dropdown-toggle i {
+.header .navbar-nav li.dropdown .dropdown-toggle i {
   color: #c84fe3 !important;
+}
+/***
+Header Search
+***/
+
+.header .search-form .form-control{
+  color: #ccc;
+  background-color: #701584;  
+}
+
+.header .search-form .submit {  
+  background: url(../../img/search-icon-purple.png);
+}
+/***
+Hor menu
+***/
+.header .hor-menu ul.nav li a {
+  color: #ccc;
+}
+
+.header .hor-menu ul.nav li.open > a,
+.header .hor-menu ul.nav li > a:hover,
+.header .hor-menu ul.nav li > a:focus {
+  color: #fff;
+  background: #69147b;
+}
+
+.header .hor-menu .dropdown-menu li:hover > a,
+.header .hor-menu ul.nav li.active > a,
+.header .hor-menu ul.nav li.active > a:hover {
+  color: #fff;
+  background: #e02222 !important; 
+}
+
+.header .hor-menu .dropdown-menu {  
+    background: #69147b;
+}
+.header .hor-menu .dropdown-menu li > a {    
+    color: #ccc;
+}
+
+.header .hor-menu .hor-menu-search-form-toggler.off {
+   background: #69147b url(../../img/hor-menu-search-close-white.png) no-repeat center;
+}
+
+.header .hor-menu .search-form {  
+  background:#69147b; 
+}
+
+.header .hor-menu .search-form form input {
+  color: #ccc;
+}
+
+.header .hor-menu .search-form .btn {
+  color: #ccc;
+  background: url(../../img/search-icon-white.png) no-repeat center;
+}
+
+.header .hor-menu .search-form form input::-webkit-input-placeholder { /* WebKit browsers */
+    color: #ccc;
+}
+.header .hor-menu .search-form form input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #ccc;
+}
+.header .hor-menu .search-form form input::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #ccc;
+}
+.header .hor-menu .search-form form input:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color: #ccc;
 }
 /***
 Page sidebar
@@ -124,52 +193,15 @@ Sidebar toggler
   background-color: #4b0e58;
 }
 /* search box bg color on expanded */
-.page-sidebar-closed .page-sidebar .sidebar-search.open {
+.page-sidebar-closed .page-sidebar .sidebar-search.open .form-container {
   background-color: #701584 !important;
 }
-.page-sidebar-closed .page-sidebar .sidebar-search.open .remove {
+.page-sidebar-closed .page-sidebar .sidebar-search.open .form-container .remove {
   background-image: url("../../img/sidebar-search-close-purple.png");
 }
 /* sub menu bg color on hover menu item */
 .page-sidebar-closed ul.page-sidebar-menu > li:hover .sub-menu {
   background-color: #701584;
-}
-/***
-Horizontal Menu(new in v1.2)
-***/
-/*search*/
-.header .hor-menu .hor-menu-search-form-toggler.hide {
-  background: #000000 url(../../img/hor-menu-search-close.png) no-repeat center;
-}
-.header .hor-menu .search-form {
-  background: #000000;
-}
-.header .hor-menu .search-form .btn {
-  color: #f1d3f8;
-  background: #000000 url(../../img/search-icon.png) no-repeat center;
-}
-.header .hor-menu .search-form form input {
-  color: #f1d3f8;
-}
-.header .hor-menu .search-form form input::-webkit-input-placeholder {
-  /* WebKit browsers */
-
-  color: #f1d3f8;
-}
-.header .hor-menu .search-form form input:-moz-placeholder {
-  /* Mozilla Firefox 4 to 18 */
-
-  color: #f1d3f8;
-}
-.header .hor-menu .search-form form input::-moz-placeholder {
-  /* Mozilla Firefox 19+ */
-
-  color: #f1d3f8;
-}
-.header .hor-menu .search-form form input:-ms-input-placeholder {
-  /* Internet Explorer 10+ */
-
-  color: #f1d3f8;
 }
 /***
 Footer 
@@ -239,7 +271,7 @@ Gritter Notifications
   color: #0b6694;
 }
 /* begin: boxed page */
-@media (min-width: 980px) {
+@media (min-width: 992px) {
   .page-boxed {
     background-color: #5a116a !important;
   }
@@ -248,12 +280,25 @@ Gritter Notifications
     border-left: 1px solid #a11ebd;
     border-bottom: 1px solid #a11ebd;
   }
+  .page-boxed.page-sidebar-reversed .page-container {
+    border-left: 0;
+    border-right: 1px solid #a11ebd;
+  }
   .page-boxed.page-sidebar-fixed .page-container {
     border-left: 0;
     border-bottom: 0;
   }
+  .page-boxed.page-sidebar-reversed.page-sidebar-fixed .page-container {
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
   .page-boxed.page-sidebar-fixed .page-sidebar {
     border-left: 1px solid #a11ebd;
+  }
+  .page-boxed.page-sidebar-reversed.page-sidebar-fixed .page-sidebar {
+    border-right: 1px solid #a11ebd;
+    border-left: 0; 
   }
   .page-boxed.page-sidebar-fixed.page-footer-fixed .footer {
     background-color: #5a116a !important;
@@ -263,7 +308,7 @@ Gritter Notifications
 /***
 Landscape phone to portrait tablet
 ***/
-@media (max-width: 979px) {
+@media (max-width: 991px) {
   /***
     page sidebar
     ***/

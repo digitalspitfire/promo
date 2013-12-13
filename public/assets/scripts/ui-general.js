@@ -15,20 +15,14 @@ var UIGeneral = function () {
             });
 
             jQuery('#pulsate-once').click(function () {
-                $(this).pulsate({
+                $('#pulsate-once-target').pulsate({
                     color: "#399bc3",
                     repeat: false
                 });
             });
 
-            jQuery('#pulsate-hover').pulsate({
-                color: "#5ebf5e",
-                repeat: false,
-                onHover: true
-            });
-
             jQuery('#pulsate-crazy').click(function () {
-                $(this).pulsate({
+                $('#pulsate-crazy-target').pulsate({
                     color: "#fdbe41",
                     reach: 50,
                     repeat: 10,
@@ -137,6 +131,9 @@ var UIGeneral = function () {
 
     var handleDynamicPagination = function() {
         $('#dynamic_pager_demo1').bootpag({
+            paginationClass: 'pagination',
+            next: '<i class="fa fa-angle-right"></i>',
+            prev: '<i class="fa fa-angle-left"></i>',
             total: 6,
             page: 1,
         }).on("page", function(event, num){
@@ -144,6 +141,9 @@ var UIGeneral = function () {
         });
 
         $('#dynamic_pager_demo2').bootpag({
+            paginationClass: 'pagination pagination-sm',
+            next: '<i class="fa fa-angle-right"></i>',
+            prev: '<i class="fa fa-angle-left"></i>',
             total: 24,
             page: 1,
             maxVisible: 6 

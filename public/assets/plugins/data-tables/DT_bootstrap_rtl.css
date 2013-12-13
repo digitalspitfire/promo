@@ -12,7 +12,8 @@ div.dataTables_filter label {
 }
 
 div.dataTables_info {
-	padding-top: 8px;
+	position: relative;
+	top:15px;
 }
 
 div.dataTables_paginate {
@@ -79,21 +80,6 @@ div.dataTables_scrollFoot table {
 /*
  * TableTools styles
  */
-.table tbody tr.active td,
-.table tbody tr.active th {
-	background-color: #08C;
-	color: white;
-}
-
-.table tbody tr.active:hover td,
-.table tbody tr.active:hover th {
-	background-color: #0075b0 !important;
-}
-
-.table-striped tbody tr.active:nth-child(odd) td,
-.table-striped tbody tr.active:nth-child(odd) th {
-	background-color: #017ebc;
-}
 
 table.DTTT_selectable tbody tr {
 	cursor: pointer;
@@ -174,4 +160,63 @@ div.DTFC_LeftBodyWrapper tbody tr:first-child td {
 
 div.DTFC_LeftFootWrapper table {
 	border-top: none;
+}
+
+
+/*
+ * FixedColumns styles
+ */
+div.DTFC_LeftHeadWrapper table,
+div.DTFC_LeftFootWrapper table,
+table.DTFC_Cloned tr.even {
+	background-color: white;
+}
+
+div.DTFC_LeftHeadWrapper table {
+	margin-bottom: 0 !important;
+	border-top-right-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+div.DTFC_LeftHeadWrapper table thead tr:last-child th:first-child,
+div.DTFC_LeftHeadWrapper table thead tr:last-child td:first-child {
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+div.DTFC_LeftBodyWrapper table {
+	border-top: none;
+	margin-bottom: 0 !important;
+}
+
+div.DTFC_LeftBodyWrapper tbody tr:first-child th,
+div.DTFC_LeftBodyWrapper tbody tr:first-child td {
+	border-top: none;
+}
+
+div.DTFC_LeftFootWrapper table {
+	border-top: none;
+}
+
+.dataTables_processing {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 180px;
+	height: 40px;
+	margin-right: -90px;
+	padding: 10px 0 10px 0;
+	text-align: center;
+	color: #333;
+	font-size: 13px;
+	background-color: #ddd;
+}
+
+.dataTables_paginate .pagination .fa-angle-right:before {
+	content: "\f104";
+}
+
+.dataTables_paginate .pagination .fa-angle-left:before {
+	content: "\f105";
 }

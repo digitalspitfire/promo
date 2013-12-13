@@ -205,11 +205,11 @@ var Index = function () {
             }
 
             function showTooltip(title, x, y, contents) {
-                $('<div id="tooltip" class="chart-tooltip"><div class="date">' + title + '<\/div><div class="label label-success">CTR: ' + x / 10 + '%<\/div><div class="label label-important">Imp: ' + x * 12 + '<\/div><\/div>').css({
+                $('<div id="tooltip" class="chart-tooltip"><div class="date">' + title + '<\/div><div class="label label-success">CTR: ' + x / 10 + '%<\/div><div class="label label-danger">Imp: ' + x * 12 + '<\/div><\/div>').css({
                     position: 'absolute',
                     display: 'none',
                     top: y - 100,
-                    width: 75,
+                    width: 80,
                     left: x - 40,
                     border: '0px solid #ccc',
                     padding: '2px 6px',
@@ -653,63 +653,51 @@ var Index = function () {
         initDashboardDaterange: function () {
 
             $('#dashboard-report-range').daterangepicker({
-                ranges: {
-                    'Today': ['today', 'today'],
-                    'Yesterday': ['yesterday', 'yesterday'],
-                    'Last 7 Days': [Date.today().add({
-                            days: -6
-                        }), 'today'],
-                    'Last 30 Days': [Date.today().add({
-                            days: -29
-                        }), 'today'],
-                    'This Month': [Date.today().moveToFirstDayOfMonth(), Date.today().moveToLastDayOfMonth()],
-                    'Last Month': [Date.today().moveToFirstDayOfMonth().add({
-                            months: -1
-                        }), Date.today().moveToFirstDayOfMonth().add({
-                            days: -1
-                        })]
-                },
                 opens: (App.isRTL() ? 'right' : 'left'),
-                format: 'MM/dd/yyyy',
-                separator: ' to ',
-                startDate: Date.today().add({
-                    days: -29
-                }),
-                endDate: Date.today(),
+                startDate: moment().subtract('days', 29),
+                endDate: moment(),
                 minDate: '01/01/2012',
                 maxDate: '12/31/2014',
+                dateLimit: {
+                    days: 60
+                },
+                showDropdowns: false,
+                showWeekNumbers: true,
+                timePicker: false,
+                timePickerIncrement: 1,
+                timePicker12Hour: true,
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                    'Last 7 Days': [moment().subtract('days', 6), moment()],
+                    'Last 30 Days': [moment().subtract('days', 29), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                },
+                buttonClasses: ['btn'],
+                applyClass: 'blue',
+                cancelClass: 'default',
+                format: 'MM/DD/YYYY',
+                separator: ' to ',
                 locale: {
-                    applyLabel: 'Submit',
+                    applyLabel: 'Apply',
                     fromLabel: 'From',
                     toLabel: 'To',
                     customRangeLabel: 'Custom Range',
                     daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
                     monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                     firstDay: 1
-                },
-                showWeekNumbers: true,
-                buttonClasses: ['btn-danger']
+                }
             },
-
             function (start, end) {
-                App.blockUI(jQuery("#dashboard"));
-                setTimeout(function () {
-                    App.unblockUI(jQuery("#dashboard"));
-                    $.gritter.add({
-                        title: 'Dashboard',
-                        text: 'Dashboard date range updated.'
-                    });
-                    App.scrollTo();
-                }, 1000);
-                $('#dashboard-report-range span').html(start.toString('MMMM d, yyyy') + ' - ' + end.toString('MMMM d, yyyy'));
+                console.log("Callback has been called!");
+                $('#dashboard-report-range span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            }
+            );
 
-            });
 
+            $('#dashboard-report-range span').html(moment().subtract('days', 29).format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
             $('#dashboard-report-range').show();
-
-            $('#dashboard-report-range span').html(Date.today().add({
-                days: -29
-            }).toString('MMMM d, yyyy') + ' - ' + Date.today().toString('MMMM d, yyyy'));
         },
 
         initIntro: function () {

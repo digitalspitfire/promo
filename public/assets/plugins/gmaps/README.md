@@ -5,8 +5,46 @@ GMaps.js allows you to use the potential of Google Maps in a simple way. No more
 
 Visit the examples in [hpneo.github.com/gmaps](http://hpneo.github.com/gmaps/)
 
+Build
+------
+
+If you would like to build gmaps from source run the following at the terminal:
+
+```sh
+git clone https://github.com/HPNeo/gmaps.git
+cd gmaps
+npm install
+grunt
+```
+
 Changelog
 ---------
+
+0.4.8
+-----------------------
+* Fix getRoutes
+
+0.4.7
+-----------------------
+* Add callback for failure in getRoutes
+* Update marker clusterer after remove marker
+* Add support for string arrays to arrayToLatLng
+
+0.4.6
+-----------------------
+* Allow initialising GMaps without new
+* Added styled map support for static maps
+* Fixed name display for styled maps
+* Allow no zoom for static map request
+
+0.4.5
+-----------------------
+* Fix IE8 bug using array_map
+* Add Grunt and Bower support
+
+0.4.4
+-----------------------
+* Fix buildContextMenu reference in addMarker
 
 0.4.3
 -----------------------

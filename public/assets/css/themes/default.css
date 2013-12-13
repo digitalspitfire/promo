@@ -1,6 +1,7 @@
 /***
 Default theme
 ***/
+
 /***
 Reset and overrides  
 ***/
@@ -10,7 +11,7 @@ body {
 /***
 Page header
 ***/
-.header .navbar-inner {
+.header {
   filter: none !important;
   background-image: none !important;
   background-color: #212121 !important;
@@ -18,13 +19,91 @@ Page header
 .header .btn-navbar {
   background-color: #212121 !important;
 }
-.header .nav .dropdown-toggle:hover,
-.header .nav .dropdown.open .dropdown-toggle {
+.header .navbar-nav .dropdown-toggle:hover,
+.header .navbar-nav .dropdown.open .dropdown-toggle {
   background-color: #383838 !important;
 }
-.header .nav li.dropdown .dropdown-toggle i {
+.header .navbar-nav li.dropdown .dropdown-toggle i {
   color: #8a8a8a !important;
 }
+
+/***
+Header Search
+***/
+
+.header .search-form .form-control{
+  color: #999;
+  background-color: #3d3d3d;  
+}
+
+.header .search-form .submit {  
+  background: url(../../img/search-icon.png);
+}
+
+/***
+Hor menu
+***/
+.header .hor-menu ul.nav li a {
+  color: #999;
+}
+
+.header .hor-menu ul.nav li.open > a,
+.header .hor-menu ul.nav li > a:hover,
+.header .hor-menu ul.nav li > a:focus {
+  color: #fff;
+  background: #383838;
+}
+
+.header .hor-menu .dropdown-menu li:hover > a,
+.header .hor-menu ul.nav li.active > a,
+.header .hor-menu ul.nav li.active > a:hover {
+  color: #fff;
+  background: #e02222 !important; 
+}
+
+.header .hor-menu ul.nav li.current > a,
+.header .hor-menu ul.nav li.current > a:hover {
+  color: #fff;
+  background: #e02222 !important; 
+}
+
+.header .hor-menu .dropdown-menu {  
+    background: #383838;
+}
+.header .hor-menu .dropdown-menu li > a {    
+    color: #999;
+}
+
+.header .hor-menu .hor-menu-search-form-toggler.off {
+   background: #383838 url(../../img/hor-menu-search-close.png) no-repeat center;
+}
+
+.header .hor-menu .search-form {  
+  background:#383838; 
+}
+
+.header .hor-menu .search-form form input {
+  color: #999;
+}
+
+.header .hor-menu .search-form .btn {
+  color: #999;
+  background: url(../../img/search-icon.png) no-repeat center;
+}
+
+.header .hor-menu .search-form form input::-webkit-input-placeholder { /* WebKit browsers */
+    color: #999;
+}
+.header .hor-menu .search-form form input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #999;
+}
+.header .hor-menu .search-form form input::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #999;
+}
+.header .hor-menu .search-form form input:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color: #999;
+}
+
 /***
 Page sidebar
 ***/
@@ -124,52 +203,15 @@ Sidebar toggler
   background-color: #242424;
 }
 /* search box bg color on expanded */
-.page-sidebar-closed .page-sidebar .sidebar-search.open {
+.page-sidebar-closed .page-sidebar .sidebar-search.open .form-container {
   background-color: #3d3d3d !important;
 }
-.page-sidebar-closed .page-sidebar .sidebar-search.open .remove {
+.page-sidebar-closed .page-sidebar .sidebar-search.open .form-container .remove {
   background-image: url("../../img/sidebar-search-close.png");
 }
 /* sub menu bg color on hover menu item */
 .page-sidebar-closed ul.page-sidebar-menu > li:hover .sub-menu {
   background-color: #3d3d3d;
-}
-/***
-Horizontal Menu(new in v1.2)
-***/
-/*search*/
-.header .hor-menu .hor-menu-search-form-toggler.hide {
-  background: #000000 url(../../img/hor-menu-search-close.png) no-repeat center;
-}
-.header .hor-menu .search-form {
-  background: #000000;
-}
-.header .hor-menu .search-form .btn {
-  color: #d6d6d6;
-  background: #000000 url(../../img/search-icon.png) no-repeat center;
-}
-.header .hor-menu .search-form form input {
-  color: #d6d6d6;
-}
-.header .hor-menu .search-form form input::-webkit-input-placeholder {
-  /* WebKit browsers */
-
-  color: #d6d6d6;
-}
-.header .hor-menu .search-form form input:-moz-placeholder {
-  /* Mozilla Firefox 4 to 18 */
-
-  color: #d6d6d6;
-}
-.header .hor-menu .search-form form input::-moz-placeholder {
-  /* Mozilla Firefox 19+ */
-
-  color: #d6d6d6;
-}
-.header .hor-menu .search-form form input:-ms-input-placeholder {
-  /* Internet Explorer 10+ */
-
-  color: #d6d6d6;
 }
 /***
 Footer 
@@ -239,7 +281,7 @@ Gritter Notifications
   color: #0b6694;
 }
 /* begin: boxed page */
-@media (min-width: 980px) {
+@media (min-width: 992px) {
   .page-boxed {
     background-color: #2e2e2e !important;
   }
@@ -248,12 +290,25 @@ Gritter Notifications
     border-left: 1px solid #5e5e5e;
     border-bottom: 1px solid #5e5e5e;
   }
+  .page-boxed.page-sidebar-reversed .page-container {
+    border-left: 0;
+    border-right: 1px solid #5e5e5e;
+  }
   .page-boxed.page-sidebar-fixed .page-container {
     border-left: 0;
     border-bottom: 0;
   }
+  .page-boxed.page-sidebar-reversed.page-sidebar-fixed .page-container {
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
   .page-boxed.page-sidebar-fixed .page-sidebar {
     border-left: 1px solid #5e5e5e;
+  }
+  .page-boxed.page-sidebar-reversed.page-sidebar-fixed .page-sidebar {
+    border-right: 1px solid #5e5e5e;
+    border-left: 0; 
   }
   .page-boxed.page-sidebar-fixed.page-footer-fixed .footer {
     background-color: #2e2e2e !important;
@@ -263,7 +318,7 @@ Gritter Notifications
 /***
 Landscape phone to portrait tablet
 ***/
-@media (max-width: 979px) {
+@media (max-width: 991px) {
   /***
     page sidebar
     ***/

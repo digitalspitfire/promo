@@ -87,7 +87,7 @@ GMaps.prototype.createMarker = function(options) {
     }
 
     if (window.context_menu[self.el.id]['marker'] != undefined) {
-      buildContextMenu('marker', e);
+      self.buildContextMenu('marker', e);
     }
   });
 
@@ -151,6 +151,10 @@ GMaps.prototype.removeMarker = function(marker) {
     if (this.markers[i] === marker) {
       this.markers[i].setMap(null);
       this.markers.splice(i, 1);
+
+      if(this.markerClusterer) {
+        this.markerClusterer.removeMarker(marker);
+      }
 
       GMaps.fire('marker_removed', marker, this);
 

@@ -11,6 +11,7 @@ console.log('listening in port 3000');
 
 //Loading static files:
 app.use(express.static(__dirname+'/public'));
+app.use(express.static(__dirname+'/public-old'));
 //Allow app.delete
 app.use(express.logger());
 
@@ -33,7 +34,9 @@ app.get('/test',function(req,res){
 app.get('/uploaded',function(req,res){
     res.sendfile('public/uploaded.html');
 });
-
+app.get('/manager-old',function(req,res){
+    res.sendfile('public-old/manager.html');
+});
 //DB deffenitions
 var Sq = require('sequelize-mysql').sequelize
 var mysql     = require('sequelize-mysql').mysql
@@ -41,7 +44,7 @@ var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
 var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
-var campaign = sq.define('campaign',{isActive:Sq.BOOLEAN, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, locationBase:Sq.TEXT, localMinTimeGap:{type:Sq.INTEGER, defaultValue:0},isRecruiting:{type:Sq.BOOLEAN, defaultValue:false}, filters:Sq.TEXT,sent:Sq.TEXT, isTerminated:{type:Sq.BOOLEAN, defaultValue:false}});
+var campaign = sq.define('campaign',{isActive:{type:Sq.BOOLEAN, defaultValue:false}, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, locationBase:Sq.TEXT, localMinTimeGap:{type:Sq.INTEGER, defaultValue:0},isRecruiting:{type:Sq.BOOLEAN, defaultValue:false}, filters:Sq.TEXT,sent:Sq.TEXT, isTerminated:{type:Sq.BOOLEAN, defaultValue:false}});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
 var activation = sq.define('activation',{mPhone:Sq.TEXT, deviceMac:Sq.TEXT, nodeMac:Sq.TEXT});
@@ -388,11 +391,11 @@ app.all('/api/dataFileUpload/:managerId',function(req, res){
         fs.writeFile(newPath, data, function(err){
             if(err){
                 result = err;
-                res.redirect('back');
+                res.send(304);
             }else{
                 console.log(newPath);
                 console.log('saved file. content: '+ data);
-                res.redirect('/manager?managerId=1&uploaded=true');    
+                res.send(200);
             }
         });
     });
@@ -661,6 +664,7 @@ app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
     if(rP.campaignId){
         campaign.find({where:{id:rP.campaignId,managerId:rP.managerId}}).success(function(c){
             if(c){
+                console.log(c);
                 uD.findAll({where:{managerId:rP.managerId}}).success(function(uDs){
                     if(uDs){
                         log('Getting managersFilters');
@@ -675,7 +679,8 @@ app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
             if(cs){
                 var campaigns = [];
                 for(var c in cs){
-                    campaigns.push(cs[c].dataValues);
+                    if( (!cs[c].isTerminated) && (!cs[c].isActive)){}//do not send this campaign //TODO this mechanism should be changed...
+                    else{campaigns.push(cs[c].dataValues);}
                 }
                 res.json(campaigns);
             }else{log('Error: no campaigns by this managerId...');}
@@ -689,18 +694,22 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
         if(req.params.campaignId && req.params.managerId){
             campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
                 if(c){
-                    c.updateAttributes(rB).success(function(c){
-                        log('Campaign-'+c.dataValues.id+' was updated');
-                        res.send('Campaign-'+c.dataValues.id+'was updated');    
-                        
-                        if(c.dataValues.isActive!=0){
-                            console.log('SSSSSSSSSSSSS');
+                    if(rB.isActive=='1'){ //registering new campaign:
+                        c.updateAttributes(rB).success(function(uC){
+                            res.send('Campaign-'+c.dataValues.id+'was updated');    
+                            log('Campaign-'+c.dataValues.id+' was updated, now scheduling....');
                             scheduleCampaign(c.dataValues);
-                        }else if(scheduledJobs[c.dataValues.id]){
-                                console.log('NNNNNNNNNNN');
+                        });
+                    }else{//User terminated campaign:
+                        c.updateAttributes({isActive:false,isTerminated:true}).success(function(uC){
+                            log('campaign was terminated by user');
+                            res.send('Campaign-'+c.dataValues.id+'was terminated');    
+                            if(scheduledJobs[c.dataValues.id]){
+                                log('Unscheduling campaign');
                                 scheduledJobs[c.dataValues.id].cancel();
-                        }
-                    });
+                            }
+                        });
+                    }
                 }else{log('Error: no campaign by this Id & managerId found..');}
             });
         }else{log('Error: no campaignId or managerId sent from client');}
@@ -735,23 +744,23 @@ app.get('/api/triggers/:managerId',function(req,res){
     });
 });
 app.all('/api/triggers/:managerId',function(req,res){
-    var data = '';
     var rB = req.body;
     var rP = req.params;
     console.log('body: ');
     console.log(rB);
-    
-    tM.findAll({where:{managerId:rP.managerId}}).success(function(tMs){
-        for(var trigger in tMs){
-            for(var t in rB){
-                if(rB[t].type==tMs[trigger].type){
-                    tMs[trigger].updateAttributes(rB[t]).success(function() {
-                        log('a');
-                    });
+    if(rB.type){
+        var type = rB.type.toString();
+        console.log(type);
+        if((type=="recognized" )|| (type=="roost-cancelation") || (type="roost-welcome-back")){
+            tM.find({where:{managerId:rP.managerId, type:type}}).success(function(t){//found
+                if(t){
+                    t.updateAttributes(rB).success(function() {
+                        log('Trigger of type "'+type+'" was updated');
+                    });    
                 }
-            }
-        }
-    });
+            });
+        }else{log('Error trigger with a bad type');}
+    }else{log('Error trigger with empty type');}
 });
 
 
@@ -1314,6 +1323,14 @@ function ValidURL(url) {
         } 
             return false;
 }
+
+
+
+/*var filters = {color:['brown'], Origin:['Rehovot'],age:['30-40']};
+var string = JSON.stringify(filters);
+log(string);
+campaign.create({filters:string, managerId:1}).success(function(){log('aa')});*/
+
 
 //===============SCHEDULE CAMPAIGNS========//
 //TODO:add enums : 0:one-time // 1:daily // 2:weekly
