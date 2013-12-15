@@ -7,26 +7,21 @@ function initTriggers(){
 
 }
 function loadTriggers(managerId){
-	var triggers=[];
-	$.ajax({
-		type: "get",
-		url: '/api/triggers/'+managerId,				
-		success: function(data){
-			if(data){
-				console.log('triggers from server:');
-				console.log(data);
-				$.each(data,function(i,t){						
-					var cntr=$('div[data-trigger-type='+t.type+']');
-					cntr.find('textarea[name=text]').val(t.text);
-					cntr.find('input[name=link]').val(t.link);
-					cntr.find('select[name=sound]').val(t.sound);
-					cntr.find('input[name=minInterval]').val(t.minInterval);
-					if(!t.isActive){
-						$('#isActive-'+t.type).bootstrapSwitch('setState', false);
-					}
-				});
-			}
-		}	
+	aGet('/api/triggers/'+managerId, function(data){
+		if(data){
+			console.log('triggers from server:');
+			console.log(data);
+			$.each(data,function(i,t){						
+				var cntr=$('div[data-trigger-type='+t.type+']');
+				cntr.find('textarea[name=text]').val(t.text);
+				cntr.find('input[name=link]').val(t.link);
+				cntr.find('select[name=sound]').val(t.sound);
+				cntr.find('input[name=minInterval]').val(t.minInterval);
+				if(!t.isActive){
+					$('#isActive-'+t.type).bootstrapSwitch('setState', false);
+				}
+			});
+		}
 	});
 }
 
@@ -40,14 +35,15 @@ $(function(){
 		t.link = $(cntr.find('input[name="link"]')[0]).val();
 		t.localMinTimeGap = $(cntr.find('input[name="minInterval"]')[0]).val();
 		console.log(t);
-		$.ajax({
+		/*$.ajax({
 			type: "post",
 			url: '/api/triggers/1',	//TODO add dynamic managerId
 			data: t,
 			success: function(newId) {
 				console.log('trigger update');
 			}
-		});
+		});*/
+		aPost('/api/triggers/1',t,function(newId){console.log('trigger update');});
 	});
 });
 

@@ -1,9 +1,84 @@
 var express = require('express');
 var app = express()
-                    .use(express.bodyParser());
+                    .use(express.bodyParser())
+                    app.use(express.cookieParser('idodo'));
+                    app.use(express.session());
 var fs = require('fs');
 var csv = require("fast-csv");
 var schedule = require('node-schedule');
+
+/*AUTHENTICATION:*/
+function isLoggedin(req, res, next) {
+  if (req.session.user) {
+    next();
+  } else {
+    req.session.error = 'Access denied!';
+    if(req.xhr){
+        res.send(401);
+    }else{
+        res.redirect('/login');
+    }
+  }
+}
+function isAdmin(req, res, next) {
+  if (req.session.admin) {
+    log('Authorised ADMIN call');
+    next();
+  } else {
+    log('Un-authorised ADMIN call');
+    req.session.error = 'Access denied!';
+    if(req.xhr){
+        res.send(401);
+    }else{
+        res.redirect('/login');
+    }
+  }
+}
+app.get('/login', function(req, res) {
+    res.sendfile('public/login.html')
+});
+app.post('/login', function(req, res) {
+    var username = req.body.username.toString().trim();
+    var password = req.body.password.toString().trim();
+    manager.find({where:{user:username, pass:password}}).success(function(m){
+        if(m){
+            req.session.regenerate(function(){
+                log('creating session');
+                req.session.user = username;
+                req.session.managerId = m.id;
+                //superAdmin:
+                if(m.id==1){req.session.admin=true;}
+                aManagerId = req.session.managerId;  //aManagerId = authenticated-Manager-Id
+                //cookie:
+                log('===========');
+                console.log(req.body.remember);
+                if(req.body.remember){
+                    log('setting cookie');
+                    res.cookie('remember',1,{maxAge:864000000,httpOnly:true});
+                }
+                res.redirect('/'); 
+            });
+        }else{
+            res.redirect('/login');
+        }
+    });
+});
+app.get('/logout', function(request, response){
+    request.session.destroy(function(){
+        /*res.clearCookie('remember');*/
+        response.redirect('/login');
+    });
+});
+//Restrict all API calls
+app.all('/api/*', isLoggedin, function(req, res,next){next();});
+app.all('/api/managers*', isLoggedin,isAdmin, function(req, res,next){
+    log('API login check');
+    next();
+});
+app.get('/isAdmin', isLoggedin, function(req, res){
+    res.send(req.session.admin);
+});
+/*AUTHENTICATION---END---*/
 
 app.listen(3000);
 console.log('listening in port 3000');
@@ -16,19 +91,17 @@ app.use(express.static(__dirname+'/public-old'));
 app.use(express.logger());
 
 //dashboard
-app.get('/dashboard',function(req,res){
-    res.sendfile('public/dashboard.html');
-});
-
 app.get('/admin',function(req,res){
     res.sendfile('public/admin.html');
 });
 
-app.get('/manager',function(req,res){
-    res.sendfile('public/manager.html');
+app.get('/',isLoggedin,function(req,res){
+    console.log(req.session.managerId);
+    res.sendfile('public/dashboard.html');
 });
-app.get('/test',function(req,res){
-    res.sendfile('public/test.html');
+//Dashboard templates
+app.get('/loadTemplate/:templateName',isLoggedin ,function(req,res){
+    res.sendfile('public/'+req.params.templateName+'.html');
 });
 //UplodedFile
 app.get('/uploaded',function(req,res){
@@ -105,6 +178,7 @@ app.get('/ivrcb',function(req,res){
 });
 
 //WIDGETS
+//TODO: limit to the widget IP OR roost IP or IVR IP !
 //Listen to widget #1, Register+ create activation if by Wifi   //TODO- add 'register-by-device-mac'
     //by phone
 app.all('/register-by-phone', function(req, res) {
@@ -356,6 +430,7 @@ function roostUnReg(rB, mPhoneTag, deviceMacTag, m){ //TODO this function works 
 }
 
 //NODES SH-SCRIPT
+//TODO add authentication here:
 //Listen to Node logon call:
 app.all('/radius/online',function(req,res){
     var rQ = req.query;
@@ -379,29 +454,37 @@ app.all('/radius/online',function(req,res){
 
 //===============DASHBOARD API LISTNERS ==============//
 //TODO-- we need to to add an event to create manager>> create 3 records in the triggerde messages table
+var aManagerId;
 
-
+app.get('/api/managerName',function(req,res){
+    manager.find({where:{id:aManagerId},attributes:['name']}).success(function(m){
+        if(m){
+            res.send(m.name);
+        }else{
+            res.send(404);
+        }
+    });
+});
 //Users data file upload + management
 app.all('/api/dataFileUpload/:managerId',function(req, res){
-    console.log(req.body);
-    console.log(req.files);
-    console.log(req.path);
     fs.readFile(req.files.dataFile.path, function(err,data){
-        var newPath = __dirname+'/uploads/data-'+req.params.managerId+'.csv';
+        var newPath = __dirname+'/uploads/data-'+aManagerId+'.csv';
         fs.writeFile(newPath, data, function(err){
             if(err){
                 result = err;
                 res.send(304);
+                log('304');
             }else{
                 console.log(newPath);
                 console.log('saved file. content: '+ data);
                 res.send(200);
+                log('200');
             }
         });
     });
 });
 app.get('/api/getCsvHeaders/:managerId', function(req,res){
-    manager.find({where:{id:req.params.managerId}}).success(function(m){
+    manager.find({where:{id:aManagerId}}).success(function(m){
         if(m){
             var uploadedData = [];
             var path = 'uploads/data-'+m.id+'.csv';
@@ -433,7 +516,7 @@ app.get('/api/getCsvHeaders/:managerId', function(req,res){
     });
 });
 app.post('/api/presentData/:managerId', function(req,res){
-    manager.find({where:{id:req.params.managerId}}).success(function(m){
+    manager.find({where:{id:aManagerId}}).success(function(m){
         if(m){
             var cellularCol = req.body.celCol;
             var selectedCols = req.body.selectedCols;
@@ -472,7 +555,7 @@ app.post('/api/presentData/:managerId', function(req,res){
     });
 });
 app.get('/api/update-users-data/:managerId',function(req,res){
-   manager.find({where:{id:req.params.managerId}}).success(function(m){
+   manager.find({where:{id:aManagerId}}).success(function(m){
         if(m){
             var uploadedData = [];
             var path = 'uploads/data-'+m.id+'.csv';
@@ -551,7 +634,7 @@ function updateUserDataValue(organizedData , index, res){
     }
 }
 app.get('/api/usersData/:managerId',function(req,res){
-   manager.find({where:{id:req.params.managerId}}).success(function(m){
+   manager.find({where:{id:aManagerId}}).success(function(m){
         if(m){
             uD.findAll({where:{managerId:m.id}}).success(function(users){
                 if(users){
@@ -597,6 +680,7 @@ app.get('/api/managers/:managerId?',function(req,res){
     }
 });
 app.post('/api/managers/:managerId?',function(req,res){
+    console.log(req.path);
     if(req.params.managerId){ //updating exsiting manager
         var rP = req.params;
         var rB = req.body;
@@ -626,12 +710,12 @@ app.post('/api/managers/:managerId?',function(req,res){
                         //Insert new nodes
                         if(nodes[0]){
                             node.bulkCreate(nodes).success(function(x){
-                            //Delete old nodes
-                            node.destroy({id:nodesIdToDel}).success(function(){
-                                log('Manager-'+m.dataValues.id+' NODES were updated');
-                                res.send('Manager-'+m.dataValues.id+' was updated');    
+                                //Delete old nodes
+                                node.destroy({id:nodesIdToDel}).success(function(){
+                                    log('Manager-'+m.dataValues.id+' NODES were updated');
+                                    res.send('Manager-'+m.dataValues.id+' was updated');    
+                                });
                             });
-                        });
                         }
                     });
                 });
@@ -647,7 +731,7 @@ app.post('/api/managers/:managerId?',function(req,res){
     }    
 });
 app.delete('/api/managers/:managerId',function(req,res){
-    campaign.find({where:{id:req.params.managerId}}).success(function(m){
+    manager.find({where:{id:req.params.managerId}}).success(function(m){
         if(m){
             log('This manager id going to be deleted: '+m.id);
             m.destroy().success(function(){
@@ -662,10 +746,10 @@ app.delete('/api/managers/:managerId',function(req,res){
 app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
     var rP=req.params;
     if(rP.campaignId){
-        campaign.find({where:{id:rP.campaignId,managerId:rP.managerId}}).success(function(c){
+        campaign.find({where:{id:rP.campaignId,managerId:aManagerId}}).success(function(c){
             if(c){
                 console.log(c);
-                uD.findAll({where:{managerId:rP.managerId}}).success(function(uDs){
+                uD.findAll({where:{managerId:aManagerId}}).success(function(uDs){
                     if(uDs){
                         log('Getting managersFilters');
                         c.dataValues['managerFilters'] = getManagerFilters(uDs);
@@ -675,7 +759,7 @@ app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
             }else{log('Error: no campaign by this Id found..');}
         });
     }else{
-        campaign.findAll({where:{managerId:rP.managerId}}).success(function(cs){
+        campaign.findAll({where:{managerId:aManagerId}}).success(function(cs){
             if(cs){
                 var campaigns = [];
                 for(var c in cs){
@@ -692,7 +776,7 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
         var rB = req.body;
         console.log(rB);
         if(req.params.campaignId && req.params.managerId){
-            campaign.find({where:{id:req.params.campaignId,managerId:req.params.managerId}}).success(function(c){
+            campaign.find({where:{id:req.params.campaignId,managerId:aManagerId}}).success(function(c){
                 if(c){
                     if(rB.isActive=='1'){ //registering new campaign:
                         c.updateAttributes(rB).success(function(uC){
@@ -714,7 +798,7 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
             });
         }else{log('Error: no campaignId or managerId sent from client');}
     }else{ //creating new campaign
-        campaign.create({managerId:req.params.managerId}).success(function(nC){ //nC=newCampaign
+        campaign.create({managerId:aManagerId}).success(function(nC){ //nC=newCampaign
             if(nC){
                 log('new campaign created! id: '+nC.id);
                 res.json(nC.id);
@@ -722,25 +806,13 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
         });
     }    
 });
-app.delete('/api/campaigns/:managerId/:campaignId',function(req,res){
-    campaign.find({where:{id:req.params.campaignId}}).success(function(c){
-        if(c){
-            log('the c going to be deleted: '+c.id);
-            c.destroy().success(function(){
-                log('campaign deleted! id: '+c.id);
-                unScheduleCampaign(c.id);
-                res.json(c.id);
-            });
-        }
-    }); 
-});
 //Triggers:
 app.get('/api/triggers/:managerId',function(req,res){
-    tM.findAll({where:{managerId:req.params.managerId}}).success(function(tMs){
+    tM.findAll({where:{managerId:aManagerId}}).success(function(tMs){
         if(tMs){
             //var tMs = [];
             res.json(tMs);
-        }else{log('NOTE: no triggered message to this by this managerId...');res.sond('');}
+        }else{log('NOTE: no triggered message to this by this managerId...');res.send('');}
     });
 });
 app.all('/api/triggers/:managerId',function(req,res){
@@ -752,7 +824,7 @@ app.all('/api/triggers/:managerId',function(req,res){
         var type = rB.type.toString();
         console.log(type);
         if((type=="recognized" )|| (type=="roost-cancelation") || (type="roost-welcome-back")){
-            tM.find({where:{managerId:rP.managerId, type:type}}).success(function(t){//found
+            tM.find({where:{managerId:aManagerId, type:type}}).success(function(t){//found
                 if(t){
                     t.updateAttributes(rB).success(function() {
                         log('Trigger of type "'+type+'" was updated');

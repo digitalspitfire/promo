@@ -1,0 +1,150 @@
+<!-- BEGIN PAGE CONTENT-->
+<div class="row" id="items-list">
+	<div class="col-md-12">
+		<div class="portlet box blue" >
+			<div class="portlet-title">
+				<div class="caption">
+					<i class="fa fa-reorder"></i>כל המשתמשים
+				</div>
+			</div>
+			<div class="portlet-body">
+				<div class="table-toolbar">
+					<div class="btn-group">
+						<button id="add-new-manager" class="btn default">
+							הוסף חדש <i class="icon-plus"></i>
+						</button>
+					</div>
+				</div>
+				<table class="table table-striped table-bordered table-hover items-list" id="tbl-managers">
+					<thead>
+						<tr>
+							<th data-field="name">שם איש הקשר</th>
+							<th data-field="vendorName">שם המנוי</th>
+							<th data-field="phoneNumber">טלפון</th>
+							<th data-field="email">אימייל</th>									
+							<th>עריכה</th>
+							<th>מחיקה</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row" id="edit-item">
+	<div class="col-md-12">
+		<div class="portlet box blue tabbable">
+			<div class="portlet-title">
+				<div class="caption">
+					<i class="fa fa-reorder"></i> עריכת קמפיין
+				</div>
+			</div>
+			<div class="portlet-body form">
+				<div class="tabbable portlet-tabs">
+					<ul class="nav nav-tabs">
+						<li><a href="#portlet_tab4" data-toggle="tab">Roost</a></li>
+						<li><a href="#portlet_tab3" data-toggle="tab">Free WiFi</a></li>
+						<li><a href="#portlet_tab2" data-toggle="tab">IVR / SMS</a></li>
+						<li class="active"><a href="#portlet_tab1" data-toggle="tab">פרטי איש הקשר</a></li>
+					</ul>
+					<form class="form-horizontal">
+						<div class="tab-content">
+							<div class="tab-pane active" id="portlet_tab1">
+								<div class="form-group">
+									<label class="control-label col-md-3">שם העסק</label>
+									<div class="col-md-4">
+										<input type="text" name="name" placeholder="שם העסק" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">שם איש הקשר</label>
+									<div class="col-md-4">
+										<input type="text" name="vendorName" placeholder="שם איש הקשר" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">אימייל</label>
+									<div class="col-md-4">
+										<input type="text" name="email" placeholder="אימייל" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">טלפון</label>
+									<div class="col-md-4">
+										<input type="text" name="phoneNumber" placeholder="טלפון" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">שם משתמש במערכת</label>
+									<div class="col-md-4">
+										<input type="text" name="user" placeholder="שם משתמש במערכת" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">סיסמה</label>
+									<div class="col-md-4">
+										<input type="text" name="pass" placeholder="סיסמה" class="form-control" />
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="portlet_tab2">
+								<div class="form-group">
+									<label class="control-label col-md-3">הטלפון במערכת IVR</label>
+									<div class="col-md-4">
+										<input type="text" name="ivrPhone" placeholder="טלפון IVR" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">IVR ID</label>
+									<div class="col-md-4">
+										<input type="text" name="ivrId" placeholder="IVR ID" class="form-control" />
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="portlet_tab3">
+								<div class="form-group">
+									<label class="control-label col-md-3"></label>
+									<div class="col-md-4">
+										<button type="button" id="btn-add-node" class="btn green">
+											<i class="icon-plus"></i> הוסף NODE 
+										</button>
+									</div>									
+								</div>
+							</div>
+							<div class="tab-pane" id="portlet_tab4">
+								<div class="form-group">
+									<label class="control-label col-md-3">Roost geo-location</label>
+									<div class="col-md-4">
+										<input type="text" name="roostGeoLoc" placeholder="Roost geo-location" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">Roost config key</label>
+									<div class="col-md-4">
+										<input type="text" name="roostConfKey" placeholder="Roost config key" class="form-control" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">Roost secret key</label>
+									<div class="col-md-4">
+										<input type="text" name="roostSecretKey" placeholder="Roost config key" class="form-control" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="form-actions clearfix">
+					<a href="javascript:;" class="btn button-previous" id="btn-all-managers">
+					<i class="m-icon-swapleft"></i> חזרה לכל המשתמשים
+					</a>
+					<a href="javascript:;" class="btn green button-submit" id="btn-save-item">
+					שמור שינויים <i class="m-icon-swapright m-icon-white"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
