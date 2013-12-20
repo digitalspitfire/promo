@@ -3,16 +3,14 @@ var FormWizard = function () {
 
     return {
         //main function to initiate the module
-        init: function () {
+        init: function (currentWizard) {
             if (!jQuery().bootstrapWizard) {
                 return;
             }
-
             function format(state) {
                 if (!state.id) return state.text; // optgroup
                 return "<img class='flag' src='assets/img/flags/" + state.id.toLowerCase() + ".png'/>&nbsp;&nbsp;" + state.text;
             }
-
             $("#country_list").select2({
                 placeholder: "Select",
                 allowClear: true,
@@ -26,28 +24,21 @@ var FormWizard = function () {
             var form = $('#submit_form');
             var error = $('.alert-danger', form);
             var success = $('.alert-success', form);
-
-            form.validate({
-                doNotHideMessage: true, //this option enables to show the error/success messages on tab switch.
-                errorElement: 'span', //default input error message container
-                errorClass: 'help-block', // default input error message class
-                focusInvalid: false, // do not focus the last invalid input
-                rules: {
-                    //account
-                    username: {
+            if(currentWizard=='#form-wizard-campaigns'){
+                var rules={
+                    //step 1
+                    name: {
+                        minlength: 1,
+                        required: true
+                    },
+                    message: {
                         minlength: 5,
                         required: true
                     },
-                    password: {
-                        minlength: 5,
-                        required: true
+                    category: {
+                        emptyNotification: "קטגוריה"
                     },
-                    rpassword: {
-                        minlength: 5,
-                        required: true,
-                        equalTo: "#submit_form_password"
-                    },
-                    //profile
+                    //receivers
                     fullname: {
                         required: true
                     },
@@ -70,9 +61,9 @@ var FormWizard = function () {
                     country: {
                         required: true
                     },
-                    //payment
-                    card_name: {
-                        required: true
+                    //content
+                    link: {
+                        emptyNotification: "קישור"
                     },
                     card_number: {
                         minlength: 16,
@@ -92,8 +83,36 @@ var FormWizard = function () {
                         required: true,
                         minlength: 1
                     }
-                },
+                }
+            }else{
+                var rules = {}
+            }
+            
+            console.log('rules:');
+            console.log(rules);
 
+/*            $('#submit_form').validate({
+                
+                success:function(){
+                    alert('yes');
+                    
+                    aPost('/api/campaigns/1/'+id,data,function(response) {
+                        console.log(response);      
+                        var alertSuccess = wizard.find('.form-actions .alert-success');
+                        alertSuccess.addClass('visible');
+                        setTimeout(function(){alertSuccess.removeClass('visible');},2000);
+                        
+                        //TODO add an "saved" notification
+                    });
+                },
+                error: function(){alert('error');}
+        });*/
+            form.validate({
+                doNotHideMessage: true, //this option enables to show the error/success messages on tab switch.
+                errorElement: 'span', //default input error message container
+                errorClass: 'help-block', // default input error message class
+                focusInvalid: false, // do not focus the last invalid input
+                rules: rules,
                 messages: { // custom messages for radio buttons and checkboxes
                     'payment[]': {
                         required: "Please select at least one option",
@@ -170,33 +189,33 @@ var FormWizard = function () {
                 var total = navigation.find('li').length;
                 var current = index + 1;
                 // set wizard title
-                $('.step-title', $('#form_wizard_1')).text('Step ' + (index + 1) + ' of ' + total);
+                $('.step-title', $(currentWizard)).text('Step ' + (index + 1) + ' of ' + total);
                 // set done steps
-                jQuery('li', $('#form_wizard_1')).removeClass("done");
+                jQuery('li', $(currentWizard)).removeClass("done");
                 var li_list = navigation.find('li');
                 for (var i = 0; i < index; i++) {
                     jQuery(li_list[i]).addClass("done");
                 }
 
                 if (current == 1) {
-                    $('#form_wizard_1').find('.button-previous').hide();
+                    $(currentWizard).find('.button-previous').hide();
                 } else {
-                    $('#form_wizard_1').find('.button-previous').show();
+                    $(currentWizard).find('.button-previous').show();
                 }
 
                 if (current >= total) {
-                    $('#form_wizard_1').find('.button-next').hide();
-                    $('#form_wizard_1').find('.button-submit').show();
+                    $(currentWizard).find('.button-next').hide();
+                    $(currentWizard).find('.button-submit').show();
                     displayConfirm();
                 } else {
-                    $('#form_wizard_1').find('.button-next').show();
-                    $('#form_wizard_1').find('.button-submit').hide();
+                    $(currentWizard).find('.button-next').show();
+                    $(currentWizard).find('.button-submit').hide();
                 }
                 App.scrollTo($('.page-title'));
             }
 
             // default form wizard
-            $('#form_wizard_1').bootstrapWizard({
+            $(currentWizard).bootstrapWizard({
                 'nextSelector': '.button-next',
                 'previousSelector': '.button-previous',
                 onTabClick: function (tab, navigation, index, clickedIndex) {
@@ -214,8 +233,15 @@ var FormWizard = function () {
                     if (form.valid() == false) {
                         return false;
                     }
+                    //ido:
+                    if( notificationsApproved(currentWizard, tab, this.nextSelector) ){
+                        handleTitle(tab, navigation, index);    
+                    }else{
+                        return false;
+                    }
+                    /*handleTitle(tab, navigation, index);    */
 
-                    handleTitle(tab, navigation, index);
+                    
                 },
                 onPrevious: function (tab, navigation, index) {
                     success.hide();
@@ -227,14 +253,14 @@ var FormWizard = function () {
                     var total = navigation.find('li').length;
                     var current = index + 1;
                     var $percent = (current / total) * 100;
-                    $('#form_wizard_1').find('.progress-bar').css({
+                    $(currentWizard).find('.progress-bar').css({
                         width: $percent + '%'
                     });
                 }
             });
 
-            $('#form_wizard_1').find('.button-previous').hide();
-            $('#form_wizard_1 .button-submit').click(function () {
+            $(currentWizard).find('.button-previous').hide();
+            $(currentWizard).find('.button-submit').click(function () {
                 /*debugger;*/
                 alert('Finished! Hope you like it XXX :)');
             }).hide();

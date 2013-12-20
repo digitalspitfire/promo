@@ -4,14 +4,14 @@
 		<div class="portlet box blue" >
 			<div class="portlet-title">
 				<div class="caption">
-					<i class="fa fa-reorder"></i>כל המשתמשים
+					<i class="fa fa-user"></i>כל הלקוחות
 				</div>
 			</div>
 			<div class="portlet-body">
 				<div class="table-toolbar">
 					<div class="btn-group">
-						<button id="add-new-manager" class="btn default">
-							הוסף חדש <i class="icon-plus"></i>
+						<button id="add-new-manager" class="btn btn-warning">
+							<i class="fa fa-plus"></i> לקוח חדש
 						</button>
 					</div>
 				</div>
@@ -23,7 +23,6 @@
 							<th data-field="phoneNumber">טלפון</th>
 							<th data-field="email">אימייל</th>									
 							<th>עריכה</th>
-							<th>מחיקה</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -38,7 +37,7 @@
 		<div class="portlet box blue tabbable">
 			<div class="portlet-title">
 				<div class="caption">
-					<i class="fa fa-reorder"></i> עריכת קמפיין
+					<i class="fa fa-user"></i> נתוני לקוח
 				</div>
 			</div>
 			<div class="portlet-body form">
@@ -88,6 +87,12 @@
 										<input type="text" name="pass" placeholder="סיסמה" class="form-control" />
 									</div>
 								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">כתובת יישומון</label>
+									<div class="col-md-4">
+										<input type="text" name="widgetUrl" placeholder="כתובת הווידג'ט..." class="form-control" />
+									</div>
+								</div>
 							</div>
 							<div class="tab-pane" id="portlet_tab2">
 								<div class="form-group">
@@ -104,7 +109,7 @@
 								</div>
 							</div>
 							<div class="tab-pane" id="portlet_tab3">
-								<div class="form-group">
+								<div class="form-group btn-add-node">
 									<label class="control-label col-md-3"></label>
 									<div class="col-md-4">
 										<button type="button" id="btn-add-node" class="btn green">
@@ -136,12 +141,15 @@
 						</div>
 					</form>
 				</div>
-				<div class="form-actions clearfix">
-					<a href="javascript:;" class="btn button-previous" id="btn-all-managers">
+				<div class="form-actions clearfix managers">
+					<!-- <a href="javascript:;" class="btn button-previous" id="btn-all-managers">
 					<i class="m-icon-swapleft"></i> חזרה לכל המשתמשים
-					</a>
-					<a href="javascript:;" class="btn green button-submit" id="btn-save-item">
-					שמור שינויים <i class="m-icon-swapright m-icon-white"></i>
+					</a> -->
+					<div class="alert alert-success">
+						<strong>השינויים נשמרו בהצלחה !</strong>
+					</div>
+					<a href="javascript:;" class="btn green button-submit" id="btn-save-manager">
+						<i class="fa fa-save"></i> שמור שינויים 
 					</a>
 				</div>
 			</div>

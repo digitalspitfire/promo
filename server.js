@@ -116,7 +116,7 @@ var mysql     = require('sequelize-mysql').mysql
 var sq = new Sq('promonim', 'root', 'rootpass');
 
 var conf = sq.define('conf',{name:Sq.TEXT,value:Sq.TEXT});
-var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
+var manager = sq.define('manager',{vendorName:Sq.TEXT, name:Sq.TEXT, email:Sq.TEXT, phoneNumber:Sq.TEXT, user:Sq.TEXT, pass:Sq.TEXT,widgetUrl:Sq.TEXT,ivrId:Sq.INTEGER,ivrPhone:Sq.INTEGER,roostConfKey:Sq.TEXT,roostSecretKey:Sq.TEXT,roostSecretKey:Sq.TEXT, roostGeoLoc:Sq.TEXT});
 var campaign = sq.define('campaign',{isActive:{type:Sq.BOOLEAN, defaultValue:false}, name:Sq.TEXT, category:Sq.TEXT,goals:Sq.TEXT,budget:Sq.TEXT,message:Sq.TEXT, link:Sq.TEXT,sound:Sq.TEXT, recurring:Sq.TEXT, dayOfWeek:Sq.INTEGER, hour:Sq.INTEGER, locationBase:Sq.TEXT, localMinTimeGap:{type:Sq.INTEGER, defaultValue:0},isRecruiting:{type:Sq.BOOLEAN, defaultValue:false}, filters:Sq.TEXT,sent:Sq.TEXT, isTerminated:{type:Sq.BOOLEAN, defaultValue:false}});
 var node = sq.define('node',{nodeMac:Sq.TEXT});
 var filter = sq.define('filter',{name:Sq.TEXT});
@@ -456,11 +456,21 @@ app.all('/radius/online',function(req,res){
 //TODO-- we need to to add an event to create manager>> create 3 records in the triggerde messages table
 var aManagerId;
 
-app.get('/api/managerName',function(req,res){
-    manager.find({where:{id:aManagerId},attributes:['name']}).success(function(m){
-        if(m){
-            res.send(m.name);
+app.get('/api/manager-self',function(req,res){
+    manager.findAll({where:{id:aManagerId},include:[node]}).success(function(ms){
+        if(ms){
+            var manager=ms[0].dataValues;
+            var nodes = [];
+            for(var m in ms){
+                if(ms[m].nodes[0]){
+                    var nodeMac = ms[m].nodes[0].dataValues.nodeMac;
+                    nodes.push(nodeMac);
+                }
+            }
+            manager.nodes = nodes;
+            res.json(manager);    
         }else{
+            log('Error: no manager by this Id found...');
             res.send(404);
         }
     });
@@ -698,26 +708,30 @@ app.post('/api/managers/:managerId?',function(req,res){
                                 nodes.push({managerId:rP.managerId,nodeMac:nodeMac});
                             }
                         }    
-                    }
-                    node.findAll({where:{managerId:rP.managerId}}).success(function(nTds){ //TODO delete all old ones !!!
-                        //List old nodes:
-                        var nodesIdToDel = [];
-                        if(nTds){
-                            for(var nTd in nTds){
-                                nodesIdToDel.push(nTds[nTd].dataValues.id);
+                        node.findAll({where:{managerId:rP.managerId}}).success(function(nTds){ //TODO delete all old ones !!!
+                            //List old nodes:
+                            var nodesIdToDel = [];
+                            if(nTds){
+                                for(var nTd in nTds){
+                                    nodesIdToDel.push(nTds[nTd].dataValues.id);
+                                }
                             }
-                        }
-                        //Insert new nodes
-                        if(nodes[0]){
-                            node.bulkCreate(nodes).success(function(x){
-                                //Delete old nodes
-                                node.destroy({id:nodesIdToDel}).success(function(){
-                                    log('Manager-'+m.dataValues.id+' NODES were updated');
-                                    res.send('Manager-'+m.dataValues.id+' was updated');    
+                            //Insert new nodes
+                            if(nodes[0]){
+                                node.bulkCreate(nodes).success(function(x){
+                                    //Delete old nodes
+                                    node.destroy({id:nodesIdToDel}).success(function(){
+                                        log('Manager-'+m.dataValues.id+' NODES were updated');
+                                        res.send('Manager-'+m.dataValues.id+' was updated');    
+                                    });
                                 });
-                            });
-                        }
-                    });
+                            }else{
+                                node.destroy({managerId:rP.managerId}).success(function(){
+                                    log('Manager nodes updated - all NODES were deleted');
+                                });
+                            }
+                        });
+                    }
                 });
             }else{log('Error: No manager found by this Id...');}
         });
@@ -748,7 +762,9 @@ app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
     if(rP.campaignId){
         campaign.find({where:{id:rP.campaignId,managerId:aManagerId}}).success(function(c){
             if(c){
-                console.log(c);
+                var date = c.dataValues.createdAt;
+                var displayDate =  date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+                c.dataValues.createdAt = displayDate;
                 uD.findAll({where:{managerId:aManagerId}}).success(function(uDs){
                     if(uDs){
                         log('Getting managersFilters');

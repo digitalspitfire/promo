@@ -1,6 +1,6 @@
 function initDataUpload(){		
 	App.init();
-	FormWizard.init();
+	FormWizard.init('#form-wizard-upload-data');
 	FormComponents.init();
 }
 function uploadDataFile(){

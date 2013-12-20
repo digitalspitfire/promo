@@ -16,8 +16,8 @@ function loadDataTableManagers(selector,aaData){
 		{ "asSorting": [ "desc", "asc"] },
 		{ "asSorting": [ "desc", "asc"] },
 		{ "asSorting": [ "desc", "asc"] },
-		{ "asSorting": [] },
 		{ "asSorting": [] }
+		/*{ "asSorting": [] }*/
 		]
 	};
 	if($(selector).hasClass('initialized')){
@@ -54,6 +54,7 @@ function loadManagers(managerId){
 					i.val(data[fieldName]);
 				});
 				//Nodes:
+				$('#portlet_tab3 .form-group:not(.btn-add-node)').remove();
 				$.each(data.nodes, function(i,n){
 					addNewNode(n);
 				});
@@ -69,9 +70,9 @@ function loadManagers(managerId){
 				var tbody = $('#tbl-managers > tbody');				
 				var aaData = [];
 				$.each(data,function(i,m){
-					var editCell = '<button class="btn green btn-sm edit" data-id="'+m.id+'">Edit</button>';
-					var deleteCell = '<button class="btn red mini btn-sm delete" data-id="'+m.id+'">Delete</button>';
-					var manager = [m.name,m.vendorName,m.phoneNumber,m.email,editCell,deleteCell];
+					var editCell = '<button class="btn green btn-sm edit" data-id="'+m.id+'"><i class="fa fa-edit"></i> עריכה</button>';
+					/*var deleteCell = '<button class="btn red mini btn-sm delete" data-id="'+m.id+'"><i class="fa fa-ban"></i> מחיקה</button>';*/
+					var manager = [m.name,m.vendorName,m.phoneNumber,m.email,editCell];
 					aaData.push(manager);
 				});
 				
@@ -144,16 +145,13 @@ $(function(){
 			console.log(id);
 			if(id>0){
 				console.log('ajax');
-				/*$.ajax({
-					type: "post",
-					url: '/api/managers/'+id,
-					data: data,
-					success: function(response) {
-						console.log(response);
-						//TODO add an "saved" notification
-					}
-				});*/
-				aPost('/api/managers/'+id,data,function(response) {console.log(response);});//TODO add an "saved" notification
+				aPost('/api/managers/'+id,data,function(response) {  //TODO add here if response == 'daved succefully'
+					console.log(response);
+					var alertSuccess = wizard.find('.form-actions .alert-success');
+					alertSuccess.addClass('visible');
+					setTimeout(function(){alertSuccess.removeClass('visible');},2000);
+					loadManagers(id);
+				});
 			}
 	});
 	//add node

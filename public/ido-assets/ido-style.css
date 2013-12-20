@@ -1,8 +1,8 @@
 /*DASHBOARD*/
 .header .navbar-nav{margin-top: 3px;}
-
-
-
+a.navbar-brand{background: url('images/promonim-logo.png') no-repeat right 1px;background-size: 27%; height: 44px;}
+h3.page-title{background: url('images/promonim-logo.png') no-repeat right 1px;background-size: 3%; padding-right: 44px;}
+/*TABLES:*/
 .dataTable .row-details{width: auto; padding-left: 18px;}
 #dashboard > .row-fluid{display:none;}
 #dashboard #managers.row-fluid{min-width: 51.46em;}
@@ -10,7 +10,7 @@ table.nodes thead{display:none;}
 tr.now-deleting{display:none;}
 tr[data-id="-1"] > td {background-color:yellow !important;}
 tr[data-id="-1"] > td > .row-details {display: none;}
-
+.dataTable .label.status-active{padding:3px 12px;}
 
 .tile .tile-object{bottom:8px;}
 .tile .tile-object .number{font-size:34px;}
@@ -34,18 +34,16 @@ input[type="text"]{width: auto;}
 
 
 /*Campaigns & Managers lists*/
-
 .table-toolbar{text-align: left; margin-bottom: -32px; margin-top: 15px;}
 .dataTables_wrapper .row .col-md-6:first-child{display: none;}
 .dataTables_wrapper .row .col-md-6{margin-right: 0;}
 .items-list{margin-top: 10px;}
 .dataTables_filter{float:right;}
-/*From Managers*/
 
 /*Edit Campaign & Manager item*/
 #edit-item{display: none;}/*toggled by JS on page load...*/
 #edit-item .portlet-title .tools{margin-top: 1px;}
-
+#edit-item input.ido-full-width{width:100%;}
 
 /*Edit campaign wizrd:*/
 .form-wizard li.active .desc{font-size: 26px; font-weight: bold;}
@@ -53,11 +51,26 @@ input[type="text"]{width: auto;}
 .form-wizard .label.large-status-indicator {font-size: 26px; font-weight: bold; padding: 10px;}
 .form-wizard .form-group .checkbox-cntr{padding-top:8px;}
 #isActive-input .label-cntr{margin-top: 8px; display: none;}
+.label.ido-white{background-color: #fff !important; color: #000;}
+.form-group .alert-success{display: inline-block;}
+#campaign-filters a .fa {margin:0 8px;} 
+#campaign-filters a .fa-angle-down {display: none;} 
+#campaign-filters a.collapsed .fa-angle-up {display: none;}
+#campaign-filters a.collapsed .fa-angle-down {display: inline-block;}
+#campaign-filters .filtered-attribute {background-color: #d9edf7;}
+
+
+
+/*Edit manager tabs*/
+.nav-tabs li a{font-size: 16px;}
+.form-actions.managers{text-align: left;}
+.form-actions .alert-success{margin-bottom: 0;opacity:0; -o-transition: opacity 1.5s; -moz-transition: opacity 1.5s;-webkit-transition: opacity 1.5s; display: inline-block;}
+.form-actions .alert-success.visible{ visibility:visible;opacity:1; -o-transition: opacity 1.5s; -moz-transition: opacity 1.5s;-webkit-transition: opacity 1.5s;}
 
 /*.form-horizontal .form-wizard .control-group .control-label{text-align: center;}
 .form-horizontal .form-wizard .control-group.span4 .control-label{text-align: center;}*/
 
-#campaign-filters{margin-right: 25%; width:33.33%;}
+#campaign-filters{margin-right: 25%; width:33.33%; padding-bottom: 66px;}
 #localMinTimeGap-input{display: none;}
 
 
