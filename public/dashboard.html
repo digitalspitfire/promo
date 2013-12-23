@@ -386,14 +386,16 @@ $(document).ready(function(){
 </script>
 <script type="text/javascript">
 	$(function(){
-		$.validator.addMethod("emptyNotification", function(value, element) {
-  			/*return window.confirm('לא הוזן שדה ' + $(element).attr('label')+' האם להמשיך?');*/
-  			var msg = 'לא הוזן שדה ' + $(element).attr('label')+' האם להמשיך?';
-  			
-			var isMovingOn;
-	        return true;
-			/*return ido;*/
-		}, "");
+		$.validator.addMethod("minutesRequired", function(value, element) {
+  			element = $(element);
+  			if(element.is(':visible')){
+  				if(element.val()=='' || element.val()==0){
+  					return false;
+  				}else{
+  					return true
+  				}
+  			}else{return true;}
+		}, 'שדה חובה');
 	});
 	
 

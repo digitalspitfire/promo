@@ -32,15 +32,13 @@ var FormWizard = function () {
                         required: true
                     },
                     message: {
-                        minlength: 5,
+                        minlength: 1,
                         required: true
-                    },
-                    category: {
-                        emptyNotification: "קטגוריה"
                     },
                     //receivers
-                    fullname: {
-                        required: true
+                    localMinTimeGap: {
+                        minutesRequired : ''
+                        /*required: true*/
                     },
                     email: {
                         required: true,
@@ -63,7 +61,7 @@ var FormWizard = function () {
                     },
                     //content
                     link: {
-                        emptyNotification: "קישור"
+                        
                     },
                     card_number: {
                         minlength: 16,
@@ -113,6 +111,7 @@ var FormWizard = function () {
                 errorClass: 'help-block', // default input error message class
                 focusInvalid: false, // do not focus the last invalid input
                 rules: rules,
+                /*rules: {},*/
                 messages: { // custom messages for radio buttons and checkboxes
                     'payment[]': {
                         required: "Please select at least one option",

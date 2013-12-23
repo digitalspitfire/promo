@@ -50,7 +50,8 @@
                     $("body").append(form);
                     form.submit();
                 } else {
-                    delete notifications[options.name];
+                    var currentStep = 'step' + (1+options.tab.index());
+                    delete notifications[currentStep][options.name];
                     $(options.nextSelector).trigger('click');
                     /*idoNotifications(options.form, options.tab);*/
                 }

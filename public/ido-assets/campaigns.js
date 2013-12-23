@@ -74,7 +74,7 @@ function loadCampaigns(managerId,campaignId){
 					$.each(o.values,function(val, count){
 						/*str+='<label><input type="checkbox" name="'+val+'">'+val++'-'+parseInt(100*parseInt(count)/parseInt(o.total))+'%</label>';*/
 						var percentage = parseInt(100*parseInt(count)/parseInt(o.total));
-						str+='<label> ( '+percentage+'% )<input type="checkbox" class="filter-value" value="'+val+'" data-attr="'+a+'">'+val+'</label>';
+						str+='<div style="overflow:hidden;"><label class="col-md-2"><input type="checkbox" class="filter-value" value="'+val+'" data-attr="'+a+'"></label><span class="col-md-4"> '+val+' </span><span class="col-md-3">  ( '+percentage+'% )  </span> </div>';	
 					});	
 					str+='</div>';
 					str+='</div>';
@@ -129,7 +129,7 @@ function loadCampaigns(managerId,campaignId){
 					v = $(v);
 					var attr = v.attr('data-attr');
 					var val = v.val();
-					console.log(attr+'---'+val);
+					/*console.log(attr+'---'+val);*/
 					if(filters){
 						if(filters[attr]){
 							if(filters[attr].indexOf(val)>-1){
@@ -163,6 +163,7 @@ function loadCampaigns(managerId,campaignId){
 					allInputsStateChange(wizard,false);	
 				}
 
+				App.init();
 				statusDisplay.html(status);
 				$('#items-list').hide();
 				$('#edit-item').show();
@@ -206,57 +207,141 @@ function loadCampaigns(managerId,campaignId){
 }
 
 function initCampaings(){
-   App.init();
-   FormComponents.init();
-   FormWizard.init('#form-wizard-campaigns');   
-   $('.toggle').parent().bootstrapSwitch();
-   //load single campagin
-   loadCampaigns(1);
-   console.log('initCampaings');
-   console.log(toolTips);
-   generateToolTipsFromDb(toolTips['campaigns']);
-}
-var notifications = {
-	empty : function(input){
-		if($(input).val().trim()=="" || $(input).val().trim()== null){
+	App.init();
+	FormComponents.init();
+	FormWizard.init('#form-wizard-campaigns');   
+	$('.toggle').parent().bootstrapSwitch();
+	//load single campagin
+	loadCampaigns(1);
+	console.log('initCampaings');
+	console.log(toolTips);
+	generateToolTipsFromDb(toolTips['campaigns']);
 
+
+	notifications={
+		step1:
+			{category : {
+					isRequired: function(input){
+						if(input.val() || input.is(':disabled') || !input.is(':visible')){return false;}
+						else{return true;}
+					},
+					name: 'category',
+					text: 'שדה קטגוריה ריק! האם להמשיך בכל זאת?'
+				},
+				goals:{
+					isRequired: function(input){
+						var txtAreaCont = input.val();
+						
+						console.log(txtAreaCont);
+						console.log(input.is(':disabled'));
+						console.log(input.is('visible'));
+						if(txtAreaCont || input.is(':disabled') || !input.is(':visible')){return false;}
+						else{return true;}
+					},
+					name: 'goals',
+					text: 'שדה יעדים נשאר ריק ! האם להמשיך בכל זאת?'
+				}
+			},
+		step2:{
+			link:{
+				isRequired: function(input){
+					if(input.val() || input.is(':disabled') || !input.is(':visible')){return false;}
+					else{return true;}
+				},
+				name: 'link',
+				text: 'שדה קישור נשאר ריק ! האם להמשיך בכל זאת?'
+			},
+			recurring:{
+				isRequired: function(input){
+					if(input.val() != 0 || input.is(':disabled') || !input.is(':visible')){return false;}
+					else{return true;}
+				},
+				name: 'recurring',
+				text: 'המסר יופץ באופן חד פעמי. האם להמשיך?'
+			},
+			dayOfWeek:{
+				isRequired: function(input){
+					if(input.val() != 0 || input.is(':disabled') || !input.is(':visible')){return false;}
+					else{return true;}
+				},
+				name: 'dayOfWeek',
+				text: 'המסר יופץ מדי יום ראשון. האם להמשיך?'
+			}
+			/*hour:{
+				isRequired: function(input){
+					
+					if(input.val() != 0 || input.is(':disabled') || !input.is(':visible')){return false;}
+					else{return true;}
+				},
+				name: 'hour',
+				text: 'המסר יופץ מדי יום ראשון. האם להמשיך?'
+			}*/
+		},
+		step3:{
+			locationBase:{
+				isRequired: function(input){
+					var options = input.find('option');
+					if( input.val() != 2 || input.is(':disabled') || !input.is(':visible')){return false;						
+					}else{
+						return true;
+					}
+				},
+				name: 'locationBase',
+				text: 'הקמפיין יופץ בפריסה ארצית. האם להמשיך?'
+			},
+			campaignFilters:{
+				isRequired: function(input){
+					var selectedFilters = input.find('input[type="checkbox"]:checked');
+					if(selectedFilters.length >= 1){return false;						
+					}else{
+						return true;
+					}
+				},
+				name: 'campaignFilters',
+				text: 'הקמפיין יופץ ללא סינון. האם להמשיך?'
+			},
+			isActive:{
+				isRequired: function(input){
+					return true;
+				},
+				name: 'isActive',
+				text: 'בהפעלת הקמפיין כל המסרים יופצו. האם להמשיך?'
+			}
 		}
-	}
+	};
+	/*notifications={};*/
 }
-var notifications={
-	category : {
-		isRequired: function(val){
-			if(val){return false;}
-			else{return true;}
-		},
-		name: 'category',
-		text: 'שדה קטגוריה ריק! האם להמשיך בכל זאת?'
-		},
-	goals:{
-		isRequired: function(val){
-			if(val){return false;}
-			else{return true;}
-		},
-		name: 'goals',
-		text: 'שדה יעדים נשאר ריק ! האם להמשיך בכל זאת?'
-	},
-}
+var notifications={};
 
 function notificationsApproved(currentWizard, tab, nextSelector){
-	if( !($.isEmptyObject(notifications)) ){
-		$.each(notifications, function(name,obj){
-			var input = $(currentWizard).find('input[name='+name+']');
+	var currentStep = 'step' + (1+tab.index());
+	console.log('notifications');
+	console.log(notifications);
+	if( !($.isEmptyObject(notifications[currentStep])) ){		
+		console.log(currentStep);
+		var lastInputDone = false;
+		$.each(notifications[currentStep], function(name,obj){
+			console.log(name);
+			var input = $(currentWizard).find('input[name='+name+'],textarea[name='+name+'],select[name='+name+'],#campaign-filters');
 			if(input){
-				var val = input.val();
-				if( notifications[name].isRequired(val) ){
-					var notification = $.extend(notifications[name], {currentWizard:currentWizard, tab:tab, nextSelector:nextSelector});
+				if( notifications[currentStep][name].isRequired(input) ){
+					console.log(name+ ' required');
+					lastInputDone =false;
+					var notification = $.extend(notifications[currentStep][name], {currentWizard:currentWizard, tab:tab, nextSelector:nextSelector});
 					$.confirm(notification);
 					return false; //get out of the loop
-				}else{}	
-			}
+				}else{
+					delete notifications[currentStep][name];
+					lastInputDone = true;
+				}	
+			}else{alert('no input found')}
 		});	
-		return false;
-	}else{return true} //do nothing the next function will be called.... which is handle title
+		//The case where last input doesn't require notification:
+		if(lastInputDone){return true;}
+		else{return false;}
+	}else{
+	return true;
+	} //do nothing the next function will be called.... which is handle title
 }
 
 
@@ -334,15 +419,23 @@ $(function(){
 			if(id>0){
 				console.log('ajax');
 				if ($('#submit_form').valid()){
-					console.log('valid');
-					aPost('/api/campaigns/1/'+id,data,function(response) {
-						console.log(response);		
-						var alertSuccess = wizard.find('.form-actions .alert-success');
-						alertSuccess.addClass('visible');
-						setTimeout(function(){alertSuccess.removeClass('visible'); /*loadCampaigns(1,id);*/},2000);
-						
-						//TODO add an "saved" notification
-					});
+					//notifications:
+					var tab = $('ul.steps li.active');
+					if( notificationsApproved('#form-wizard-campaigns', tab, '#btn-activate-campaign') ){
+						debugger;
+						console.log('valid');
+						aPost('/api/campaigns/1/'+id,data,function(response) {
+							console.log(response);		
+							var alertSuccess = wizard.find('.form-actions .alert-success');
+							alertSuccess.addClass('visible');
+							setTimeout(function(){alertSuccess.removeClass('visible'); /*loadCampaigns(1,id);*/},2000);
+							
+							//TODO add an "saved" notification
+						});
+					}else{
+						$(this).addClass('returning-switch');
+						$('input#btn-activate-campaign').parent().parent().bootstrapSwitch('toggleState');
+					}
 				}else{
 					$(this).addClass('returning-switch');
 					$('input#btn-activate-campaign').parent().parent().bootstrapSwitch('toggleState');
@@ -375,13 +468,14 @@ $(function(){
 
 	//campaign filter accordions:
 	$('body').on('change','#campaign-filters input[type="checkbox"]', function(){
-		if($(this).is(':selected')){
-			$(this).closest('.panel-heading').addClass('filtered-attribute');
+		var heading =  $(this).parents('.panel-collapse').prev('.panel-heading');
+		if(($(this).is(':checked')) ){			
+			heading.addClass('filtered-attribute');
 		}else{
 			var values = [];
-			values = $(this).parent().parent().find('input[type=checkbox]:checked');
+			values = $(this).parents('.panel-collapse').find('input[type=checkbox]:checked');
 			if( !(values.length>0) ){
-				$(this).closest('.panel-heading').removeClass('filtered-attribute');	
+				heading.removeClass('filtered-attribute');	
 			}
 		}
 	});
