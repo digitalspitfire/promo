@@ -303,6 +303,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 <script src="assets/scripts/form-wizard.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script> 
 <script src="ido-assets/jquery.confirm.js"></script> 
+<script src="assets/scripts/ui-general.js"></script>
 <!-- <script src="ido-assets/bootstrap-confirmation.js"></script>  -->
 
 <!-- END PAGE LEVEL SCRIPTS -->
@@ -347,7 +348,9 @@ $('.page-sidebar-menu').on('click', ' li:not(.loading-template) a' ,function(){
 	loadTemplate(templateName);
 });
 
+//Globals:
 var manager;
+var toolTips;
 
 $(document).ready(function(){	
 	aGet('/isAdmin',function(isAdmin){
@@ -363,6 +366,14 @@ $(document).ready(function(){
 			$('.header .navbar-nav .username').html(manager.name);
 			console.log('manager');
 			console.log(manager);
+		}		
+	});
+	aGet('/api/tool-tips',function(toolTipsFromDb){
+		if(toolTipsFromDb){
+			console.log('toolTips:');
+			console.log(toolTipsFromDb);
+			toolTips = toolTipsFromDb; 
+			/*$('.page-sidebar-menu li:first-child a').trigger('click');*/
 		}		
 	});
 	init = {
@@ -383,8 +394,6 @@ $(document).ready(function(){
 	        return true;
 			/*return ido;*/
 		}, "");
-
-		$('.page-sidebar-menu li:first-child a').trigger('click');
 	});
 	
 

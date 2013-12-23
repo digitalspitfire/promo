@@ -127,6 +127,7 @@ var uD = sq.define('usersData',{mPhone:Sq.TEXT, filterName:Sq.TEXT, value:Sq.TEX
 var recMac = sq.define('recognisedMac',{deviceMac:Sq.TEXT, nodeMac:Sq.TEXT, unixTimeStamp:Sq.INTEGER});
 var sentTrigger=sq.define('sentTrigger',{mPhone:Sq.TEXT, roostDeviceToken:Sq.TEXT, type:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT});
 var sentCampaign=sq.define('sentCampaign',{mPhone:Sq.TEXT, roostDeviceToken:Sq.TEXT, campaignId:Sq.TEXT, text:Sq.TEXT, link:Sq.TEXT});
+var toolTip=sq.define('toolTip',{section:Sq.TEXT, field:Sq.TEXT, text:Sq.TEXT});
 
 manager
     .hasMany(campaign)
@@ -471,6 +472,24 @@ app.get('/api/manager-self',function(req,res){
             res.json(manager);    
         }else{
             log('Error: no manager by this Id found...');
+            res.send(404);
+        }
+    });
+});
+app.get('/api/tool-tips',function(req,res){
+    toolTip.findAll().success(function(tT){
+        if(tT){
+            var toolTips={};
+            for(var t in tT){
+                var tip = tT[t];
+                if(!toolTips[tip.section]){
+                    toolTips[tip.section]={};
+                }
+                toolTips[tip.section][tip.field] = tip.text;
+            }
+            res.json(toolTips);
+        }else{
+            log('Error: ToolTips were not found!');
             res.send(404);
         }
     });
@@ -944,7 +963,6 @@ function triggerRecognizedMac(rM){ //rM = recMac object
         }
     });
 }
-
 
 //SMS & PUSH Functions:
 //SEND SMS or PUSH to a spcific reg

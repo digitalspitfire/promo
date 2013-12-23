@@ -4,6 +4,7 @@ function initTriggers(){
    FormSamples.init();
    $('.toggle').parent().bootstrapSwitch();
    loadTriggers(1);
+   generateToolTipsFromDb(toolTips['triggers']);
 
 }
 function loadTriggers(managerId){

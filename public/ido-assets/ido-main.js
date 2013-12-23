@@ -10,13 +10,27 @@ function loadTemplate(templateName){
     $('.page-sidebar-menu li').removeClass('loading-template')
   });
 }
-
 function isAuth(response){
   console.log('response: ');
   console.log(response);
   var isAuth = 401 ? false : true;
   return isAuth;
 }
+function generateToolTipsFromDb(sectionToolTips){
+  console.log('sectionToolTips : ');
+  console.log(sectionToolTips);
+  
+  //put in function:
+  var identifiedTips = $('[rel="tooltip"]');
+  $.each(identifiedTips, function(i,t){
+    t = $(t);
+    var field = t.attr('data-tooltip-name');
+    t.attr('data-original-title',sectionToolTips[field]);
+  });
+  identifiedTips.tooltip({placement:'bottom'});
+  
+}
+
 //TODO : these 3 can be one function:
 function aGet(url , successFunc){
   var aReq = $.ajax({
@@ -66,7 +80,6 @@ function aDelete(url, successFunc){
     }
   });  
 }
-
 
 /*
 

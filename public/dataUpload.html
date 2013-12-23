@@ -59,8 +59,9 @@
 								</div>
 								<div class="tab-pane active" id="tab1">
 									<div class="form-group">
-										<label for="btn-fileInput"  class="control-label col-md-4">עדיין לא נבחר קובץ
-											<span class="required">*</span>
+										<label for="btn-fileInput"  class="control-label col-md-4">עדיין לא נבחר קובץ:
+											<span class="required">* </span>
+											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="fileUpload">
 										</label>
 										<div class="col-md-4">
 											<button type="button" id="btn-fileInput">בחר קובץ</button>
@@ -70,14 +71,19 @@
 								</div>
 								<div class="tab-pane" id="tab2">
 									<div class="form-group">
-										<label class="col-md-3 control-label">בחר עמודות רצויות</label>
+										<label class="col-md-3 control-label" name="lbl-">
+											בחר עמודות רצויות
+											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="selectColumns">
+										</label>
 										<div class="col-md-4">
 											<div class="checkbox-list" id="checkboxes-attributes">
 											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="col-md-3 control-label">בחר את המאפיין הסלולרי</label>
+										<label class="col-md-3 control-label">בחר את המאפיין הסלולרי
+ 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="cellularIdentifier">
+										</label>
 										<div class="col-md-4">
 											<select class="form-control" id="select-cellular-column">
 											</select>

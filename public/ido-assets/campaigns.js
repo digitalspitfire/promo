@@ -212,6 +212,9 @@ function initCampaings(){
    $('.toggle').parent().bootstrapSwitch();
    //load single campagin
    loadCampaigns(1);
+   console.log('initCampaings');
+   console.log(toolTips);
+   generateToolTipsFromDb(toolTips['campaigns']);
 }
 var notifications = {
 	empty : function(input){

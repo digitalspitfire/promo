@@ -2,6 +2,10 @@ function initDataUpload(){
 	App.init();
 	FormWizard.init('#form-wizard-upload-data');
 	FormComponents.init();
+	console.log('aaa');
+	console.log(toolTips['dataUpload']);
+	generateToolTipsFromDb(toolTips['dataUpload']);
+
 }
 function uploadDataFile(){
 	var options ={ success:getCsvHeaders };
