@@ -42,7 +42,7 @@
             confirmButton: "Yes",
             cancelButton: "Cancel",
             post: false,
-            confirm: function (o) {
+            confirm: function (confirmButton) {
                 // var url = e.currentTarget.attributes['href'].value;  //ido
                 if (options.post) {
                     alert('answer yes'); //ido
@@ -50,9 +50,14 @@
                     $("body").append(form);
                     form.submit();
                 } else {
+                    console.log('settings');
+                    console.log(settings);
+
                     var currentStep = 'step' + (1+options.tab.index());
                     delete notifications[currentStep][options.name];
                     $(options.nextSelector).trigger('click');
+                    confirmButton.show();
+
                     /*idoNotifications(options.form, options.tab);*/
                 }
             },
@@ -100,7 +105,9 @@
             modal.remove();
         });
         modal.find(".confirm").click(function (e) {
-            settings.confirm(settings.button);
+            var confirmButton = $(this);
+            confirmButton.hide()
+            settings.confirm(/*settings.button*/confirmButton);
         });
         modal.find(".cancel").click(function (e) {
             settings.cancel(settings.button);

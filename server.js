@@ -59,7 +59,7 @@ app.post('/login', function(req, res) {
                 res.redirect('/'); 
             });
         }else{
-            res.redirect('/login');
+            res.redirect('/login?success=false');
         }
     });
 });
@@ -814,10 +814,21 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
             campaign.find({where:{id:req.params.campaignId,managerId:aManagerId}}).success(function(c){
                 if(c){
                     if(rB.isActive=='1'){ //registering new campaign:
-                        c.updateAttributes(rB).success(function(uC){
-                            res.send('Campaign-'+c.dataValues.id+'was updated');    
-                            log('Campaign-'+c.dataValues.id+' was updated, now scheduling....');
-                            scheduleCampaign(c.dataValues);
+                        manager.find({where:{id:aManagerId}}).success(function(m){
+                            if(m){
+                                if(!m.widgetUrl){
+                                    m.widgetUrl="";
+                                }
+                                rB.link = m.widgetUrl.toString() + '/' +rB.link.toString();
+                                console.log(rB.link);
+                                c.updateAttributes(rB).success(function(uC){
+                                    res.send('Campaign-'+c.dataValues.id+'was updated');    
+                                    log('Campaign-'+c.dataValues.id+' was updated, now scheduling....');
+                                    scheduleCampaign(c.dataValues);
+                                });    
+                            }else{
+                                log('Error: manager Not found by this id');
+                            }
                         });
                     }else{//User terminated campaign:
                         c.updateAttributes({isActive:false,isTerminated:true}).success(function(uC){
@@ -1105,7 +1116,7 @@ function scheduleCampaign(camp){
         log('Campaign-'+id+' was scheduled (single-time campaign)');
     }else if(camp.recurring==1){//daily
         var rule=new schedule.RecurrenceRule();
-        rule.hour=camp.hour;
+        rule.hour=parseInt(camp.hour);
         rule.minute=0;
         scheduledJobs[id]= schedule.scheduleJob(rule,cb(camp));
         log('Campaign-'+id+' was scheduled (daily campaign)');

@@ -24,11 +24,11 @@ function loadDataTableCampaigns(selector,aaData){
 			 "sZeroRecords": "לא נמצאו תוצאות"
 		},
 		"aoColumns": [
-		{ "asSorting": [ "desc", "asc"],"sWidth":"30%" },
-		{ "asSorting": [ "desc", "asc"],"sWidth":"30%" },
+		{ "asSorting": [ "desc", "asc"],"sWidth":"40%" },
+		{ "asSorting": [ "desc", "asc"],"sWidth":"20%" },
+		{ "asSorting": [ "desc", "asc"],"sWidth":"10%" },
 		{ "asSorting": [ "desc", "asc"],"sWidth":"10%" },
 		{ "asSorting": [],"sWidth":"10%" },
-		{ "asSorting": [ "desc", "asc"],"sWidth":"10%" },
 		{ "asSorting": [],"sWidth":"10%" }
 		]
 	});	
@@ -187,7 +187,7 @@ function loadCampaigns(managerId,campaignId){
 						var totalPublishCount = 0
 					}
 					var createdAt = arrDate[2]+'-'+arrDate[1]+'-'+arrDate[0];
-					var item = [i.name,i.category,createdAt, totalPublishCount,status,editCell];
+					var item = [i.name,i.category,createdAt, status, totalPublishCount,editCell];
 					aaData.push(item);
 				});
 				loadDataTableCampaigns('#tbl-campaigns', aaData);
@@ -266,16 +266,27 @@ function initCampaings(){
 				},
 				name: 'dayOfWeek',
 				text: 'המסר יופץ מדי יום ראשון. האם להמשיך?'
-			}
-			/*hour:{
+			},
+			hour:{
 				isRequired: function(input){
-					
-					if(input.val() != 0 || input.is(':disabled') || !input.is(':visible')){return false;}
-					else{return true;}
+					if(input.is(':disabled') || !input.is(':visible')){return false;}
+
+					var dateNow = new Date;
+					var today = dateNow.getDay();
+					var currentHour = dateNow.getHours();
+					var cDay = parseInt( $('select[name="dayOfWeek"]').val() );
+					var cHour = parseInt( input.val() );
+					var recurring = $('select[name="recurring"]').val();
+
+					if( (recurring==0) && (cDay==today) && cHour<=currentHour ){
+						return true;
+					}else{
+						return false
+					}
 				},
 				name: 'hour',
-				text: 'המסר יופץ מדי יום ראשון. האם להמשיך?'
-			}*/
+				text: 'שים לב: המסר יופץ בשבוע הבא. האם להמשיך?'
+			}
 		},
 		step3:{
 			locationBase:{
@@ -300,6 +311,18 @@ function initCampaings(){
 				name: 'campaignFilters',
 				text: 'הקמפיין יופץ ללא סינון. האם להמשיך?'
 			},
+			isRecruiting:{
+				isRequired: function(input){
+					debugger;
+					console.log(input.is(':selected'));
+					if( !input.is(':checked') || input.is(':disabled') || !input.is(':visible')){return false;						
+					}else{
+						return true;
+					}
+				},
+				name: 'isRecruiting',
+				text: 'הקמפיין יופץ למשתמשים לא רשומים בלבד. האם להמשיך?'
+			},
 			isActive:{
 				isRequired: function(input){
 					return true;
@@ -321,6 +344,7 @@ function notificationsApproved(currentWizard, tab, nextSelector){
 		console.log(currentStep);
 		var lastInputDone = false;
 		$.each(notifications[currentStep], function(name,obj){
+			//debugger;
 			console.log(name);
 			var input = $(currentWizard).find('input[name='+name+'],textarea[name='+name+'],select[name='+name+'],#campaign-filters');
 			if(input){
@@ -422,13 +446,13 @@ $(function(){
 					//notifications:
 					var tab = $('ul.steps li.active');
 					if( notificationsApproved('#form-wizard-campaigns', tab, '#btn-activate-campaign') ){
-						debugger;
 						console.log('valid');
 						aPost('/api/campaigns/1/'+id,data,function(response) {
 							console.log(response);		
 							var alertSuccess = wizard.find('.form-actions .alert-success');
 							alertSuccess.addClass('visible');
 							setTimeout(function(){alertSuccess.removeClass('visible'); /*loadCampaigns(1,id);*/},2000);
+							$('#modal-campaign-saved').modal();
 							
 							//TODO add an "saved" notification
 						});
@@ -479,6 +503,10 @@ $(function(){
 			}
 		}
 	});
-	//temp
-		/*$('body').on('click','input#btn-activate-campaign',function(e){alert('b');});*/
+	
+	
+	$('body').on('click','#modal-campaign-saved button', function(){		
+		$('.page-sidebar-menu li a[data-template="campaigns"]').trigger('click');
+		$('html,body').animate({scrollTop:0},1000);
+	});
 });

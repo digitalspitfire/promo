@@ -1,7 +1,7 @@
 /*DASHBOARD*/
 .header .navbar-nav{margin-top: 3px;}
 a.navbar-brand{background: url('images/promonim-logo.png') no-repeat right 1px;background-size: 27%; height: 44px;}
-h3.page-title{background: url('images/promonim-logo.png') no-repeat right 1px;background-size: 3%; padding-right: 44px;}
+/*h3.page-title{background: url('images/promonim-logo.png') no-repeat right 1px;background-size: 3%; padding-right: 44px;}*/
 /*TABLES:*/
 .dataTable .row-details{width: auto; padding-left: 18px;}
 #dashboard > .row-fluid{display:none;}

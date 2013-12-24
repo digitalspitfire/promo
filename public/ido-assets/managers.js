@@ -72,7 +72,7 @@ function loadManagers(managerId){
 				$.each(data,function(i,m){
 					var editCell = '<button class="btn green btn-sm edit" data-id="'+m.id+'"><i class="fa fa-edit"></i> עריכה</button>';
 					/*var deleteCell = '<button class="btn red mini btn-sm delete" data-id="'+m.id+'"><i class="fa fa-ban"></i> מחיקה</button>';*/
-					var manager = [m.name,m.vendorName,m.phoneNumber,m.email,editCell];
+					var manager = [m.vendorName,m.name,m.phoneNumber,m.email,editCell];
 					aaData.push(manager);
 				});
 				
@@ -89,6 +89,50 @@ function initManagers(){
     App.init();
     FormComponents.init();
 	loadManagers();
+	
+
+	/*var error = $('#edit-item form .alert-danger');
+	var success = $('#edit-item form .alert-success');
+	$('#edit-item form').validate({
+        doNotHideMessage: true,
+        errorElement: 'span', //default input error message container
+        errorClass: 'help-block', // default input error message class
+        focusInvalid: true, // do not focus the last invalid input
+        rules: {
+            vendorName: {
+                required: true,
+                minlength:1
+            },
+        },
+        invalidHandler: function (event, validator) { //display error alert on form submit   
+            error.show();
+            App.scrollTo(error, -200);
+        },
+        highlight: function (element) { // hightlight error inputs
+            console.log('hightlight');
+            console.log(element);
+            success.hide();
+            $(element)
+                .closest('.form-group').addClass('has-error'); // set error class to the control group
+
+                
+        },
+        success: function (label) {
+            label.closest('.form-group').removeClass('has-error');
+            label.remove();
+            error.hide();
+            success.show();
+        },
+        errorPlacement: function (error, element) {
+            console.log('errorPlacement');
+            console.log(element);
+            error.insertAfter(element);
+        },
+
+        submitHandler: function (form) {
+            form.submit(); // form validation success, call ajax form submit
+        }
+    });*/
 }
 
 $(function(){
@@ -107,7 +151,11 @@ $(function(){
 		});
 	});
 	//save manager:
-	$('body').on('click','#btn-save-manager',function(){
+	$('body').on('click','#btn-save-manager',function(){			
+		if($('#edit-item form').valid()== false){
+			alert('yo');
+			return false;
+		}else{
 			var data = {};
 			var wizard = $($(this).parents('#edit-item')[0]);
 			console.log('wizard:');
@@ -153,6 +201,7 @@ $(function(){
 					loadManagers(id);
 				});
 			}
+		}
 	});
 	//add node
 	$('body').on('click','#btn-add-node',function(){

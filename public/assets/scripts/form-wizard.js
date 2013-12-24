@@ -136,16 +136,22 @@ var FormWizard = function () {
                 },
 
                 highlight: function (element) { // hightlight error inputs
+                    console.log('hightlight');
+                    console.log(element);
                     $(element)
                         .closest('.form-group').removeClass('has-success').addClass('has-error'); // set error class to the control group
                 },
 
                 unhighlight: function (element) { // revert the change done by hightlight
+                    console.log('success');
+                    console.log(element);
                     $(element)
                         .closest('.form-group').removeClass('has-error'); // set error class to the control group
                 },
 
                 success: function (label) {
+                    console.log('errorPlacement');
+                    console.log(label);
                     if (label.attr("for") == "gender" || label.attr("for") == "payment[]") { // for checkboxes and radio buttons, no need to show OK icon
                         label
                             .closest('.form-group').removeClass('has-error').addClass('has-success');
@@ -214,16 +220,25 @@ var FormWizard = function () {
             }
 
             // default form wizard
+
+            var isTabClickFromNextButton = false;
             $(currentWizard).bootstrapWizard({
                 'nextSelector': '.button-next',
                 'previousSelector': '.button-previous',
                 onTabClick: function (tab, navigation, index, clickedIndex) {
-                    success.hide();
+                    //ido commented:
+                    /*success.hide();
                     error.hide();
                     if (form.valid() == false) {
                         return false;
+                    }*/
+                    //ido addition:
+                    if(isTabClickFromNextButton){
+                        handleTitle(tab, navigation, clickedIndex);    
+                    }else{
+                        return false;
                     }
-                    handleTitle(tab, navigation, clickedIndex);
+                    
                 },
                 onNext: function (tab, navigation, index) {
                     success.hide();
@@ -234,7 +249,9 @@ var FormWizard = function () {
                     }
                     //ido:
                     if( notificationsApproved(currentWizard, tab, this.nextSelector) ){
+                        isTabClickFromNextButton=true;
                         handleTitle(tab, navigation, index);    
+                        isTabClickFromNextButton=false;
                     }else{
                         return false;
                     }
