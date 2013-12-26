@@ -114,7 +114,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					<li class="user">
 						<a href="#" data-template="triggers">
 							<i class="fa fa-table"></i>
-							<span class="title">טריגרים</span>
+							<span class="title">מסרים אוטומטיים</span>
 							<span class="selected"></span>
 						</a>
 					</li>
@@ -291,6 +291,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 <script type="text/javascript" src="assets/plugins/jquery-validation/dist/jquery.validate.js"></script>
 <script type="text/javascript" src="assets/plugins/jquery-validation/dist/additional-methods.min.js"></script>
 <script src="assets/plugins/bootstrap-hover-dropdown/twitter-bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
+<script src="assets/plugins/jquery-validation/localization/messages_he.js" type="text/javascript"></script>
 <!-- END PAGE LEVEL PLUGINS -->
 
 <!-- BEGIN PAGE LEVEL SCRIPTS -->
@@ -304,6 +305,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 <script src="http://malsup.github.com/jquery.form.js"></script> 
 <script src="ido-assets/jquery.confirm.js"></script> 
 <script src="assets/scripts/ui-general.js"></script>
+
 <!-- <script src="ido-assets/bootstrap-confirmation.js"></script>  -->
 
 <!-- END PAGE LEVEL SCRIPTS -->
@@ -396,6 +398,27 @@ $(document).ready(function(){
   				}
   			}else{return true;}
 		}, 'שדה חובה');
+
+		$.validator.addMethod("csvFile", function(value, element) {
+  			element = $(element);
+  			var fileName = element.val();
+  			if(fileName.length>=4){
+  				var lastThree = fileName.substr(fileName.length - 3); 
+  				if(lastThree=='csv'){
+  					return true;
+  				}else{
+  					return false;
+  				}
+			}
+		}, 'יש לבחור קובץ מסוג CSV בלבד');
+		$.validator.addMethod("minNumOfColomns", function(value, element) {  			
+  			var attrCount = $('#checkboxes-attributes input[type="checkbox"]:checked').length;
+  			if(attrCount>=2){
+				return true;
+			}else{
+				return false;
+			}
+		}, 'יש לבחור לפחות מסנן אחד');
 	});
 	
 

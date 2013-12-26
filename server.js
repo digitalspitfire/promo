@@ -6,6 +6,7 @@ var app = express()
 var fs = require('fs');
 var csv = require("fast-csv");
 var schedule = require('node-schedule');
+/*var Iconv = require('iconv').Iconv;*/
 
 /*AUTHENTICATION:*/
 function isLoggedin(req, res, next) {
@@ -498,14 +499,17 @@ app.get('/api/tool-tips',function(req,res){
 app.all('/api/dataFileUpload/:managerId',function(req, res){
     fs.readFile(req.files.dataFile.path, function(err,data){
         var newPath = __dirname+'/uploads/data-'+aManagerId+'.csv';
+        console.log('============================');
+        console.log(req.files);
         fs.writeFile(newPath, data, function(err){
             if(err){
                 result = err;
                 res.send(304);
                 log('304');
             }else{
-                console.log(newPath);
-                console.log('saved file. content: '+ data);
+                /*console.log(newPath);
+                console.log('saved file. content: '+ data);*/
+                log('dataFileUpload');
                 res.send(200);
                 log('200');
             }
@@ -774,7 +778,6 @@ app.delete('/api/managers/:managerId',function(req,res){
         }
     }); 
 });
-
 //Campaigns:
 app.get('/api/campaigns/:managerId/:campaignId?',function(req,res){
     var rP=req.params;
@@ -856,12 +859,17 @@ app.post('/api/campaigns/:managerId/:campaignId?',function(req,res){
 app.get('/api/triggers/:managerId',function(req,res){
     tM.findAll({where:{managerId:aManagerId}}).success(function(tMs){
         if(tMs){
-            //var tMs = [];
+            manager.find({where:{id:aManagerId}}).success(function(m){
+                for(var i in tMs){
+                    var t = tMs[i].dataValues;
+                    t.link = t.link.toString().replace(m.widgetUrl + '/','');
+                }
             res.json(tMs);
+            });
         }else{log('NOTE: no triggered message to this by this managerId...');res.send('');}
     });
 });
-app.all('/api/triggers/:managerId',function(req,res){
+app.post('/api/triggers/:managerId',function(req,res){
     var rB = req.body;
     var rP = req.params;
     console.log('body: ');
@@ -872,9 +880,14 @@ app.all('/api/triggers/:managerId',function(req,res){
         if((type=="recognized" )|| (type=="roost-cancelation") || (type="roost-welcome-back")){
             tM.find({where:{managerId:aManagerId, type:type}}).success(function(t){//found
                 if(t){
-                    t.updateAttributes(rB).success(function() {
-                        log('Trigger of type "'+type+'" was updated');
-                    });    
+                    manager.find({where:{id:aManagerId}}).success(function(m){
+                        rB.link = m.widgetUrl.toString() + '/' +rB.link.toString();
+                        if(rB.isActive=='true'){rB.isActive=1}else{rB.isActive = 0};
+                        t.updateAttributes(rB).success(function() {
+                            log('Trigger of type "'+type+'" was updated');
+                            res.send(200);
+                        });    
+                    });
                 }
             });
         }else{log('Error trigger with a bad type');}

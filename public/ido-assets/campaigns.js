@@ -9,7 +9,6 @@ function allInputsStateChange(wizard,isDisabling){
 		$(i).prop('disabled',isDisabling);
 	});
 }
-
 function loadDataTableCampaigns(selector,aaData){
 	if($(selector).hasClass('initialized')){
 		oTable.fnDestroy();
@@ -213,11 +212,7 @@ function initCampaings(){
 	$('.toggle').parent().bootstrapSwitch();
 	//load single campagin
 	loadCampaigns(1);
-	console.log('initCampaings');
-	console.log(toolTips);
 	generateToolTipsFromDb(toolTips['campaigns']);
-
-
 	notifications={
 		step1:
 			{category : {
@@ -338,18 +333,13 @@ var notifications={};
 
 function notificationsApproved(currentWizard, tab, nextSelector){
 	var currentStep = 'step' + (1+tab.index());
-	console.log('notifications');
-	console.log(notifications);
 	if( !($.isEmptyObject(notifications[currentStep])) ){		
 		console.log(currentStep);
 		var lastInputDone = false;
 		$.each(notifications[currentStep], function(name,obj){
-			//debugger;
-			console.log(name);
 			var input = $(currentWizard).find('input[name='+name+'],textarea[name='+name+'],select[name='+name+'],#campaign-filters');
 			if(input){
 				if( notifications[currentStep][name].isRequired(input) ){
-					console.log(name+ ' required');
 					lastInputDone =false;
 					var notification = $.extend(notifications[currentStep][name], {currentWizard:currentWizard, tab:tab, nextSelector:nextSelector});
 					$.confirm(notification);
@@ -438,17 +428,12 @@ $(function(){
 				}			
 			});
 			data['filters']=JSON.stringify(filtersData);
-			console.log('data before send to update:');
-			console.log(data);
 			if(id>0){
-				console.log('ajax');
 				if ($('#submit_form').valid()){
 					//notifications:
 					var tab = $('ul.steps li.active');
 					if( notificationsApproved('#form-wizard-campaigns', tab, '#btn-activate-campaign') ){
-						console.log('valid');
 						aPost('/api/campaigns/1/'+id,data,function(response) {
-							console.log(response);		
 							var alertSuccess = wizard.find('.form-actions .alert-success');
 							alertSuccess.addClass('visible');
 							setTimeout(function(){alertSuccess.removeClass('visible'); /*loadCampaigns(1,id);*/},2000);

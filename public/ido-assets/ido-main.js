@@ -17,10 +17,6 @@ function isAuth(response){
   return isAuth;
 }
 function generateToolTipsFromDb(sectionToolTips){
-  console.log('sectionToolTips : ');
-  console.log(sectionToolTips);
-  
-  //put in function:
   var identifiedTips = $('[rel="tooltip"]');
   $.each(identifiedTips, function(i,t){
     t = $(t);
@@ -80,7 +76,6 @@ function aDelete(url, successFunc){
     }
   });  
 }
-
 /*
 
 function getParameterByName(name) {

@@ -2,8 +2,6 @@ function initDataUpload(){
 	App.init();
 	FormWizard.init('#form-wizard-upload-data');
 	FormComponents.init();
-	console.log('aaa');
-	console.log(toolTips['dataUpload']);
 	generateToolTipsFromDb(toolTips['dataUpload']);
 
 }
@@ -17,11 +15,13 @@ function getCsvHeaders(){
 	aGet('/api/getCsvHeaders/1',function(response){
 		if(!response){response='empty';}
 		console.log('columns received: '+response);
+		$('#select-cellular-column').html('');
+		$('#select-cellular-column').append('<option name="" value="">לא נבחר</option>');
 		$.each(response, function(i,h){
 			//debugger;
 			var strRadios = '<option name="cellular-column" value="'+i+'">'+h+'</option>';
 			$('#select-cellular-column').append(strRadios);
-			var strChbks = '<label><input type="checkbox" value="'+i+'">'+h+'</label>';
+			var strChbks = '<label><input type="checkbox" value="'+i+'" name="desiredAttr">'+h+'</label>';
 			$('#checkboxes-attributes').append(strChbks);
 		});
 		App.init();
@@ -68,43 +68,11 @@ function displayData(){
 					 "sZeroRecords": "לא נמצאו תוצאות"
 				}
 			});	
+			$('#total-uploaded-records').html('סך הכל נקלטו '+aaData.length+' רשומות');
 			console.log('organized data:');
 			console.log(rows);
 		}
     );
-    /*$.ajax({
-		type: "post",
-		url: '/api/presentData/1',				
-		data: {celCol: cellularColumn,selectedCols:selectedColumns},
-		success: function(rows){
-			
-			var aaData = [];
-			var aoColumns = [];
-			$.each(rows,function(i,r){
-				if(i==0){
-					$.each(r,function(j,c){
-						aoColumns.push({'sTitle':c});
-					});
-				}else{
-					aaData.push(r);
-				}
-			});
-
-			oTable = $('#tbl-users-data').addClass('initialized').dataTable( {
-				"aaData":aaData,
-				"aoColumns":aoColumns,
-				"bFilter": true,
-				"bInfo": false,
-				"bPaginate": false,
-				"oLanguage": {
-					 "sSearch": "חיפוש: ",
-					 "sZeroRecords": "לא נמצאו תוצאות"
-				}
-			});	
-			console.log('organized data:');
-			console.log(rows);
-		}	
-	});*/
 }
 
 
@@ -133,11 +101,23 @@ $(function(){
 	/*upload data file form:*/	
 	$('body').on('click','#btn-fileInput',function(){$('#dataFile').click();});
 	$('body').on('change','#dataFile',function(){
-		$('label[for=btn-fileInput]').html(this.files[0].name);
+		$('label#chosen-file-name').html('נבחר קובץ:&nbsp; ' + this.files[0].name);
+		var fileName = $(this).val();
+		$('#hdnFileInput').val(fileName);
 	});
 	$('body').on('click','#btn-cancel',function(){
 		emptyDashboard();
 	});
+	$('body').on('change','#select-cellular-column',function(){
+		var cellularCol = $(this).val();	
+		$('#checkboxes-attributes').find('input[type=checkbox]').parent().parent().parent().show();
+		$('#checkboxes-attributes').find('input[type=checkbox][value="'+cellularCol+'"]').trigger('click');
+		$('#checkboxes-attributes').find('input[type=checkbox][value="'+cellularCol+'"]').parent().parent().parent().hide();
+	});
+	/*$('body').on('change',' input[type="checkbox"]',function(){
+		var attrCount = $('#scheckboxes-attributes input[type="checkbox"]:checked').length;
+		$('#scheckboxes-attributes input[name="desiredAttrs"]').val(attrCount);
+	});*/
 
 	
 });

@@ -82,29 +82,26 @@ var FormWizard = function () {
                         minlength: 1
                     }
                 }
+            }else if(currentWizard=='#form-wizard-upload-data'){
+                var rules={
+                    //step 1
+                    hdnFileInput: {
+                        csvFile: '',
+                    },
+                    selectCelCol: {
+                        required: true
+                    },
+                    desiredAttrs: {
+                        minNumOfColomns: 2
+                    },
+
+                }
             }else{
                 var rules = {}
             }
-            
-            console.log('rules:');
+            console.log('rules');
             console.log(rules);
 
-/*            $('#submit_form').validate({
-                
-                success:function(){
-                    alert('yes');
-                    
-                    aPost('/api/campaigns/1/'+id,data,function(response) {
-                        console.log(response);      
-                        var alertSuccess = wizard.find('.form-actions .alert-success');
-                        alertSuccess.addClass('visible');
-                        setTimeout(function(){alertSuccess.removeClass('visible');},2000);
-                        
-                        //TODO add an "saved" notification
-                    });
-                },
-                error: function(){alert('error');}
-        });*/
             form.validate({
                 doNotHideMessage: true, //this option enables to show the error/success messages on tab switch.
                 errorElement: 'span', //default input error message container
@@ -149,9 +146,7 @@ var FormWizard = function () {
                         .closest('.form-group').removeClass('has-error'); // set error class to the control group
                 },
 
-                success: function (label) {
-                    console.log('errorPlacement');
-                    console.log(label);
+                success: function (label) {                    
                     if (label.attr("for") == "gender" || label.attr("for") == "payment[]") { // for checkboxes and radio buttons, no need to show OK icon
                         label
                             .closest('.form-group').removeClass('has-error').addClass('has-success');
@@ -201,7 +196,6 @@ var FormWizard = function () {
                 for (var i = 0; i < index; i++) {
                     jQuery(li_list[i]).addClass("done");
                 }
-
                 if (current == 1) {
                     $(currentWizard).find('.button-previous').hide();
                 } else {
@@ -243,7 +237,6 @@ var FormWizard = function () {
                 onNext: function (tab, navigation, index) {
                     success.hide();
                     error.hide();
-
                     if (form.valid() == false) {
                         return false;
                     }

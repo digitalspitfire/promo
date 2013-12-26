@@ -1,7 +1,4 @@
 function loadDataTableManagers(selector,aaData){
-	console.log('aaData:');
-	console.log(aaData);
-
 	var options = {
 		"aaData":aaData,
 		"bFilter": true,
@@ -17,7 +14,6 @@ function loadDataTableManagers(selector,aaData){
 		{ "asSorting": [ "desc", "asc"] },
 		{ "asSorting": [ "desc", "asc"] },
 		{ "asSorting": [] }
-		/*{ "asSorting": [] }*/
 		]
 	};
 	if($(selector).hasClass('initialized')){
@@ -38,11 +34,7 @@ function addNewNode(nodeMac){
 function loadManagers(managerId){
 		var id = managerId ? managerId : '';
 		if(id){
-			console.log('Loading an item');
-			console.log(managerId)
 			var parseManagers = function(data){
-				console.log('manager data from server: ');
-				console.log(data);
 				var wizard = $('#edit-item');
 				wizard.attr('data-id',managerId);
 				var textInputs = wizard.find('input[type="text"]:not(.node-mac)');
@@ -61,12 +53,8 @@ function loadManagers(managerId){
 				$('#items-list').hide();
 				$('#edit-item').show();			
 			}
-		}else{
-			
-			console.log('Loading managers list:');
+		}else{			
 			var parseManagers =  function(data){
-				console.log('managers data: ');
-				console.log(data);
 				var tbody = $('#tbl-managers > tbody');				
 				var aaData = [];
 				$.each(data,function(i,m){
@@ -75,7 +63,6 @@ function loadManagers(managerId){
 					var manager = [m.vendorName,m.name,m.phoneNumber,m.email,editCell];
 					aaData.push(manager);
 				});
-				
 				loadDataTableManagers('#tbl-managers', aaData);
 				$('#managers-table a.edit').removeClass('now-getting');
 				$('#edit-item').hide();
@@ -91,7 +78,7 @@ function initManagers(){
 	loadManagers();
 	
 
-	/*var error = $('#edit-item form .alert-danger');
+	var error = $('#edit-item form .alert-danger');
 	var success = $('#edit-item form .alert-success');
 	$('#edit-item form').validate({
         doNotHideMessage: true,
@@ -132,7 +119,7 @@ function initManagers(){
         submitHandler: function (form) {
             form.submit(); // form validation success, call ajax form submit
         }
-    });*/
+    });
 }
 
 $(function(){
@@ -143,7 +130,6 @@ $(function(){
 		var button = $(this);
 		$(this).addClass('creating-manager');
 		aPost('/api/managers',{},function(newId) {
-			alert(newId);
 			button.removeClass('creating-manager');
 			loadManagers(newId);	//TODO this could be made with just one call...					
 			$('#items-list').hide();
@@ -153,13 +139,10 @@ $(function(){
 	//save manager:
 	$('body').on('click','#btn-save-manager',function(){			
 		if($('#edit-item form').valid()== false){
-			alert('yo');
 			return false;
 		}else{
 			var data = {};
 			var wizard = $($(this).parents('#edit-item')[0]);
-			console.log('wizard:');
-			console.log(wizard);
 			var id= wizard.attr('data-id');
 			var textInputs = wizard.find('input[type="text"]:not(.node-mac)');
 			var nodeMacs = wizard.find('input.node-mac[type="text"]');
@@ -177,7 +160,6 @@ $(function(){
 			});
 			//Nodes:
 			var nodes=[];//TODO
-			console.log('nodes number:' +nodeMacs.length);
 			$.each(nodeMacs, function(index,i){
 				i = $(i);
 				if(!i.is(':disabled')){
@@ -188,13 +170,8 @@ $(function(){
 				}
 			});
 			data.nodes=nodes;
-			console.log('manager data from GUI: ');
-			console.log(data);
-			console.log(id);
 			if(id>0){
-				console.log('ajax');
 				aPost('/api/managers/'+id,data,function(response) {  //TODO add here if response == 'daved succefully'
-					console.log(response);
 					var alertSuccess = wizard.find('.form-actions .alert-success');
 					alertSuccess.addClass('visible');
 					setTimeout(function(){alertSuccess.removeClass('visible');},2000);

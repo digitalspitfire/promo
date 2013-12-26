@@ -25,9 +25,11 @@ input[type="text"]{width: auto;}
 /*temp (solve problem of 2 large managers table */
 /*.portlet-body{overflow: auto;}*/
 
+/*data upload*/
 .input-line-holder {display: inline-block; padding: 0 20px;}
 #data-upload .portlet-body .control-group{display:none;}
 #data-upload .portlet-body .control-group:first-child{display:block;}
+label#chosen-file-name{text-align: right;}
 
 
 
@@ -73,12 +75,16 @@ input[type="text"]{width: auto;}
 #campaign-filters{margin-right: 25%; width:33.33%; padding-bottom: 66px;}
 #localMinTimeGap-input{display: none;}
 
-
+/*Triggers*/
+.tab-pane .form-group .alert-success{display: block !important;}
+.tab-pane .form-group .alert-success{text-align:center; padding: 5px 15px;margin-right: 10px; margin-bottom: 0;opacity:0; -o-transition: opacity 1.5s; -moz-transition: opacity 1.5s;-webkit-transition: opacity 1.5s; display: inline-block;}
+.tab-pane .form-group .alert-success.visible{ visibility:visible;opacity:1; -o-transition: opacity 1.5s; -moz-transition: opacity 1.5s;-webkit-transition: opacity 1.5s;}
 
 /*Data upload*/
 /*temp:*/
 .tab-content{min-height: 100px;}
 #temp{position:absolute; top:270px; z-index:999; right: 335px;}
+#total-uploaded-records{text-align: center;}
 
 /*Login page*/
 .login-form .form-actions{border:none !important; padding-bottom: 0 !important;}

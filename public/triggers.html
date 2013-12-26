@@ -4,13 +4,13 @@
 		<div class="tabbable tabbable-custom boxless">
 			<ul class="nav nav-tabs">
 				<li class="active">
-					<a href="#tab_0" data-toggle="tab">משתמש שזוהה על ידי WiFi</a>
+					<a href="#tab_0" data-toggle="tab">למתקשר רשום במערכת</a>
 				</li>
 				<li>
-					<a href="#tab_1" data-toggle="tab">משתמש שביטל</a>
+					<a href="#tab_1" data-toggle="tab">למתקשר שביטל מנוי קיים</a>
 				</li>
 				<li>
-					<a href="#tab_2" data-toggle="tab">משתמש שביטל ונרשם מחדש</a>
+					<a href="#tab_2" data-toggle="tab">למתקשר שהוסיף/עדכן מנוי</a>
 				</li>
 			</ul>
 			<div class="tab-content">
@@ -18,7 +18,7 @@
 					<div class="portlet box blue">
 						<div class="portlet-title">
 							<div class="caption">
-								<i class="fa fa-reorder"></i>משתמש שזוהה על ידי WiFi
+								<i class="fa fa-reorder"></i>למתקשר רשום במערכת
 							</div>
 							<div class="tools">
 								<a href="javascript:;" class="collapse"></a>
@@ -28,20 +28,29 @@
 							</div>
 						</div>
 						<div class="portlet-body form">
-							<!-- BEGIN FORM-->
-							<div action="#" class="form-horizontal">
+							<div class="alert alert-danger display-hide">
+								<span>
+									יש לתקן את השגיאות הבאות:
+								</span>
+							</div>
+							<div class="alert alert-success display-none">
+								<button class="close" data-dismiss="alert"></button>
+								כעת ניתן לבצע שמירה
+							</div>
+							<form action="#" class="form-horizontal">
 								<div class="form-body">
 									<div class="form-group">
 										<label class="control-label col-md-3">
 											<span class="required">*</span>
-											תוכן ההודעה
+											תוכן המסר
+											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="text">
 										</label>
 										<div class="col-md-4">
 											<textarea class="form-control" rows="3" name="text" maxlength="180"></textarea>
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-3">לינק
+										<label class="control-label col-md-3">קישור
 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="link">
 										</label>
 										<div class="col-md-4">
@@ -49,7 +58,9 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-3">מרווח שעות מינמלי בין הודעה להודעה
+										<label class="control-label col-md-3">
+											<span class="required">*</span>
+											מינימום שעות שקטות
 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="minInterval">
 										</label>
 										<div class="col-md-4">
@@ -59,25 +70,22 @@
 									
 
 									<div class="form-group">
-										<label class="control-label col-md-3">הפעלה
+										<label class="control-label col-md-3">שמירה והפעלה
 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="isActive">
 										</label>
 										<div class="col-md-9">
 											<div>
-												<div class="make-switch" id="isActive-recognized">
-													<input type="checkbox" checked class="toggle"/>
+												<div class="make-switch col-md-1" id="isActive-recognized" >
+													<input type="checkbox" class="toggle" name="isActive"/>
+												</div>
+												<div class="alert alert-success col-md-2">
+													<strong>השינויים נשמרו בהצלחה !</strong>
 												</div>
 											</div>
 										</div>
 									</div>
-									<div class="form-actions fluid">
-										<div class="col-md-offset-3 col-md-9">
-											<button type="submit" class="btn green btn-save-trigger"><i class="fa fa-save"></i> שמור שינויים </button>
-										</div>
-									</div>
 								</div>
-								<!-- END FORM-->
-							</div>
+							</form>
 						</div>
 					</div>
 				</div>
@@ -85,7 +93,7 @@
 					<div class="portlet box blue">
 						<div class="portlet-title">
 							<div class="caption">
-								<i class="fa fa-reorder"></i>משתמש שביטל
+								<i class="fa fa-reorder"></i>למתקשר שביטל מנוי קיים
 							</div>
 							<div class="tools">
 								<a href="javascript:;" class="collapse"></a>
@@ -95,20 +103,29 @@
 							</div>
 						</div>
 						<div class="portlet-body form">
-							<!-- BEGIN FORM-->
-							<div action="#" class="form-horizontal">
+							<div class="alert alert-danger display-hide">
+								<span>
+									יש לתקן את השגיאות הבאות:
+								</span>
+							</div>
+							<div class="alert alert-success display-none">
+								<button class="close" data-dismiss="alert"></button>
+								כעת ניתן לבצע שמירה
+							</div>
+							<form action="#" class="form-horizontal">
 								<div class="form-body">
 									<div class="form-group">
 										<label class="control-label col-md-3">
 											<span class="required">*</span>
-											תוכן ההודעה
+											תוכן המסר
+											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="text">
 										</label>
 										<div class="col-md-4">
 											<textarea class="form-control" rows="3" name="text" maxlength="180"></textarea>
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-3">לינק
+										<label class="control-label col-md-3">קישור
 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="link">
 										</label>
 										<div class="col-md-4">
@@ -116,25 +133,27 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-3">הפעלה
-											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="isActive">
+										<label class="control-label col-md-3">שמירה והפעלה
+											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" name="isActive">
 										</label>
 										<div class="col-md-9">
 											<div>
-												<div class="make-switch" id="isActive-roost-cancelation">
-													<input type="checkbox" checked class="toggle"/>
+												<div class="make-switch col-md-1" id="isActive-roost-cancelation">
+													<input type="checkbox" class="toggle" name="isActive"/>
+												</div>
+												<div class="alert alert-success col-md-2">
+													<strong>השינויים נשמרו בהצלחה !</strong>
 												</div>
 											</div>
 										</div>
 									</div>
-									<div class="form-actions fluid">
+									<!-- <div class="form-actions fluid">
 										<div class="col-md-offset-3 col-md-9">
 											<button type="submit" class="btn green btn-save-trigger"><i class="fa fa-save"></i> שמור שינויים </button>
 										</div>
-									</div>
+									</div> -->
 								</div>
-								<!-- END FORM-->
-							</div>
+							</form>
 						</div>
 					</div>
 				</div>
@@ -142,7 +161,7 @@
 					<div class="portlet box blue">
 						<div class="portlet-title">
 							<div class="caption">
-								<i class="fa fa-reorder"></i>משתמש שזוהה על ידי WiFi
+								<i class="fa fa-reorder"></i>למתקשר שהוסיף/עדכן מנוי
 							</div>
 							<div class="tools">
 								<a href="javascript:;" class="collapse"></a>
@@ -151,21 +170,30 @@
 								<a href="javascript:;" class="remove"></a>
 							</div>
 						</div>
-						<div class="portlet-body form">
-							<!-- BEGIN FORM-->
-							<div action="#" class="form-horizontal">
+						<div class="portlet-body form">							
+							<div class="alert alert-danger display-hide">
+								<span>
+									יש לתקן את השגיאות הבאות:
+								</span>
+							</div>
+							<div class="alert alert-success display-none">
+								<button class="close" data-dismiss="alert"></button>
+								כעת ניתן לבצע שמירה
+							</div>
+							<form action="#" class="form-horizontal">
 								<div class="form-body">
 									<div class="form-group">
 										<label class="control-label col-md-3">
 											<span class="required">*</span>
-											תוכן ההודעה
+											תוכן המסר
+											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="text">
 										</label>
 										<div class="col-md-4">
 											<textarea class="form-control" rows="3" name="text" maxlength="180"></textarea>
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-3">לינק
+										<label class="control-label col-md-3">קישור
 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="link">
 										</label>
 										<div class="col-md-4">
@@ -173,25 +201,27 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-3">הפעלה
+ 										<label class="control-label col-md-3">שמירה והפעלה
 											<img src="ido-assets/images/tool-tip-icon.png" width="15" rel="tooltip" data-tooltip-name="isActive">
 										</label>
 										<div class="col-md-9">
 											<div>
-												<div class="make-switch">
-													<input type="checkbox" checked class="toggle" id="isActive-roost-welcome-back"/>
+												<div class="make-switch col-md-1" id="isActive-roost-welcome-back">
+													<input type="checkbox" class="toggle" id="isActive-roost-welcome-back" name="isActive"/>
+												</div>
+												<div class="alert alert-success col-md-2">
+													<strong>השינויים נשמרו בהצלחה !</strong>
 												</div>
 											</div>
 										</div>
 									</div>
-									<div class="form-actions fluid">
+									<!-- <div class="form-actions fluid">
 										<div class="col-md-offset-3 col-md-9">
 											<button type="submit" class="btn green btn-save-trigger"><i class="fa fa-save"></i> שמור שינויים</button>
 										</div>
-									</div>
+									</div> -->
 								</div>
-							</div>	
-							<!-- END FORM-->
+							</form>	
 						</div>
 					</div>
 				</div>
