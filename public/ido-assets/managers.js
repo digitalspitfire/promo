@@ -108,7 +108,7 @@ function initManagers(){
             label.closest('.form-group').removeClass('has-error');
             label.remove();
             error.hide();
-            success.show();
+            success.hide();
         },
         errorPlacement: function (error, element) {
             console.log('errorPlacement');
@@ -139,6 +139,7 @@ $(function(){
 	//save manager:
 	$('body').on('click','#btn-save-manager',function(){			
 		if($('#edit-item form').valid()== false){
+
 			return false;
 		}else{
 			var data = {};
@@ -173,9 +174,11 @@ $(function(){
 			if(id>0){
 				aPost('/api/managers/'+id,data,function(response) {  //TODO add here if response == 'daved succefully'
 					var alertSuccess = wizard.find('.form-actions .alert-success');
+					console.log('alertSuccess');
+					console.log(alertSuccess);
 					alertSuccess.addClass('visible');
 					setTimeout(function(){alertSuccess.removeClass('visible');},2000);
-					loadManagers(id);
+					//loadManagers(id);
 				});
 			}
 		}

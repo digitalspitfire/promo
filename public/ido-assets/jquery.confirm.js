@@ -175,4 +175,61 @@
         modal.modal();
     }
 
+    $.confirmDataUpload = function (options, e) {
+        
+        // Default options
+        var settings = $.extend({
+            text: "Are you sure?",
+            confirmButton: "כן",
+            cancelButton: "בטל",
+            confirm: function (confirmButton) {
+                console.log('settings');
+                console.log(settings);
+                allowApplyData = true;
+                $(options.nextSelector).trigger('click');
+                confirmButton.show();
+            },
+            cancel: function (o) {
+            },
+            button: null
+        }, options);
+
+        // Modal - ido edited
+        var buttons = '<button class="confirm btn btn-primary" type="button" data-dismiss="modal">'
+            + settings.confirmButton + '</button>'
+            + '<button class="cancel btn" type="button" data-dismiss="modal">'
+            + settings.cancelButton + '</button>';
+        var modalHTML = '<div class="modal fade" tabindex="-1" role="dialog">'
+            + '<div class="modal-dialog ">'
+            + '<div class="modal-content">'
+            + '<div class="modal-body">' + settings.text + '</div>'
+            + '<div class="modal-footer">' + buttons + '</div>'
+            + '</div>';
+            + '</div>';
+            + '</div>';
+
+
+
+        var modal = $(modalHTML);
+
+        modal.on('shown', function () {
+            modal.find(".btn-primary:first").focus();
+        });
+        modal.on('hidden', function () {
+            modal.remove();
+        });
+        modal.find(".confirm").click(function (e) {
+            var confirmButton = $(this);
+            confirmButton.hide()
+            settings.confirm(/*settings.button*/confirmButton);
+        });
+        modal.find(".cancel").click(function (e) {
+            settings.cancel(settings.button);
+        });
+
+        // Show the modal
+        $("body").append(modal);
+        modal.modal();
+    }
+
 })(jQuery);

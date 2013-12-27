@@ -3,7 +3,13 @@ function initDataUpload(){
 	FormWizard.init('#form-wizard-upload-data');
 	FormComponents.init();
 	generateToolTipsFromDb(toolTips['dataUpload']);
-
+	dataUploadNotifications={
+		applyData:{
+			isRequired:true,
+			name: 'applyData',
+			text: 'שמירה והפעלת הנתונים תביא לסיום כל הקמפיינים הפעילים.האם לבצע שמירה והפעלה?'
+		}
+	};
 }
 function uploadDataFile(){
 	var options ={ success:getCsvHeaders };
@@ -40,7 +46,6 @@ function displayData(){
     console.log('selected cols before send: '+selectedColumns);
     console.log(selectedColumns.indexOf(cellularColumn));
     if(!cellularColumn){alert('חובה לבחור שדה סללורי'); return false;}
-    if(!(selectedColumns.indexOf(cellularColumn) > -1)){alert('עמודת מאפיין סללורי חייבת להיבחר'); return false;}
 
     aPost('/api/presentData/1',
     	{celCol: cellularColumn,selectedCols:selectedColumns},
@@ -81,6 +86,7 @@ var wiz={
 	step1 : uploadDataFile,
 	step2 : displayData
 }
+var allowApplyData = false;
 $(function(){
 	$('body').on('click','.row#data-file-upload .button-next',function(){
 		var all = $('ul.steps li.active a .number');		
@@ -90,13 +96,22 @@ $(function(){
 		wiz['step'+currentStep]();
 	});
 	$('body').on('click','.row#data-file-upload .button-submit',function(){
-		var button = $(this);
-		var form = $(this).closest('.form-wizard');
-		aGet('/api/update-users-data/1',function(response){
-			console.log(response);
-			form.find('.tab-content').html('<h2 style="text-align: center;">הנתונים עודכנו בהצלחה :))</h2>');
-			form.find('.form-actions a').hide();
-		});
+		if(allowApplyData){
+			allowApplyData = false;
+			var button = $(this);
+			var form = $(this).closest('.form-wizard');
+			aGet('/api/update-users-data/1',function(response){
+				console.log(response);
+				form.find('.tab-content').html('<h2 style="text-align: center;">הנתונים עודכנו בהצלחה :))</h2>');
+				form.find('.form-actions a').hide();
+				$('#modal-data-applied').modal();
+			});	
+		}else{			
+			var btnUploadData = $(this);
+			var n = $.extend(dataUploadNotifications.applyData, {currentWizard:form, tab:'not neede here', nextSelector:btnUploadData});
+			$.confirmDataUpload(n);
+			return false;
+		}
 	});
 	/*upload data file form:*/	
 	$('body').on('click','#btn-fileInput',function(){$('#dataFile').click();});
@@ -114,10 +129,10 @@ $(function(){
 		$('#checkboxes-attributes').find('input[type=checkbox][value="'+cellularCol+'"]').trigger('click');
 		$('#checkboxes-attributes').find('input[type=checkbox][value="'+cellularCol+'"]').parent().parent().parent().hide();
 	});
-	/*$('body').on('change',' input[type="checkbox"]',function(){
-		var attrCount = $('#scheckboxes-attributes input[type="checkbox"]:checked').length;
-		$('#scheckboxes-attributes input[name="desiredAttrs"]').val(attrCount);
-	});*/
+	$('body').on('click','#modal-data-applied button', function(){		
+		$('.page-sidebar-menu li a[data-template="campaigns"]').trigger('click');
+		$('html,body').animate({scrollTop:0},1000);
+	});
 
 	
 });

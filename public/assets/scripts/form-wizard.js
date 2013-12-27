@@ -271,7 +271,7 @@ var FormWizard = function () {
             $(currentWizard).find('.button-previous').hide();
             $(currentWizard).find('.button-submit').click(function () {
                 /*debugger;*/
-                alert('Finished! Hope you like it XXX :)');
+                /*alert('Finished! Hope you like it XXX :)');*/
             }).hide();
         }
 

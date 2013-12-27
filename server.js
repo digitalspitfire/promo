@@ -745,15 +745,18 @@ app.post('/api/managers/:managerId?',function(req,res){
                                     //Delete old nodes
                                     node.destroy({id:nodesIdToDel}).success(function(){
                                         log('Manager-'+m.dataValues.id+' NODES were updated');
-                                        res.send('Manager-'+m.dataValues.id+' was updated');    
+                                        res.send(200);    
                                     });
                                 });
                             }else{
                                 node.destroy({managerId:rP.managerId}).success(function(){
                                     log('Manager nodes updated - all NODES were deleted');
+                                    res.send(200);    
                                 });
                             }
                         });
+                    }else{
+                        res.send(200);    
                     }
                 });
             }else{log('Error: No manager found by this Id...');}

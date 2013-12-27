@@ -307,9 +307,7 @@ function initCampaings(){
 				text: 'הקמפיין יופץ ללא סינון. האם להמשיך?'
 			},
 			isRecruiting:{
-				isRequired: function(input){
-					debugger;
-					console.log(input.is(':selected'));
+				isRequired: function(input){					
 					if( !input.is(':checked') || input.is(':disabled') || !input.is(':visible')){return false;						
 					}else{
 						return true;
